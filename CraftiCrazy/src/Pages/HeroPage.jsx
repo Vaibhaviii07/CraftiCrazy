@@ -1,3 +1,4 @@
+import BestSeller from "../Components/BestSellers"
 import HomePage from "../Components/HomePage"
 import WatchShop from "../Components/watchShop"
 
@@ -7,6 +8,7 @@ const HeroPage =() =>
         <>
         <HomePage/>
         <WatchShop/>
+        <BestSeller/>
         </>
 
     )
