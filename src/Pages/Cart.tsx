@@ -50,20 +50,20 @@ const Cart = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => decreaseQty(item.id)}
-                  className="p-1 bg-gray-100 rounded-full hover:bg-gray-200"
+                  className="p-1 bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer"
                 >
                   <Minus size={16} />
                 </button>
                 <span className="px-2 font-medium">{item.quantity}</span>
                 <button
                   onClick={() => increaseQty(item.id)}
-                  className="p-1 bg-gray-100 rounded-full hover:bg-gray-200"
+                  className="p-1 bg-gray-100 rounded-full hover:bg-gray-200 cursor-pointer"
                 >
                   <Plus size={16} />
                 </button>
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="ml-3 text-red-500 hover:bg-red-100 p-2 rounded-full transition"
+                  className="ml-3 text-red-500 hover:bg-red-100 p-2 rounded-full transition cursor-pointer"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -95,12 +95,12 @@ const Cart = () => {
 
           {/* Actions */}
           <div className="flex flex-col gap-3 mt-6">
-            <button className="bg-amber-500 text-white py-3 rounded-xl hover:bg-amber-600 transition">
+            <button className="bg-amber-500 text-white py-3 rounded-xl hover:bg-amber-600 transition cursor-pointer">
               Proceed to Checkout
             </button>
             <button
               onClick={clearCart}
-              className="bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition"
+              className="bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition cursor-pointer"
             >
               Clear Cart
             </button>

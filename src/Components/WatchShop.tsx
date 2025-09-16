@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
+import { useEffect, useRef } from "react";
 
 const reels = [
   { id: 1, src: "/frame.mp4" },
@@ -10,7 +11,7 @@ const reels = [
 ];
 
 const ReelsRow = () => {
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;

@@ -1,3 +1,4 @@
+import React from "react";
 // src/Pages/CustomizedHamper/BirthdayHamper.jsx
 import { Gift, Heart } from "lucide-react";
 import { motion } from "framer-motion";

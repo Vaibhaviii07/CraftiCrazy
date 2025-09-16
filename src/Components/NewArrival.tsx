@@ -1,154 +1,129 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
-import { GlobeHemisphereWest, FlagBanner, ShieldCheck, Truck, Chats, Gift } from "@phosphor-icons/react";
+import { useCart } from "../AuthContext/CartContext"; 
+import { newArrivalsData } from "../Data/NewArrivalsData";
 
-const newArrivalsData = {
-  freshPicks: [
-    { name: "Wedding Varmala Preservation", price: 499, oldPrice: 699, discount: "10%", type: "Resin", image: "/Wedding.jpeg" },
-    { name: "Personalized Hamper Box", price: 999, oldPrice: 1199, discount: "15%", type: "Hamper", image: "/Hamper.jpeg" },
-    { name: "Custom Photo Frame", price: 599, oldPrice: 799, discount: "10%", type: "Frame", image: "/ResinArtifi.jpeg" },
-    { name: "Handmade Accessory Set", price: 399, oldPrice: 499, discount: "20%", type: "Accessory", image: "/Acess.jpeg" },
-    { name: "Engagement Tray", price: 899, oldPrice: 1099, discount: "15%", type: "Resin", image: "/EngagementRingTray.jpeg" },
-    { name: "KeyChain", price: 749, oldPrice: 999, discount: "25%", type: "Frame", image: "/chain.jpeg" },
-    { name: "Custom Photo Frame", price: 599, oldPrice: 799, discount: "10%", type: "Frame", image: "/ResinArtifi.jpeg" },
-    { name: "Handmade Accessory Set", price: 399, oldPrice: 499, discount: "20%", type: "Accessory", image: "/Acess.jpeg" },
-    { name: "Engagement Tray", price: 899, oldPrice: 1099, discount: "15%", type: "Resin", image: "/EngagementRingTray.jpeg" },
-    { name: "KeyChain", price: 749, oldPrice: 999, discount: "25%", type: "Frame", image: "/chain.jpeg" },
-    { name: "Wedding Varmala Preservation", price: 499, oldPrice: 699, discount: "10%", type: "Resin", image: "/Wedding.jpeg" },
-    { name: "Personalized Hamper Box", price: 999, oldPrice: 1199, discount: "15%", type: "Hamper", image: "/Hamper.jpeg" },
-    { name: "Custom Photo Frame", price: 599, oldPrice: 799, discount: "10%", type: "Frame", image: "/ResinArtifi.jpeg" },
-    { name: "Handmade Accessory Set", price: 399, oldPrice: 499, discount: "20%", type: "Accessory", image: "/Acess.jpeg" },
-    { name: "Engagement Tray", price: 899, oldPrice: 1099, discount: "15%", type: "Resin", image: "/EngagementRingTray.jpeg" },
-    { name: "KeyChain", price: 749, oldPrice: 999, discount: "25%", type: "Frame", image: "/chain.jpeg" },
-    { name: "Custom Photo Frame", price: 599, oldPrice: 799, discount: "10%", type: "Frame", image: "/ResinArtifi.jpeg" },
-    { name: "Handmade Accessory Set", price: 399, oldPrice: 499, discount: "20%", type: "Accessory", image: "/Acess.jpeg" },
-    { name: "Engagement Tray", price: 899, oldPrice: 1099, discount: "15%", type: "Resin", image: "/EngagementRingTray.jpeg" },
-    { name: "KeyChain", price: 749, oldPrice: 999, discount: "25%", type: "Frame", image: "/chain.jpeg" },
-   
-  ],
-};
-
-const services = [
-  { icon: <GlobeHemisphereWest size={40} weight="duotone" className="text-pink-500" />, title: "Worldwide Delivery", description: "We deliver gifts to over 194 countries" },
-  { icon: <FlagBanner size={40} weight="duotone" className="text-yellow-500" />, title: "Made in India", description: "All our products are proudly made in India" },
-  { icon: <ShieldCheck size={40} weight="duotone" className="text-green-500" />, title: "100% Safe & Secure Payments", description: "Pay using secure payment methods" },
-  { icon: <Truck size={40} weight="duotone" className="text-blue-500" />, title: "Same Day Dispatch", description: "Dispatched today, delivered fast!" },
-  { icon: <Chats size={40} weight="duotone" className="text-green-500" />, title: "Expert Assistance", description: "Chat with us on WhatsApp for instant help" },
-  { icon: <Gift size={40} weight="duotone" className="text-red-500" />, title: "Personalized Gifting", description: "Custom-made gifts for your special moments" },
-];
 
 const NewArrivals = () => {
-  const [email, setEmail] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<{ [key: number]: boolean }>({});
-  const sectionRef = useRef(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Subscribed with:", email);
-    setEmail("");
-  };
-
   const handleImageLoad = (index: number) => {
     setImagesLoaded((prev) => ({ ...prev, [index]: true }));
   };
 
+  const handleAddToCart = (item: any) => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      image: item.image,
+      price: item.price,
+      quantity: 1,
+    });
+
+    setToast(`${item.name} added to cart`);
+    setTimeout(() => setToast(null), 3000);
+  };
+
   return (
-    <section className="bg-[#FBFAF7]" ref={sectionRef}>
-      {/* Banner */}
-      <div className="relative h-[50vh] w-full">
-        <img src="/NewArr1.jpg" alt="Banner" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-white">Discover New Arrivals</h2>
+    <section className="bg-[#FBFAF7]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          <AnimatePresence>
+            {loaded
+              ? newArrivalsData.freshPicks.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    exit={{ opacity: 0, y: 30 }}
+                    className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="relative w-full h-44 sm:h-56">
+                      {!imagesLoaded[index] && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                          <div className="w-8 h-8 border-4 border-t-[#b46029] border-b-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+                          imagesLoaded[index] ? "opacity-100" : "opacity-0"
+                        }`}
+                        onLoad={() => handleImageLoad(index)}
+                      />
+
+                      <span className="absolute top-2 right-2 bg-[#b46029] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow">
+                        {item.discount} OFF
+                      </span>
+                    </div>
+
+                    <div className="p-2 sm:p-3 flex flex-col flex-1">
+                      <p className="text-xs sm:text-sm font-medium text-gray-800 truncate">
+                        {item.name}
+                      </p>
+
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-gray-400 text-[11px] sm:text-xs line-through">
+                          ₹{item.oldPrice}
+                        </span>
+                        <span className="text-sm sm:text-base font-semibold text-[#b46029]">
+                          ₹{item.price}
+                        </span>
+                      </div>
+
+                      {/* ✅ Add to Cart Button */}
+                      <button
+                        onClick={() => handleAddToCart(item)}
+                        className="mt-2 sm:mt-3 bg-[#C1856D] hover:bg-[#8c341f] text-white 
+                          text-[11px] sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 rounded-md transition"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              : Array(8)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div
+                      key={i}
+                      className="animate-pulse bg-gray-200 rounded-xl h-52 sm:h-60"
+                    ></div>
+                  ))}
+          </AnimatePresence>
         </div>
       </div>
 
-      {/* Intro Text */}
-      <div className="max-w-4xl mx-auto px-6 bg-[#faf5f0] py-12 text-center shadow-md hover:shadow-xl transition">
-        <h3 className="text-2xl md:text-3xl font-semibold text-[#AB420A] mb-6">Where Every Gift Tells a Story</h3>
-        <p className="text-gray-800 leading-relaxed mb-4">
-          Every gift tells a story — a memory, an emotion, a bond. At <span className="font-semibold text-[#b46029]">CraftiCrazy</span>, we craft keepsakes that hold meaning.
-        </p>
-        <p className="text-gray-800 leading-relaxed mb-4">
-          From personalized hampers to timeless resin treasures, each creation is designed with love to make your celebrations unforgettable.
-        </p>
-        <p className="text-gray-800 leading-relaxed font-medium italic">
-          A handmade gift isn’t just given — it’s felt, cherished, and remembered forever. 💝
-        </p>
-      </div>
-
-      {/* Heading */}
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 border-b border-gray-200">
-        <h3 className="text-2xl font-bold text-[#AB420A] flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-[#b46029]" />
-          <span className="tracking-wide">Discover Fresh Picks</span>
-        </h3>
-      </div>
-
-      {/* Product Grid */}
-      {/* Product Grid */}
-<div className="max-w-7xl mx-auto px-6 py-12">
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 justify-center">
-    <AnimatePresence>
-      {loaded
-        ? newArrivalsData.freshPicks.map((item, index) => (
-            <motion.div
-              key={item.name + index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              exit={{ opacity: 0, y: 30 }}
-              className="group flex flex-col items-center"
-            >
-              {/* Card */}
-              <div className="relative w-72 h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform transform hover:-translate-y-2 duration-500 bg-white">
-                {!imagesLoaded[index] && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                    <div className="w-10 h-10 border-4 border-t-[#b46029] border-b-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${
-                    imagesLoaded[index] ? "opacity-100" : "opacity-0"
-                  }`}
-                  onLoad={() => handleImageLoad(index)}
-                />
-                <span className="absolute top-3 right-3 bg-[#b46029] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-                  {item.discount} OFF
-                </span>
-              </div>
-
-              {/* Info */}
-              <div className="mt-4 text-center">
-                <p className="text-lg font-semibold text-gray-900 font-playfair">{item.name}</p>
-                <div className="mt-2 flex justify-center gap-2 items-baseline">
-                  <span className="text-gray-400 text-sm line-through">₹{item.oldPrice}</span>
-                  <span className="text-xl font-bold text-[#b46029] font-cinzel">₹{item.price}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))
-        : // Loading Skeletons
-          Array(8)
-            .fill(0)
-            .map((_, i) => (
-              <div
-                key={i}
-                className="flex flex-col items-center animate-pulse w-72 h-80 rounded-2xl bg-gray-200"
-              ></div>
-            ))}
-    </AnimatePresence>
-  </div>
-</div>
-
+      {/* ✅ Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 
+               bg-[#E8D4B7] text-black 
+               px-4 sm:px-6 py-2 sm:py-3 
+               rounded-lg sm:rounded-xl shadow-lg 
+               text-sm sm:text-base 
+               max-w-[90%] sm:max-w-md w-auto text-center"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
