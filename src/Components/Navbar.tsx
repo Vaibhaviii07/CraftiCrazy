@@ -72,6 +72,7 @@ const Navbar = () => {
     { name: "New & Best Sellers", href: "/NewArrivals" },
     {
       name: "Customized Hampers",
+       href: "/hamper",
       submenu: [
         { name: "Birthday Hampers", href: "/BirthdayHamper" },
         { name: "Wedding Hampers", href: "/hampers/wedding" },

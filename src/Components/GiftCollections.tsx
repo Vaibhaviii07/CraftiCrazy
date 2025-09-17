@@ -39,21 +39,21 @@ export default function GiftCollections() {
     title: "Flat Discount 30%",
     subtitle: "Custom Resin Ring Tray",
     image: "ringTray.jpeg",
-    link: "#",
+    link: "/resin",
   },
   {
     id: 2,
     title: "20% Off",
     subtitle: "Handmade Candles",
     image: "diya.jpeg",
-    link: "#",
+    link: "/festival",
   },
   {
     id: 3,
     title: "Limited Offer",
     subtitle: "Gift Hampers for All festivals",
     image: "DiwaliHamper.jpeg",
-    link: "#",
+    link: "/hamper",
   },
 ];
   return (
