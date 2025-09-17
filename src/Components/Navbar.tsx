@@ -125,15 +125,19 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 bg-[#faf7f0] shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-10 py-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 cursor-pointer">
-          <div className="relative">
-            <Gift className="w-9 h-9 text-black drop-shadow-md" />
-            <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-yellow-600 animate-ping" />
-          </div>
-          <span className="font-extrabold text-3xl tracking-wide text-black">
-            CraftiCrazy
-          </span>
-        </Link>
+        <Link to="/" className="flex items-center gap-2 cursor-pointer relative">
+  {/* Icon with sparkle */}
+  <div className="relative flex items-center justify-center">
+    <Gift className="w-8 h-8 text-[#432818]" />
+    <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-500 animate-ping" />
+  </div>
+
+  {/* Brand Name */}
+  <span className="font-bold text-3xl text-[#432818] tracking-wide hover:text-[#7f5539] transition-colors">
+    CraftiCrazy
+  </span>
+</Link>
+
 
         {/* Search Bar (Desktop Only) */}
         <div className="hidden md:flex flex-1 justify-center px-6">
@@ -145,7 +149,7 @@ const Navbar = () => {
               placeholder="Search for gifts..."
               className="w-full rounded-full py-2.5 pl-5 pr-14 
                         border border-gray-700 
-                        text-black placeholder-gray-400
+                        text-[#432818] placeholder-gray-400
                         shadow-lg backdrop-blur-md
                         focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             />
@@ -163,7 +167,7 @@ const Navbar = () => {
               </div>
             )}
             {/* Search Button */}
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-black 
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-[#432818] 
                                rounded-full p-2 shadow-md transition">
               <Search className="w-5 h-5" />
             </button>
@@ -174,19 +178,19 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-6">
           <Link
             to="/login"
-            className="text-black hover:text-yellow-200 transition transform hover:scale-110"
+            className="text-[#432818] hover:text-yellow-200 transition transform hover:scale-110"
           >
             <User size={22} />
           </Link>
           <Link
             to="/wishlist"
-            className="text-black hover:text-yellow-200 transition transform hover:scale-110"
+            className="text-[#432818] hover:text-yellow-200 transition transform hover:scale-110"
           >
             <Heart size={22} />
           </Link>
           <Link
             to="/cart"
-            className="text-black hover:text-yellow-200 transition relative transform hover:scale-110"
+            className="text-[#432818] hover:text-yellow-200 transition relative transform hover:scale-110"
           >
             <ShoppingCart size={22} />
             {cart.length > 0 && (
@@ -200,7 +204,7 @@ const Navbar = () => {
         {/* Mobile Cart + Hamburger */}
         <div className="md:hidden flex items-center gap-4">
           {/* Cart Icon in Mobile */}
-          <Link to="/cart" className="text-black hover:text-yellow-200 relative">
+          <Link to="/cart" className="text-[#432818] hover:text-yellow-200 relative">
             <ShoppingCart size={26} />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
@@ -211,7 +215,7 @@ const Navbar = () => {
 
           {/* Hamburger Button */}
           <button
-            className="text-black"
+            className="text-[#432818]"
             onClick={() => setOpen(!open)}
           >
             {open ? <X size={28} /> : <Menu size={28} />}
@@ -220,7 +224,7 @@ const Navbar = () => {
       </div>
 
       {/* Desktop Nav */}
-      <nav className="hidden md:flex justify-center gap-8 text-black font-medium text-base py-3 bg-[#fbfaf8]">
+      <nav className="hidden md:flex justify-center gap-8 text-[#432818] font-medium text-base py-3 bg-[#fbfaf8]">
         {links.map((link, idx) => (
           <div
             key={idx}
@@ -261,7 +265,7 @@ const Navbar = () => {
             <div key={idx}>
               <Link
                 to={link.href ?? "#"}
-                className="block py-2 text-black font-medium border-b border-gray-200"
+                className="block py-2 text-[#432818] font-medium border-b border-gray-200"
                 onClick={() => setOpen(false)} // close menu on click
               >
                 {link.name}

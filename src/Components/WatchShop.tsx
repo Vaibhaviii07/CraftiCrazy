@@ -36,13 +36,8 @@ const ReelsRow = () => {
 
   return (
     <div className="w-full bg-[#FBFAF7] py-10">
-      <h2 className="text-3xl md:text-4xl font-serif font-bold text-center text-[#AB420A] mb-10 flex items-center justify-center gap-3">
+      <h2 className="text-3xl md:text-4xl font-serif font-bold text-center text-[#432818] mt-6 mb-19 flex items-center justify-center gap-3">
         Handmade Wonders That Speak Stories
-        <img
-          className="w-32 md:w-40 object-contain"
-          src="/wonderLogo2.png"
-          alt="Handmade Wonders Logo"
-        />
       </h2>
 
       <div

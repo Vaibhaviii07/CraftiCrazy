@@ -81,7 +81,7 @@ const CustomerDemand = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-orange-500 text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold text-[#583101] text-center mb-12">
             How It Works
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -99,7 +99,7 @@ const CustomerDemand = () => {
           </div>
         </motion.div>
       {/* Customer Demand Section */}
-      <div className="flex flex-col md:flex-row items-center gap-12 w-full">
+      <div className="flex flex-col md:flex-row items-center gap-12 w-full ">
         {/* Form */}
         <motion.div 
           className="w-full md:w-1/2 bg-white p-6 rounded-2xl shadow-lg"
@@ -107,10 +107,10 @@ const CustomerDemand = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-orange-500 text-center mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#583101] text-center mb-4">
             Customer Demands
           </h1>
-          <p className="text-center text-gray-600 text-base md:text-lg mb-6 font-[Playfair_Display]">
+          <p className="text-center text-gray-600 text-base md:text-lg mb-10 font-[Playfair_Display]">
             Share your ideas or requests! We love crafting something special for you.
           </p>
 
@@ -122,7 +122,7 @@ const CustomerDemand = () => {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
+              className="w-full mb-7 px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
             />
             <input
               type="email"
@@ -131,7 +131,7 @@ const CustomerDemand = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
+              className="w-full px-4 mb-7 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
             />
             <input
               type="tel"
@@ -140,7 +140,7 @@ const CustomerDemand = () => {
               value={formData.phone}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
+              className="w-full px-4 py-2 mb-7 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
             />
             <textarea
               name="demand"
@@ -149,7 +149,7 @@ const CustomerDemand = () => {
               onChange={handleChange}
               required
               rows={4}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none resize-none"
+              className="w-full px-4 py-2 mb-7 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none resize-none"
             />
             <input
               key={formData.image ? formData.image.name : "file-input"}
@@ -161,16 +161,27 @@ const CustomerDemand = () => {
             />
 
             {formData.image && (
-              <img
-                src={URL.createObjectURL(formData.image)}
-                alt="Preview"
-                className="mt-2 w-24 h-24 object-cover rounded-lg mx-auto"
-              />
+              <div className="relative mt-1 -mb-5 w-30 h-30 mx-auto">
+                <img
+                  src={URL.createObjectURL(formData.image)}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg shadow"
+                />
+                {/* Cross Button */}
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, image: null }))}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow hover:bg-red-600 transition"
+                >
+                  ✕
+                </button>
+              </div>
             )}
+
 
             <motion.button
               type="submit"
-              className="w-full py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition"
+              className="w-40 py-2 mb-7 mt-8 bg-[#8b5e34] text-white font-medium rounded-lg hover:bg-orange-600 transition"
               whileHover={{ scale: 1.03 }}
             >
               Submit
@@ -210,7 +221,7 @@ const CustomerDemand = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-orange-500 text-center mb-8">
+      <h2 className="text-3xl md:text-4xl font-bold text-[#8b5e34] text-center mb-8">
           Our Creations
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

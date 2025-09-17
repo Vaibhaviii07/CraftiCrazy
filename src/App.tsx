@@ -13,7 +13,7 @@ import ContactUs from "./Pages/ContactUs";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
 import Cart from "./Pages/Cart";
-
+import ParallaxSection from "./Components/ParallaxSection.js";
 import LoginPromptModal from "./Components/LoginPromptModal"; //  Import modal
 
 import "slick-carousel/slick/slick.css";
@@ -60,7 +60,7 @@ function App() {
         {/* Cart */}
         <Route path="/cart" element={<Cart />} />
       </Routes>
-
+      <ParallaxSection />
       <Footer />
 
       {/* 🔑 Show login prompt if not logged in */}

@@ -1,174 +1,162 @@
 import React, { useState } from "react";
-import { Mail, Phone, Send, Instagram, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, Instagram, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type FormState = {
-  name: string;
-  email: string;
-  phone: string;
-  comment: string;
-};
-
-const initialForm: FormState = { name: "", email: "", phone: "", comment: "" };
+type FormState = { name: string; email: string; phone: string; message: string; };
+const initialForm: FormState = { name: "", email: "", phone: "", message: "" };
 
 const ContactUs: React.FC = () => {
   const [form, setForm] = useState<FormState>(initialForm);
   const [sent, setSent] = useState(false);
 
   const handleChange =
-    (k: keyof FormState) => (ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (k: keyof FormState) =>
+    (ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((prev) => ({ ...prev, [k]: ev.target.value }));
     };
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
-    await new Promise((res) => setTimeout(res, 1000)); // fake send
+    await new Promise((res) => setTimeout(res, 1000));
     setForm(initialForm);
     setSent(true);
     setTimeout(() => setSent(false), 3000);
   };
 
   return (
-    <div className="relative min-h-screen py-5 px-6">
-      <div className="max-w-6xl mx-auto space-y-12 relative z-10">
-        {/* Header */}
-    <div className="text-center py-10">
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2 leading-snug">
-            Contact <span className="text-amber-600">Us</span>
-            </h2>
-            <p className="text-lg text-gray-800 font-medium">
-            CraftiCrazy by  Sanika Milmile ✨
-            </p>
-
-        <p className="mt-2 text-sm text-gray-500">
-            We love hearing from you! Let’s connect and craft some magic together.
+    <div className="bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="bg-gray-50 text-center py-13 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 shadow-md">
+        <h1 className="text-4xl md:text-5xl font-semibold text-[#603808] tracking-tight mb-3">
+          Contact Us
+        </h1>
+        <h3 className="text-2xl font-semibold text-amber-600 mb-2">Sanika Milmile</h3>
+        <p className="text-lg text-[#8b5e34] italic max-w-xl mx-auto">
+          “Turning your craft dreams into reality!”
         </p>
-    </div>
+        
+      </div>
 
 
-        {/* Main Grid */}
-        <div className="grid md:grid-cols-2 gap-10">
-          {/* Left Info */}
-          <div className="space-y-6">
-            {/* Get in Touch */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100 transition hover:shadow-2xl"
-            >
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Phone className="w-5 h-5 text-orange-600" /> Get in Touch
-              </h2>
-              <p className="mt-3 text-gray-600">
-                Phone: +91 7721028815 <br />
-                Email:{" "}
-                <a href="mailto:crafticrazy@gmail.com" className="text-orange-600 font-medium">
-                  crafticrazy@gmail.com
-                </a>
-              </p>
-              <p className="mt-2 text-sm text-gray-500">We’ll respond within 24–48 hours.</p>
-              <p className="mt-3 text-gray-600">Location: Chandrapur, Maharashtra, India</p>
-            </motion.div>
+      {/* Main Grid */}
+      <div className="max-w-7xl mx-auto py-14 px-6 grid md:grid-cols-2 gap-10">
+        {/* Left: Map */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="rounded-2xl overflow-hidden shadow-xl border border-gray-200 h-[500px]"
+        >
+          <iframe
+            title="CraftiCrazy Location"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3731.233253124482!2d79.2981!3d19.9596!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a2d3f5a3f7f2a3b%3A0x3a2d3f5a3f7f2a3b!2sChandrapur%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1694600000000!5m2!1sen!2sin"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+          ></iframe>
+        </motion.div>
 
-            {/* Socials */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100 transition hover:shadow-2xl"
-            >
-              <p className="text-xl font-semibold text-gray-800 mb-3">
-                ✨ Stay in touch! We love hearing from you
-              </p>
-              <div className="flex gap-4">
-                <a
-                  href="https://www.instagram.com/crafticrazy_710"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-pink-400 to-pink-600 text-white rounded-full shadow-xl hover:scale-110 transition-transform duration-300"
-                >
-                  <Instagram className="w-6 h-6" />
-                </a>
-                <a
-                  href="https://wa.me/917721028815"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-green-400 to-green-600 text-white rounded-full shadow-xl hover:scale-110 transition-transform duration-300"
-                >
-                  <MessageCircle className="w-6 h-6" />
-                </a>
-              </div>
-            </motion.div>
+        {/* Right: Contact Form + Socials */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col justify-between bg-white shadow-xl rounded-2xl p-8 border border-gray-100"
+        >
+          {/* Form */}
+          <div>
+           <h2 className="text-3xl md:text-3xl font-extrabold text-gray-900 mb-6 flex items-center justify-center gap-3">
+          <span className="text-[#AB420A] animate-bounce">
+            <Send className="w-6 h-6" />
+          </span>
+          Let’s Craft Together
+        </h2>
 
-            {/* Customer Service */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100 transition hover:shadow-2xl"
-            >
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Mail className="w-5 h-5 text-orange-600" /> Customer Service
-              </h2>
-              <p className="mt-3 text-gray-600">
-                For order-related questions, contact us at{" "}
-                <a href="mailto:crafticrazy@gmail.com" className="text-orange-600 font-medium">
-                  crafticrazy@gmail.com
-                </a>{" "}
-                or +91 7721028815
-              </p>
-            </motion.div>
-          </div>
-
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="bg-white shadow-2xl rounded-2xl p-8 border border-gray-100"
-          >
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <Send className="w-5 h-5 text-orange-600" /> Contact Form
-            </h2>
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 value={form.name}
                 onChange={handleChange("name")}
                 type="text"
-                placeholder="Name"
-                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm transition"
+                placeholder="Your Name"
+                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#D98B4A] outline-none shadow-sm transition"
                 required
               />
               <input
                 value={form.email}
                 onChange={handleChange("email")}
                 type="email"
-                placeholder="Email *"
-                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm transition"
+                placeholder="Your Email"
+                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#D98B4A] outline-none shadow-sm transition"
                 required
               />
               <input
                 value={form.phone}
                 onChange={handleChange("phone")}
                 type="tel"
-                placeholder="Phone Number"
-                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm transition"
+                placeholder="Your Phone"
+                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#D98B4A] outline-none shadow-sm transition"
               />
               <textarea
-                value={form.comment}
-                onChange={handleChange("comment")}
+                value={form.message}
+                onChange={handleChange("message")}
                 rows={4}
-                placeholder="Comment"
-                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none shadow-sm transition"
+                placeholder="Message"
+                className="w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#D98B4A] outline-none shadow-sm transition"
                 required
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="w-full bg-orange-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-orange-700 transition"
+                className="w-40 bg-gradient-to-r from-[#AB420A] to-[#D98B4A]  text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-[#ddbea9] transition"
               >
                 Send Message
               </motion.button>
             </form>
-          </motion.div>
-        </div>
+          </div>
+
+        </motion.div>
       </div>
+     
+  <div className=" max-w-full grid sm:grid-cols-2 lg:grid-cols-5 rounded-3xl p-9 mb-9 mt-2">
+    {/* Address */}
+    <div className="flex flex-col items-center text-center p-4 bg-gray-200  shadow-sm hover:shadow-md transition-shadow duration-300">
+      <MapPin className="w-8 h-8 text-amber-500 mb-2" />
+      <h4 className="font-semibold text-gray-800">Our Address</h4>
+      <p className="text-sm text-gray-600 mt-1">Chandrapur, Maharashtra, India</p>
+    </div>
+
+    {/* Phone */}
+    <div className="flex flex-col items-center text-center p-4 bg-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <Phone className="w-8 h-8 text-green-500 mb-2" />
+      <h4 className="font-semibold text-gray-800">Phone</h4>
+      <p className="text-sm text-gray-600 mt-1">+91 7721028815</p>
+    </div>
+
+    {/* Email */}
+    <div className="flex flex-col items-center text-center p-4 bg-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <Mail className="w-8 h-8 text-red-600 mb-2" />
+      <h4 className="font-semibold text-gray-800">Email</h4>
+      <p className="text-sm text-gray-600 mt-1">crafticrazy@gmail.com</p>
+    </div>
+
+     {/* Instagram */}
+    <div className="flex flex-col items-center text-center p-4 bg-gray-100  shadow-sm hover:shadow-md transition-shadow duration-300">
+      <Instagram className="w-8 h-8 text-pink-500 mb-2" />
+      <h4 className="font-semibold text-gray-800">Instagram</h4>
+      <p className="text-sm text-gray-600 mt-1">@crafticrazy_710</p>
+    </div>
+
+    {/* WhatsApp */}
+    <div className="flex flex-col items-center text-center p-4 bg-gray-200  shadow-sm hover:shadow-md transition-shadow duration-300">
+      <MessageCircle className="w-8 h-8 text-green-500 mb-2" />
+      <h4 className="font-semibold text-gray-800">WhatsApp</h4>
+      <p className="text-sm text-gray-600 mt-1">+91 7721028815</p>
+    </div>
+    </div>
+
 
       {/* Success Toast */}
       <AnimatePresence>

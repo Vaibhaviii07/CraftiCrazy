@@ -28,7 +28,7 @@ const AboutUs: React.FC = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-snug">
-            About <span className="text-amber-600">CraftiCrazy</span>
+            About <span className="text-[#a47148]">CraftiCrazy</span>
           </h2>
 
           <p className="text-lg text-gray-700 mb-4 font-serif leading-relaxed">
@@ -47,15 +47,15 @@ const AboutUs: React.FC = () => {
           {/* Values with icons */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 font-serif">
             <div className="flex items-center gap-3">
-              <Heart className="text-amber-500 w-6 h-6" />
+              <Heart className="text-[#a47148] w-6 h-6" />
               <span className="text-gray-800 font-medium">Made with Love</span>
             </div>
             <div className="flex items-center gap-3">
-              <Gift className="text-amber-500 w-6 h-6" />
+              <Gift className="text-[#a47148] w-6 h-6" />
               <span className="text-gray-800 font-medium">Unique Gifts</span>
             </div>
             <div className="flex items-center gap-3">
-              <Star className="text-amber-500 w-6 h-6" />
+              <Star className="text-[#a47148] w-6 h-6" />
               <span className="text-gray-800 font-medium">Premium Quality</span>
             </div>
           </div>
