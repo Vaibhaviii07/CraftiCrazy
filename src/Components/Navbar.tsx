@@ -94,6 +94,9 @@ const Navbar = () => {
       submenu: [
         { name: "Women Accessories", href: "/accessories/women" },
         { name: "Keychains", href: "/accessories/keychains" },
+        { name: "Leather Wallet", href: "/accessories/wallet" },
+        { name: "Handmade Bracelet", href: "/accessories/bracelet" },
+        { name: "Stylish Tote Bag", href: "/accessories/totebag" },
       ],
     },
     {
@@ -105,6 +108,9 @@ const Navbar = () => {
         { name: "Resin Wall Clocks", href: "/resin/clocks" },
         { name: "Resin Name Plates", href: "/resin/nameplates" },
         { name: "Resin Photo Frames", href: "/resin/frames" },
+        { name: "Resin Coasters Set", href: "/resin/coasters" },
+        { name: "Resin Wall Clock", href: "/resin/clock" },
+        { name: "Resin Jewelry Box", href: "/resin/jewelrybox" },
       ],
     },
     {

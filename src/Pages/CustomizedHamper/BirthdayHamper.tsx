@@ -168,6 +168,7 @@ export default function BirthdayHamper() {
           </p>
         </motion.div>
       </div>
+      
     </div>
   );
 }

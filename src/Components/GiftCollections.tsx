@@ -59,7 +59,7 @@ export default function GiftCollections() {
   return (
     <div className="min-h-screen py-20 px-6 font-[Poppins]">
       {/* How It Works Section */}
-       <section className="bg-white mb-7 py-12">
+       <section className="bg-white mb-3 py-12">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
         {steps.map((step) => (
           <div
@@ -136,11 +136,11 @@ export default function GiftCollections() {
 </section>
 
       {/* Hero Section */}
-      <div className="text-center mb-20">
+      <div className="text-center mb-12 mt-9">
         <h1 className="text-5xl md:text-6xl font-semibold font-[Playfair_Display] text-[#603808]">
           Luxury Gift Collections
         </h1>
-        <p className="mt-4 text-lg md:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+        <p className="mt-4 text-lg md:text-xl font-[Playfair_Display] text-gray-700 max-w-3xl mx-auto leading-relaxed">
           Discover{" "}
           <span className="font-semibold italic text-[#AB420A]">
             artisanal creations
@@ -158,13 +158,14 @@ export default function GiftCollections() {
           <div key={category.id} className="space-y-12">
             {/* Category Header */}
             <div className="text-center">
-              <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-[#603808] flex items-center justify-center gap-2">
+              <h2 className="text-3xl md:text-4xl font-serif  text-[#603808] flex items-center justify-center gap-2">
                 <Gift className="w-7 h-7 text-[#D9A441]" /> {category.name}
               </h2>
               <p className="text-lg italic text-[#8C5E3C] mt-2">
                 {category.tagline}
               </p>
             </div>
+
 
             {/* Product Cards */}
             <div className="max-w-6xl mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
@@ -197,14 +198,14 @@ export default function GiftCollections() {
                       </div>
                       {/* Card Text */}
                       <div className="mt-6 text-center">
-                        <p className="text-xl font-semibold text-gray-900 font-playfair leading-snug">
+                        <p className="text-xl  text-gray-900 font-playfair leading-snug">
                           {variant.name}
                         </p>
                         <div className="mt-3 flex justify-center gap-4 items-baseline">
-                          <span className="text-gray-400 text-sm line-through">
+                          <span className="text-gray-400 italic text-sm line-through">
                             ₹{variant.oldPrice}
                           </span>
-                          <span className="text-2xl font-bold text-[#b46029] font-cinzel">
+                          <span className="text-2xl text-[#b46029] font-cinzel">
                             ₹{variant.price}
                           </span>
                         </div>
@@ -217,7 +218,8 @@ export default function GiftCollections() {
           </div>
         ))}
       </div>
-
+          
     </div>
+
   );
 }

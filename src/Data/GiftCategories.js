@@ -37,7 +37,7 @@ export const giftCategories = [
         { id: 401, name: "Diwali Special Hamper", image: "DiwaliHamper.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/festival/diwali" },
         { id: 402, name: "Christmas Joy Pack", image: "ChristmasHamper.jpeg", oldPrice: 2299, price: 1899, discount: "17%", link: "/festival/christmas" },
         { id: 403, name: "Holi Special", image: "HoliHamper.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/festival/holi" },
-        { id: 404, name: "Raksha Bandhan", image: "RakhiHamper.jpeg", oldPrice: 1599, price: 1299, discount: "19%", link: "/festival/rakhi" },
+        // { id: 404, name: "Raksha Bandhan", image: "RakhiHamper.jpeg", oldPrice: 1599, price: 1299, discount: "19%", link: "/festival/rakhi" },
       ],
     },
     {
@@ -45,8 +45,8 @@ export const giftCategories = [
       name: "Resin Art",
       tagline: "Elegant | Handcrafted Resin Creations",
       variants: [
-        { id: 501, name: "Resin Coasters Set", image: "ResinCoasters.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/resin/coasters" },
-        { id: 502, name: "Resin Wall Clock", image: "ResinClock.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/resin/clock" },
+        { id: 501, name: "Resin Coasters Set", image: "Coaster.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/resin/coasters" },
+        { id: 502, name: "Resin Wall Clock", image: "Clock.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/resin/clock" },
         { id: 503, name: "Resin Jewelry Box", image: "ResinBox.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/resin/jewelrybox" },
       ],
     },
@@ -55,9 +55,9 @@ export const giftCategories = [
       name: "Personalized Gifts",
       tagline: "Make It Truly Yours | Custom Touch",
       variants: [
-        { id: 601, name: "Name Engraved Mug", image: "CustomMug.jpeg", oldPrice: 599, price: 449, discount: "25%", link: "/custom/mug" },
-        { id: 602, name: "Custom T-Shirt", image: "CustomTshirt.jpeg", oldPrice: 899, price: 699, discount: "22%", link: "/custom/tshirt" },
-        { id: 603, name: "Photo Cushion", image: "PhotoCushion.jpeg", oldPrice: 999, price: 799, discount: "20%", link: "/custom/cushion" },
+        { id: 601, name: "Name Engraved Mug", image: "CustomMug.jpeg", oldPrice: 599, price: 449, discount: "25%", link: "/CustomerDemand" },
+        { id: 602, name: "Custom T-Shirt", image: "T-Shirt.jpeg", oldPrice: 899, price: 699, discount: "22%", link: "/CustomerDemand" },
+        { id: 603, name: "Photo Cushion", image: "Photocushion.jpg", oldPrice: 999, price: 799, discount: "20%", link: "/CustomerDemand" },
       ],
     },
     {
@@ -66,7 +66,7 @@ export const giftCategories = [
       tagline: "Trendy | Everyday Essentials",
       variants: [
         { id: 701, name: "Leather Wallet", image: "Wallet.jpeg", oldPrice: 1199, price: 899, discount: "25%", link: "/accessories/wallet" },
-        { id: 702, name: "Handmade Bracelet", image: "Bracelet.jpeg", oldPrice: 799, price: 599, discount: "25%", link: "/accessories/bracelet" },
+        { id: 702, name: "Handmade Bracelet", image: "Bracelet.jpg", oldPrice: 799, price: 599, discount: "25%", link: "/accessories/bracelet" },
         { id: 703, name: "Stylish Tote Bag", image: "ToteBag.jpeg", oldPrice: 1499, price: 1199, discount: "20%", link: "/accessories/totebag" },
       ],
     },

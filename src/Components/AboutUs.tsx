@@ -61,6 +61,7 @@ const AboutUs: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      
     </section>
   );
 };
