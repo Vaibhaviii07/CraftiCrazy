@@ -9,12 +9,11 @@ import {
   Gift,
   Sparkles,
   ChevronDown,
-  Heart,
 } from "lucide-react";
 import { useCart } from "../AuthContext/CartContext";
 import { allProducts } from "../Data/AllProduct";
 
-// Define submenu + link types
+
 interface SubLink {
   name: string;
   href: string;
@@ -75,28 +74,28 @@ const Navbar = () => {
        href: "/hamper",
       submenu: [
         { name: "Birthday Hampers", href: "/BirthdayHamper" },
-        { name: "Wedding Hampers", href: "/hampers/wedding" },
-        { name: "Corporate Hampers", href: "/hampers/corporate" },
+        { name: "Wedding Hampers", href: "/wedding" },
+        { name: "Corporate Hampers", href: "/corporate" },
       ],
     },
     {
       name: "Photo Frames",
       href: "/frames",
       submenu: [
-        { name: "Wooden Frames", href: "/frames/wooden" },
-        { name: "Glass Frames", href: "/frames/glass" },
-        { name: "Resin Photo Frames", href: "/frames/resin" },
+        { name: "Wooden Frames", href: "/wooden" },
+        { name: "Glass Frames", href: "/glass" },
+        { name: "Resin Photo Frames", href: "/resin" },
       ],
     },
     {
       name: "Accessories",
       href: "/accessories",
       submenu: [
-        { name: "Women Accessories", href: "/accessories/women" },
-        { name: "Keychains", href: "/accessories/keychains" },
-        { name: "Leather Wallet", href: "/accessories/wallet" },
-        { name: "Handmade Bracelet", href: "/accessories/bracelet" },
-        { name: "Stylish Tote Bag", href: "/accessories/totebag" },
+        { name: "Women Accessories", href: "/womenAss" },
+        { name: "Keychains", href: "/keychain" },
+        { name: "Leather Wallet", href: "/wallet" },
+        { name: "Handmade Bracelet", href: "/bracelet" },
+        { name: "Stylish Tote Bag", href: "/tote" },
       ],
     },
     {
@@ -188,12 +187,6 @@ const Navbar = () => {
             className="text-[#432818] hover:text-yellow-200 transition transform hover:scale-110"
           >
             <User size={22} />
-          </Link>
-          <Link
-            to="/wishlist"
-            className="text-[#432818] hover:text-yellow-200 transition transform hover:scale-110"
-          >
-            <Heart size={22} />
           </Link>
           <Link
             to="/cart"

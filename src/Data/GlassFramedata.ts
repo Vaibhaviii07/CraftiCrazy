@@ -1,0 +1,136 @@
+export const glassFrames = [
+  {
+    id: 1,
+    name: "Wedding Keepsake Glass Frame",
+    description:
+      "Capture wedding memories elegantly with this premium keepsake frame.",
+    price: "₹2,999",
+    rating: 5,
+    discount: 10,
+    category: "Luxury",
+    highlight: "Luxury",
+    image: "/glass6.jpg",
+  },
+  {
+    id: 2,
+    name: "Modern Minimalist Frame",
+    description:
+      "Clean lines and clear glass make this frame a perfect addition to contemporary interiors.",
+    price: "₹1,299",
+    rating: 4,
+    discount: 5,
+    category: "Modern",
+    highlight: "Discounted",
+    image: "/glass5.jpg",
+  },
+  {
+    id: 3,
+    name: "Personalized Glass Frame",
+    description:
+      "Customize this elegant glass frame with a name or message to make it truly unique.",
+    price: "₹1,499",
+    rating: 5,
+    discount: 15,
+    category: "Personalized",
+    highlight: "Best Seller",
+    image: "/glass7.jpg",
+  },
+  {
+    id: 4,
+    name: "Floating Glass Frame",
+    description:
+      "This transparent floating frame gives your photo a magical, suspended appearance.",
+    price: "₹1,799",
+    rating: 4,
+    discount: null,
+    category: "Modern",
+    highlight: "Luxury",
+    image: "/glass2.jpg",
+  },
+  {
+    id: 5,
+    name: "Premium Anniversary Glass Frame",
+    description:
+      "Celebrate anniversaries with a crystal-clear glass frame designed for elegance and love.",
+    price: "₹2,499",
+    rating: 5,
+    discount: 15,
+    category: "Personalized",
+    highlight: "Best Seller",
+    image: "/glass4.jpg",
+  },
+  {
+    id: 6,
+    name: "Premium Engraved Glass Frame",
+    description:
+      "Exquisite engraved details on clear glass — a perfect gift for weddings or anniversaries.",
+    price: "₹2,499",
+    rating: 5,
+    discount: 10,
+    category: "Luxury",
+    highlight: "Best Seller",
+    image: "/glass8.jpg",
+  },
+  {
+    id: 7,
+    name: "Glass Photo Cube",
+    description:
+      "Innovative cube-shaped glass frame for a 3D effect on your cherished pictures.",
+    price: "₹1,799",
+    rating: 5,
+    discount: 5,
+    category: "Modern",
+    highlight: "Trendy",
+    image: "/glass9.jpg",
+  },
+  {
+    id: 8,
+    name: "Double Layer Glass Frame",
+    description:
+      "Two panes of clear glass create a stunning depth effect for your most beautiful photos.",
+    price: "₹1,599",
+    rating: 4,
+    discount: null,
+    category: "Luxury",
+    highlight: "Luxury",
+    image: "/glass10.jpg",
+  },
+  {
+    id: 9,
+    name: "Heart-Shaped Glass Frame",
+    description:
+      "A romantic glass frame shaped like a heart — perfect for couples and special occasions.",
+    price: "₹1,299",
+    rating: 5,
+    discount: 10,
+    category: "Personalized",
+    highlight: "Best Seller",
+    image: "/glass11.jpg",
+  },
+  {
+    id: 10,
+    name: "Artistic Frosted Glass Frame",
+    description:
+      "Frosted glass with intricate patterns adds an artistic touch to any photo.",
+    price: "₹1,499",
+    rating: 4,
+    discount: 15,
+    category: "Artistic",
+    highlight: "Discounted",
+    image: "/glass3.jpg",
+  },
+ 
+  {
+    id: 11,
+    name: "Minimal Floating Stand Frame",
+    description:
+      "A modern floating frame with a minimal stand, ideal for desks or shelves.",
+    price: "₹1,199",
+    rating: 4,
+    discount: null,
+    category: "Modern",
+    highlight: "Trendy",
+    image: "/glass5.jpg",
+  },
+  
+];

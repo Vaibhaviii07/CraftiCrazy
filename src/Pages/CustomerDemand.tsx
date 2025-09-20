@@ -54,16 +54,25 @@ const CustomerDemand = () => {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, files } = e.target;
-    if (name === "image" && files?.length) {
+ const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = e.target;
+
+  // Check if it's a file input
+  if (e.target instanceof HTMLInputElement && e.target.type === "file") {
+    const files = e.target.files;
+    if (files && files.length > 0) {
       setFormData((prev) => ({ ...prev, image: files[0] }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  };
+  } else {
+    // For text, email, tel, textarea inputs
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }
+};
+
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
