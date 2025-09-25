@@ -1,21 +1,26 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 // --- Cart Item Type ---
-export type CartItem = {
-  id: number;
+export interface CartItem {
+  id: string;           // ✅ string instead of number
   name: string;
-  price: number; // ✅ Must be number
-  image: string;
+  description?: string;
+  price: string;
   quantity: number;
-};
+  image: string;
+  rating?: number;
+  discount?: number;
+  category?: string;
+  highlight?: string;
+}
 
 // --- Context Type ---
 type CartContextType = {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number) => void;
-  increaseQty: (id: number) => void;
-  decreaseQty: (id: number) => void;
+  removeFromCart: (id: string) => void;   // ✅ string
+  increaseQty: (id: string) => void;     // ✅ string
+  decreaseQty: (id: string) => void;     // ✅ string
   clearCart: () => void;
 };
 
@@ -37,17 +42,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setCart((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const increaseQty = (id: number) => {
+  const increaseQty = (id: string) => {
     setCart((prev) =>
       prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i))
     );
   };
 
-  const decreaseQty = (id: number) => {
+  const decreaseQty = (id: string) => {
     setCart((prev) =>
       prev.map((i) =>
         i.id === id

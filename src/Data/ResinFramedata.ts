@@ -1,6 +1,5 @@
-
 export type ResinFrame = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -12,7 +11,7 @@ export type ResinFrame = {
 
 export const resinFrames: ResinFrame[] = [
   {
-    id: 1,
+    id: "rframe-1",
     name: "Classic Resin Frame",
     price: 1200,
     image: "/resin1.jpg",
@@ -22,7 +21,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Handmade resin frame with a traditional touch."
   },
   {
-    id: 2,
+    id: "rframe-2",
     name: "Modern Resin Art Frame",
     price: 1500,
     image: "/resin2.jpg",
@@ -32,7 +31,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Contemporary resin frame with artistic edges."
   },
   {
-    id: 3,
+    id: "rframe-3",
     name: "Pearl White Resin Frame",
     price: 2000,
     image: "/resin3.jpg",
@@ -42,7 +41,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Elegant pearl white resin frame with a glossy look."
   },
   {
-    id: 4,
+    id: "rframe-4",
     name: "Ocean Blue Resin Frame",
     price: 1400,
     image: "/resin7.jpg",
@@ -52,7 +51,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Deep ocean-inspired blue resin frame with glossy texture."
   },
   {
-    id: 5,
+    id: "rframe-5",
     name: "Floral Embedded Resin Frame",
     price: 1600,
     image: "/resin8.jpg",
@@ -62,7 +61,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Unique resin frame embedded with real dried flowers."
   },
   {
-    id: 6,
+    id: "rframe-6",
     name: "Marble Effect Resin Frame",
     price: 1750,
     image: "/resin5.jpg",
@@ -72,7 +71,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Resin frame with a premium marble-like effect."
   },
   {
-    id: 7,
+    id: "rframe-7",
     name: "Minimal Resin Edge Frame",
     price: 1100,
     image: "/resin4.jpg",
@@ -82,7 +81,7 @@ export const resinFrames: ResinFrame[] = [
     description: "Simple and sleek resin frame with minimalistic edges."
   },
   {
-    id: 8,
+    id: "rframe-8",
     name: "Resin Varmala Preservation Frame",
     price: 1350,
     image: "/resin6.jpg",

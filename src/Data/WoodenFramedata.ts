@@ -1,6 +1,6 @@
 export const woodenFrames = [
   {
-    id: 1,
+    id: "wf1",
     name: "Classic Family Frame",
     description:
       "Elegant handcrafted wooden frame perfect for preserving family memories in style.",
@@ -12,7 +12,7 @@ export const woodenFrames = [
     image: "/wooden1.jpg",
   },
   {
-    id: 2,
+    id: "wf2",
     name: "Birthday Memory Frame",
     description:
       "Celebrate birthdays with this beautifully carved wooden frame, ideal for gifting loved ones.",
@@ -24,7 +24,7 @@ export const woodenFrames = [
     image: "/wooden2.jpg",
   },
   {
-    id: 3,
+    id: "wf3",
     name: "Travel Adventure Frame",
     description:
       "A rustic wooden frame designed to showcase your travel photographs and cherished adventures.",
@@ -36,7 +36,7 @@ export const woodenFrames = [
     image: "/wooden3.jpg",
   },
   {
-    id: 4,
+    id: "wf4",
     name: "Pet Lover Frame",
     description:
       "Capture adorable moments of your pets in this handcrafted wooden frame.",
@@ -48,7 +48,7 @@ export const woodenFrames = [
     image: "/wooden4.jpg",
   },
   {
-    id: 5,
+    id: "wf5",
     name: "Friends Forever Frame",
     description:
       "Celebrate friendship memories with this stylish wooden frame, perfect for gifting.",
@@ -60,7 +60,7 @@ export const woodenFrames = [
     image: "/wooden7.jpg",
   },
   {
-    id: 6,
+    id: "wf6",
     name: "Romantic Couple Frame",
     description:
       "A beautifully carved wooden frame designed to hold your favorite couple photographs.",
@@ -72,7 +72,7 @@ export const woodenFrames = [
     image: "/wooden5.jpg",
   },
   {
-    id: 7,
+    id: "wf7",
     name: "Minimalist Wooden Frame",
     description:
       "Sleek and minimal design, perfect for modern home decor and gifting.",
@@ -84,7 +84,7 @@ export const woodenFrames = [
     image: "/wooden6.jpg",
   },
   {
-    id: 8,
+    id: "wf8",
     name: "Vintage Carved Frame",
     description:
       "Handcrafted vintage wooden frame with intricate carvings, ideal for classic photos.",
@@ -96,7 +96,7 @@ export const woodenFrames = [
     image: "/wooden7.jpg",
   },
   {
-    id: 9,
+    id: "wf9",
     name: "Artistic Photo Frame",
     description:
       "Unique artistic wooden frame designed to make your photos pop with style.",
@@ -108,7 +108,7 @@ export const woodenFrames = [
     image: "/wooden9.jpg",
   },
   {
-    id: 10,
+    id: "wf10",
     name: "Personalized Engraved Frame",
     description:
       "Add a personal touch with this engraved wooden frame, perfect for special gifts.",

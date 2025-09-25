@@ -1,33 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ShoppingCart } from "lucide-react";
 import { birthdayHampers } from "../../Data/BirthdayHampersdata";
 import { Link } from "react-router-dom";
-import { useCart } from "../../AuthContext/CartContext"; // centralized cart
+import { Heart, ShoppingCart } from "lucide-react";
 
-export default function BirthdayHamper() {
+export default function BirthdayHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { cart, addToCart } = useCart(); // centralized cart
-
-  
-  // --- Add to Cart with animated toast ---
-  const handleAddToCart = (hamper: any) => {
-    const exists = cart.find((c) => c.id === hamper.id);
-    if (!exists) {
-      addToCart({ ...hamper, quantity: 1 });
-      setToastMessage(`${hamper.name} added to cart!`);
-      setTimeout(() => setToastMessage(null), 2500);
-    } else {
-      setToastMessage(`${hamper.name} is already in the cart`);
-      setTimeout(() => setToastMessage(null), 2500);
-    }
-  };
-
-  // --- Category toggle ---
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
@@ -37,18 +18,18 @@ export default function BirthdayHamper() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(birthdayHampers.map((item) => item.category))];
 
-  // --- Filter hampers ---
   const filteredHampers = birthdayHampers.filter((item) => {
     const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(item.category);
 
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = ((item as any).popularity ?? 0) > 80;
+        highlightMatch = item.rating >= 5;
         break;
       case "Discounted":
-        highlightMatch = ((item as any).discount ?? 0) > 0;
+        highlightMatch = item.discount > 0;
         break;
       default:
         highlightMatch = true;
@@ -57,13 +38,18 @@ export default function BirthdayHamper() {
     return categoryMatch && highlightMatch;
   });
 
-  // --- Sorting ---
   const sortedHampers = [...filteredHampers].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
-        return parseInt(a.price.replace(/[₹,]/g, "")) - parseInt(b.price.replace(/[₹,]/g, ""));
+        return (
+          parseInt(a.price.replace(/[₹,]/g, "")) -
+          parseInt(b.price.replace(/[₹,]/g, ""))
+        );
       case "Price: High to Low":
-        return parseInt(b.price.replace(/[₹,]/g, "")) - parseInt(a.price.replace(/[₹,]/g, ""));
+        return (
+          parseInt(b.price.replace(/[₹,]/g, "")) -
+          parseInt(a.price.replace(/[₹,]/g, ""))
+        );
       case "Rating":
         return (b.rating || 0) - (a.rating || 0);
       default:
@@ -71,8 +57,9 @@ export default function BirthdayHamper() {
     }
   });
 
+
   return (
-    <div className="bg-gray-50 relative min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
       <div
         className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
@@ -119,7 +106,10 @@ export default function BirthdayHamper() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -137,7 +127,9 @@ export default function BirthdayHamper() {
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
+                    highlight === opt
+                      ? "text-[#b46029] font-semibold"
+                      : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -151,25 +143,8 @@ export default function BirthdayHamper() {
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex justify-between items-center mb-3">
             <p className="text-sm text-gray-600">
-              Showing {sortedHampers.length} results • Cart:{" "}
-              <span className="font-semibold">{cart.length}</span>
+              Showing {sortedHampers.length} results
             </p>
-            <div className="flex items-center gap-2">
-              <label htmlFor="sorting" className="text-sm font-medium text-gray-700">
-                Sort:
-              </label>
-              <select
-                id="sorting"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
-              >
-                <option>Default sorting</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Rating</option>
-              </select>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
@@ -181,76 +156,52 @@ export default function BirthdayHamper() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 30 }}
                   transition={{ duration: 0.5 }}
-                  className="group flex justify-center"
+                  className="group flex justify-center relative"
                 >
-                  <div className="w-full max-w-[360px] flex flex-col">
+                  <Link
+                    to={`/birthdaydetail/${hamper.id}`}
+                    className="w-full max-w-[360px] flex flex-col"
+                  >
                     <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
                       <img
                         src={hamper.image}
                         alt={hamper.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-
-                      {((hamper as any).discount ?? 0) > 0 && (
+                      {hamper.discount > 0 && (
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                          }}
                           className="absolute top-4 right-4 bg-[#b46029] text-white text-sm font-semibold px-3 py-1 rounded-md shadow"
                         >
-                          {(hamper as any).discount}% OFF
+                          {hamper.discount}% OFF
                         </motion.span>
                       )}
 
-
-                      {/* Add to Cart */}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleAddToCart(hamper);
-                        }}
-                        className="absolute bottom-4 right-4 px-3 py-1 rounded-md shadow text-sm font-medium flex items-center gap-1 transition bg-[#b46029] text-white hover:bg-[#944a20]"
-                      >
-                        <ShoppingCart className="w-4 h-4" /> Add to Cart
-                      </button>
                     </div>
 
                     <div className="mt-4 text-center">
                       <p className="text-xl text-gray-900 font-playfair leading-snug">
                         {hamper.name}
                       </p>
-                      {hamper.description && (
-                        <p className="text-gray-500 text-sm mt-1 line-clamp-2">
-                          {hamper.description}
-                        </p>
-                      )}
                       <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#b46029] font-cinzel">{hamper.price}</span>
+                        <span className="text-2xl text-[#b46029] font-cinzel">
+                          {hamper.price}
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </div>
       </div>
-
-      {/* Custom Toast */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base z-50"
-          >
-            {toastMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

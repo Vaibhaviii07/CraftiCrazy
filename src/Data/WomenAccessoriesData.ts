@@ -1,6 +1,5 @@
-
 export type WomenAccessory = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -12,7 +11,7 @@ export type WomenAccessory = {
 
 export const womenAccessories: WomenAccessory[] = [
   {
-    id: 1,
+    id: "w1",
     name: "Handmade Beaded Necklace",
     price: 120,
     image: "/Access3.jpg",
@@ -22,7 +21,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Elegant handmade beaded necklace featuring vibrant colors and intricate detailing."
   },
   {
-    id: 2,
+    id: "w2",
     name: "Handcrafted Resin Earrings",
     price: 800,
     image: "/Access2.jpg",
@@ -32,7 +31,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Stylish handcrafted resin earrings, perfect for daily wear or special occasions."
   },
   {
-    id: 3,
+    id: "w3",
     name: "Handmade Beaded Bracelet",
     price: 600,
     image: "/Access1.jpg",
@@ -42,7 +41,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Colorful handmade beaded bracelet, a charming accessory for any outfit."
   },
   {
-    id: 4,
+    id: "w4",
     name: "Hand-painted Silk Scarf",
     price: 1500,
     image: "/Access4.jpg",
@@ -52,7 +51,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Unique hand-painted silk scarf with exquisite patterns and vibrant hues."
   },
   {
-    id: 5,
+    id: "w5",
     name: "Handprinted Tote Bag",
     price: 2500,
     image: "/Access5.jpg",
@@ -62,7 +61,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Durable handprinted tote bag, beautifully designed for everyday use."
   },
   {
-    id: 6,
+    id: "w6",
     name: "Handmade Resin Ring",
     price: 700,
     image: "/Access7.jpg",
@@ -72,7 +71,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Artisan resin ring handcrafted with precision, ideal for gifting or personal wear."
   },
   {
-    id: 7,
+    id: "w7",
     name: "Floral Hair Clips",
     price: 400,
     image: "/Access11.jpg",
@@ -82,7 +81,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Charming floral hair clips, perfect for casual and festive hairstyles."
   },
   {
-    id: 8,
+    id: "w8",
     name: "Handmade Resin Bracelet",
     price: 950,
     image: "/Access9.jpg",
@@ -92,7 +91,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Vibrant handmade resin bracelet, a stylish addition to any jewelry collection."
   },
   {
-    id: 9,
+    id: "w9",
     name: "Hand-stitched Handkerchief",
     price: 1800,
     image: "/craft.jpeg",
@@ -102,7 +101,7 @@ export const womenAccessories: WomenAccessory[] = [
     description: "Elegant hand-stitched handkerchief with a unique, intricate pattern."
   },
   {
-    id: 10,
+    id: "w10",
     name: "Handmade Resin Pendant",
     price: 1200,
     image: "/Access8.jpg",

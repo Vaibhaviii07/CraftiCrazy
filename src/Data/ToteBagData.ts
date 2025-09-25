@@ -1,6 +1,5 @@
-
 export interface ToteBag {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -12,7 +11,7 @@ export interface ToteBag {
 
 export const toteBags: ToteBag[] = [
   {
-    id: 1,
+    id: "tb1",
     name: "Canvas Tote Bag",
     price: 1200,
     image: "/totebag1.jpg",
@@ -22,7 +21,7 @@ export const toteBags: ToteBag[] = [
     description: "Sturdy and stylish canvas tote bag for everyday use."
   },
   {
-    id: 2,
+    id: "tb2",
     name: "Leather Tote Bag",
     price: 2500,
     image: "/totebag2.jpg",
@@ -32,7 +31,7 @@ export const toteBags: ToteBag[] = [
     description: "Premium handmade leather tote bag with spacious compartments."
   },
   {
-    id: 3,
+    id: "tb3",
     name: "Eco-Friendly Tote Bag",
     price: 900,
     image: "/totebag3.jpg",
@@ -42,7 +41,7 @@ export const toteBags: ToteBag[] = [
     description: "Reusable eco-friendly tote bag made from organic materials."
   },
   {
-    id: 4,
+    id: "tb4",
     name: "Embroidered Tote Bag",
     price: 1500,
     image: "/totebag4.jpg",
@@ -52,7 +51,7 @@ export const toteBags: ToteBag[] = [
     description: "Hand-embroidered tote bag with colorful patterns."
   },
   {
-    id: 5,
+    id: "tb5",
     name: "Mini Leather Tote",
     price: 1800,
     image: "/totebag5.jpg",
@@ -62,7 +61,7 @@ export const toteBags: ToteBag[] = [
     description: "Compact and elegant leather tote for daily essentials."
   },
   {
-    id: 6,
+    id: "tb6",
     name: "Printed Canvas Tote",
     price: 1100,
     image: "/totebag6.jpg",

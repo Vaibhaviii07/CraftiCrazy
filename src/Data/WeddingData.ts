@@ -1,6 +1,6 @@
 export const weddingHampers = [
   {
-    id: 1,
+    id: "wh1",
     name: "Royal Wedding Hamper",
     description:
       "Celebrate the big day with an opulent hamper featuring premium champagne, artisanal chocolates, and fresh exotic flowers — the perfect gift for newlyweds.",
@@ -13,7 +13,7 @@ export const weddingHampers = [
     image: "/wedding11.jpg",
   },
   {
-    id: 2,
+    id: "wh2",
     name: "Sweet Togetherness Hamper",
     description:
       "A delightful collection of gourmet cookies, handcrafted chocolates, and scented candles — crafted to celebrate love and sweetness.",
@@ -26,7 +26,7 @@ export const weddingHampers = [
     image: "/wedding4.jpg",
   },
   {
-    id: 3,
+    id: "wh3",
     name: "Traditional Blessings Hamper",
     description:
       "Bring joy with this cultural hamper featuring dry fruits, silver-coated sweets, and a handcrafted diya — a token of blessings and prosperity.",
@@ -39,7 +39,7 @@ export const weddingHampers = [
     image: "/wedding5.jpg",
   },
   {
-    id: 4,
+    id: "wh4",
     name: "Elegant Couple Hamper",
     description:
       "A thoughtful hamper with personalized mugs, a couple photo frame, and artisanal chocolates — designed to cherish togetherness.",
@@ -52,7 +52,7 @@ export const weddingHampers = [
     image: "/wedding6.jpg",
   },
   {
-    id: 5,
+    id: "wh5",
     name: "Luxury Spa Hamper",
     description:
       "Pamper the couple with luxury spa essentials, aromatic oils, and skincare treats — the perfect way to unwind post-wedding celebrations.",
@@ -65,7 +65,7 @@ export const weddingHampers = [
     image: "/wedding1.jpg",
   },
   {
-    id: 6,
+    id: "wh6",
     name: "Couple’s Romantic Delight",
     description:
       "Surprise the lovebirds with premium wine, scented candles, and gourmet chocolates — a hamper that celebrates romance.",
@@ -78,7 +78,7 @@ export const weddingHampers = [
     image: "/wedding7.jpg",
   },
   {
-    id: 7,
+    id: "wh7",
     name: "Modern Wedding Hamper",
     description:
       "A stylish collection featuring trendy accessories, elegant perfumes, and a designer gift box — curated for modern celebrations.",
@@ -91,7 +91,7 @@ export const weddingHampers = [
     image: "/wedding8.jpg",
   },
   {
-    id: 8,
+    id: "wh8",
     name: "Classic Dry Fruit Hamper",
     description:
       "A traditional and healthy gift — premium dry fruits packed in a luxurious wooden box, perfect for blessings and prosperity.",

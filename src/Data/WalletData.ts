@@ -1,6 +1,5 @@
-
 export type Wallet = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -12,7 +11,7 @@ export type Wallet = {
 
 export const wallets: Wallet[] = [
   {
-    id: 1,
+    id: "w1",
     name: "Classic Leather Wallet for Men",
     price: 600,
     image: "/wallet1.jpg",
@@ -22,7 +21,7 @@ export const wallets: Wallet[] = [
     description: "Premium handmade leather wallet with sleek finish and elegant stitching."
   },
   {
-    id: 2,
+    id: "w2",
     name: "Vintage Brown Wallet",
     price: 1350,
     image: "/wallet2.jpg",
@@ -32,7 +31,7 @@ export const wallets: Wallet[] = [
     description: "Durable vintage-style brown leather wallet with spacious compartments."
   },
   {
-    id: 3,
+    id: "w3",
     name: "Fabric Zipper Wallet",
     price: 850,
     image: "/wallet8.jpg",
@@ -42,7 +41,7 @@ export const wallets: Wallet[] = [
     description: "Lightweight fabric wallet with secure zipper closure and trendy prints."
   },
   {
-    id: 4,
+    id: "w4",
     name: "Crochet Handmade Wallet",
     price: 600,
     image: "/wallet7.jpg",
@@ -52,7 +51,7 @@ export const wallets: Wallet[] = [
     description: "Colorful crochet wallet, hand-knitted for casual daily use."
   },
   {
-    id: 5,
+    id: "w5",
     name: "Resin Art Wallet",
     price: 1500,
     image: "/wallet6.jpg",
@@ -62,7 +61,7 @@ export const wallets: Wallet[] = [
     description: "Unique resin art wallet with glossy finish and creative designs."
   },
   {
-    id: 6,
+    id: "w6",
     name: "Hand-Painted Wallet",
     price: 1100,
     image: "/wallet5.jpg",
@@ -72,7 +71,7 @@ export const wallets: Wallet[] = [
     description: "Hand-painted fabric wallet featuring custom artistic patterns."
   },
   {
-    id: 7,
+    id: "w7",
     name: "Slim Leather Card Holder",
     price: 700,
     image: "/wallet4.jpg",
@@ -82,7 +81,7 @@ export const wallets: Wallet[] = [
     description: "Minimalist leather wallet for carrying essential cards with style."
   },
   {
-    id: 9,
+    id: "w8",
     name: "Eco-Friendly Fabric Wallet",
     price: 950,
     image: "/wallet3.jpg",
@@ -92,8 +91,8 @@ export const wallets: Wallet[] = [
     description: "Made from eco-friendly fabric, stylish and sustainable wallet option."
   },
   {
-   id: 10,
-    name: "Classic Leather Wallet for women",
+    id: "w9",
+    name: "Classic Leather Wallet for Women",
     price: 600,
     image: "/wallet11.jpg",
     popularity: 95,

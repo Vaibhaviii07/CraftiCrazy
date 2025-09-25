@@ -1,29 +1,13 @@
 import { useState, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ShoppingCart } from "lucide-react";
-import { womenAccessories, WomenAccessory } from "../../Data/WomenAccessoriesData"; // ✅ correct file name
-import { useCart } from "../../AuthContext/CartContext";
+import { ShoppingCart } from "lucide-react";
+import { womenAccessories, WomenAccessory } from "../../Data/WomenAccessoriesData";
 
 export default function WomenAccessories() {
-  const { cart, addToCart } = useCart();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  
-
-  const handleAddToCart = (item: WomenAccessory) => {
-    const product = { ...item, quantity: 1 };
-    const exists = cart.find((c) => c.id === product.id);
-    if (!exists) {
-      addToCart(product);
-      setToastMessage(`${product.name} added to cart!`);
-    } else {
-      setToastMessage(`${product.name} is already in the cart`);
-    }
-    setTimeout(() => setToastMessage(null), 2500);
-  };
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -67,6 +51,11 @@ export default function WomenAccessories() {
     setSortOption(e.target.value);
   };
 
+  const handleAddToCart = (item: WomenAccessory) => {
+    setToastMessage(`${item.name} added to cart!`);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
   return (
     <div className="min-h-screen relative">
       {/* Hero */}
@@ -104,7 +93,7 @@ export default function WomenAccessories() {
               Categories
             </h3>
             <ul className="space-y-2">
-              {categories.map((cat: string) => (
+              {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -143,14 +132,7 @@ export default function WomenAccessories() {
 
         {/* Products */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="flex justify-between items-center mb-3">
-            <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results • Cart:{" "}
-              <span className="font-semibold">
-                {cart.reduce((acc, i) => acc + i.quantity, 0)}
-              </span>
-            </p>
-
+          <div className="flex justify-end items-center mb-3">
             <div className="flex items-center gap-2">
               <label htmlFor="sorting" className="text-sm font-medium text-gray-700">
                 Sort:
@@ -170,7 +152,7 @@ export default function WomenAccessories() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
             <AnimatePresence>
-              {sortedItems.map((item: WomenAccessory) => (
+              {sortedItems.map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 30 }}
