@@ -1,7 +1,7 @@
 // src/Pages/Accessories/ToteBagPage.tsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toteBags, ToteBag } from "../../Data/ToteBagData";
+import { toteBags } from "../../Data/ToteBagData";
 import { Link } from "react-router-dom";
 
 export default function ToteBagPage() {
@@ -16,19 +16,21 @@ export default function ToteBagPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(toteBags.map((item) => item.category))];
+  const categories = [...new Set(toteBags.map((i) => i.category))];
 
+  // Filtering
   const filteredItems = toteBags.filter((item) => {
     const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(item.category);
 
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = item.popularity >= 90;
+        highlightMatch = (item.rating ?? 0) >= 4.5; // adjust rating as per data
         break;
       case "Discounted":
-        highlightMatch = item.price <= 1200;
+        highlightMatch = (item.discount ?? 0) > 0;
         break;
       default:
         highlightMatch = true;
@@ -36,22 +38,25 @@ export default function ToteBagPage() {
     return categoryMatch && highlightMatch;
   });
 
+  // Sorting
   const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
         return a.price - b.price;
       case "Price: High to Low":
         return b.price - a.price;
+      case "Rating":
+        return (b.rating || 0) - (a.rating || 0);
       default:
         return 0;
     }
   });
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <section className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
       <div
-        className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
+        className="relative w-full h-[220px] sm:h-[300px] md:h-[400px] flex flex-col items-center justify-center text-center"
         style={{
           backgroundImage: "url('/totebag/banner.jpg')",
           backgroundSize: "cover",
@@ -60,14 +65,15 @@ export default function ToteBagPage() {
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <motion.h1
-          className="relative text-4xl md:text-5xl font-serif font-semibold text-white mb-4"
+          className="relative text-2xl sm:text-3xl md:text-5xl font-serif font-semibold text-white mb-1 sm:mb-2 md:mb-4 px-4"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
           Tote Bags
         </motion.h1>
         <motion.p
-          className="relative text-gray-200 text-lg max-w-2xl"
+          className="relative text-gray-200 text-xs sm:text-sm md:text-lg max-w-xs sm:max-w-md md:max-w-2xl px-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -76,10 +82,11 @@ export default function ToteBagPage() {
         </motion.p>
       </div>
 
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 grid grid-cols-1 md:grid-cols-5 gap-8">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-6 sm:mt-12 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8">
         {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 h-[350px] rounded-lg shadow mt-2">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -92,9 +99,12 @@ export default function ToteBagPage() {
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
+                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -102,6 +112,7 @@ export default function ToteBagPage() {
             </ul>
           </div>
 
+          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -112,7 +123,9 @@ export default function ToteBagPage() {
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
+                    highlight === opt
+                      ? "text-[#b46029] font-semibold"
+                      : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -122,43 +135,70 @@ export default function ToteBagPage() {
           </div>
         </aside>
 
-        {/* Products */}
-        <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="flex justify-between items-center mb-3">
+        {/* Products Grid */}
+        <div className="md:col-span-4 flex flex-col gap-4">
+          {/* Top Bar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
             </p>
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36] focus:border-[#C45A36]"
+            >
+              <option>Default sorting</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Rating</option>
+            </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12">
             <AnimatePresence>
               {sortedItems.map((item) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ duration: 0.5 }}
-                  className="group flex justify-center"
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex justify-center"
                 >
                   <Link
                     to={`/totebagdetail/${item.id}`}
-                    className="w-full max-w-[360px] flex flex-col"
+                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
-                    <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
+                    <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-1 sm:hover:-translate-y-2 md:hover:-translate-y-3">
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
                     </div>
 
-                    <div className="mt-4 text-center">
-                      <p className="text-xl text-gray-900 font-playfair leading-snug">
+                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
                         {item.name}
                       </p>
-                      <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#C45A36] font-cinzel">
+                      {item.description && (
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
                           ₹{item.price}
                         </span>
                       </div>
@@ -170,6 +210,6 @@ export default function ToteBagPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

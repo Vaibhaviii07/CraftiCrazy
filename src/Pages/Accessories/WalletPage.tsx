@@ -18,17 +18,18 @@ export default function WalletPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(wallets.map((item) => item.category))];
 
-  const filteredItems: Wallet[] = wallets.filter((item) => {
+  // Filtering
+  const filteredWallets = wallets.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = item.price > 500;
+        highlightMatch = (item.rating ?? 0) >= 4.5; // change threshold as needed
         break;
       case "Discounted":
-        highlightMatch = item.price <= 500;
+        highlightMatch = (item.discount ?? 0) > 0;
         break;
       default:
         highlightMatch = true;
@@ -36,22 +37,25 @@ export default function WalletPage() {
     return categoryMatch && highlightMatch;
   });
 
-  const sortedItems: Wallet[] = [...filteredItems].sort((a, b) => {
+  // Sorting
+  const sortedWallets = [...filteredWallets].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
         return a.price - b.price;
       case "Price: High to Low":
         return b.price - a.price;
+      case "Rating":
+        return (b.rating || 0) - (a.rating || 0);
       default:
         return 0;
     }
   });
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <section className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
       <div
-        className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
+        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
         style={{
           backgroundImage: "url('/wallets/banner.jpg')",
           backgroundSize: "cover",
@@ -60,27 +64,28 @@ export default function WalletPage() {
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <motion.h1
-          className="relative text-4xl md:text-5xl font-serif font-semibold text-white mb-4"
+          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
           Wallets
         </motion.h1>
         <motion.p
-          className="relative text-gray-200 text-lg max-w-2xl"
+          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Explore handcrafted leather, fabric, and resin wallets designed for
-          durability and style.
+          Explore handcrafted leather, fabric, and resin wallets designed for durability and style.
         </motion.p>
       </div>
 
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 grid grid-cols-1 md:grid-cols-5 gap-8">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 h-[350px] rounded-lg shadow mt-2">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -95,7 +100,10 @@ export default function WalletPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -103,6 +111,7 @@ export default function WalletPage() {
             </ul>
           </div>
 
+          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -113,7 +122,9 @@ export default function WalletPage() {
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
+                    highlight === opt
+                      ? "text-[#C45A36] font-semibold"
+                      : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -123,45 +134,77 @@ export default function WalletPage() {
           </div>
         </aside>
 
-        {/* Products */}
+        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="flex justify-between items-center mb-3">
+          {/* Top Bar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results
+              Showing {sortedWallets.length} results
             </p>
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36] focus:border-[#C45A36]"
+            >
+              <option>Default sorting</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Rating</option>
+            </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedItems.map((item) => (
+              {sortedWallets.map((item) => (
                 <motion.div
-                  key={item.id} // unique id like ToteBagPage
-                  initial={{ opacity: 0, y: 30 }}
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ duration: 0.5 }}
-                  className="group flex justify-center"
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex justify-center"
                 >
                   <Link
                     to={`/walletdetail/${item.id}`}
-                    className="w-full max-w-[360px] flex flex-col"
+                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
-                    <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
+                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
                     </div>
 
-                    <div className="mt-4 text-center">
-                      <p className="text-xl text-gray-900 font-playfair leading-snug">
+                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
                         {item.name}
                       </p>
-                      <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#C45A36] font-cinzel">
+                      {item.description && (
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
                           ₹{item.price}
                         </span>
+                        {item.discount && (
+                          <span className="line-through text-gray-400 text-xs sm:text-sm">
+                            ₹{Math.round(item.price / (1 - item.discount! / 100))}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </Link>
@@ -171,6 +214,6 @@ export default function WalletPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

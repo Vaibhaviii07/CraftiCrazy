@@ -1,7 +1,7 @@
 // src/Pages/ResinArt/ResinPhotoFramesPage.tsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { resinPhotoFrames, ResinPhotoFrame } from "../../Data/ResinPhotoFramesData";
+import { resinFrames, ResinFrame } from "../../Data/ResinFramedata"; // ✅ corrected import
 import { Link } from "react-router-dom";
 
 export default function ResinPhotoFramesPage() {
@@ -16,19 +16,19 @@ export default function ResinPhotoFramesPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinPhotoFrames.map((item) => item.category))];
+  const categories = [...new Set(resinFrames.map((item) => item.category))]; // ✅ using resinFrames
 
-  const filteredItems = resinPhotoFrames.filter((item) => {
+  const filteredItems = resinFrames.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = item.popularity >= 90;
+        highlightMatch = item.highlight === "Best Seller"; // ✅ use highlight property
         break;
       case "Discounted":
-        highlightMatch = item.price <= 1200; // adjust discount price
+        highlightMatch = (item.discount ?? 0) > 0; // ✅ use discount property
         break;
       default:
         highlightMatch = true;
@@ -42,6 +42,8 @@ export default function ResinPhotoFramesPage() {
         return a.price - b.price;
       case "Price: High to Low":
         return b.price - a.price;
+      case "Rating":
+        return (b.rating ?? 0) - (a.rating ?? 0);
       default:
         return 0;
     }
@@ -132,7 +134,7 @@ export default function ResinPhotoFramesPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
             <AnimatePresence>
-              {sortedItems.map((item) => (
+              {sortedItems.map((item: ResinFrame) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -151,8 +153,19 @@ export default function ResinPhotoFramesPage() {
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
+                      {(item.discount ?? 0) > 0 && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-4 right-4 bg-[#C45A36] text-white text-sm font-semibold px-3 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
                     </div>
 
+                    {/* Frame Name & Price */}
                     <div className="mt-4 text-center">
                       <p className="text-xl text-gray-900 font-playfair leading-snug">
                         {item.name}

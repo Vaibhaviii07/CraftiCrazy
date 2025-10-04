@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Star } from "lucide-react";
 
 const testimonials = [
   {
@@ -39,60 +39,49 @@ const testimonials = [
   },
 ];
 
-export default function TestimonialsCards() {
-  const [page, setPage] = useState(0);
-  const perPage = 3;
+export default function TestimonialsSlider() {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const totalPages = Math.ceil(testimonials.length / perPage);
+  // Auto slide every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const startIndex = page * perPage;
-  const currentTestimonials = testimonials.slice(startIndex, startIndex + perPage);
-
-  const handlePrev = () => setPage((prev) => (prev > 0 ? prev - 1 : prev));
-  const handleNext = () => setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev));
+  // Scroll to the active card
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        left: scrollRef.current.clientWidth * currentIndex,
+        behavior: "smooth",
+      });
+    }
+  }, [currentIndex]);
 
   return (
-    <section className="py-20  relative">
+    <section className="py-20 relative bg-[#fff8f2]">
       {/* Header */}
-      <div className="text-center mb-14 px-4 relative">
+      <div className="text-center mb-14 px-4">
         <h2 className="text-4xl md:text-5xl font-serif text-[#603808]">
           Our Happy Clients
         </h2>
         <p className="mt-4 text-lg text-[#6B3F28] max-w-xl mx-auto italic">
           Hear from those who chose handmade craftsmanship for their big moments.
         </p>
-
-        {/* Arrows */}
-        {totalPages > 1 && (
-          <div className="absolute top-0 right-6 flex gap-3 mt-9">
-            <button
-              onClick={handlePrev}
-              disabled={page === 0}
-              className={`p-2 rounded-full shadow-md bg-white hover:bg-gray-100 transition ${
-                page === 0 ? "opacity-40 cursor-not-allowed" : ""
-              }`}
-            >
-              <ChevronLeft className="w-5 h-5 text-[#603808]" />
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={page === totalPages - 1}
-              className={`p-2 rounded-full shadow-md bg-white hover:bg-gray-100 transition ${
-                page === totalPages - 1 ? "opacity-40 cursor-not-allowed" : ""
-              }`}
-            >
-              <ChevronRight className="w-5 h-5 text-[#603808]" />
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Cards */}
-      <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-2 lg:grid-cols-3 px-6">
-        {currentTestimonials.map((t) => (
+      {/* Slider */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-hidden scroll-smooth snap-x snap-mandatory gap-6 max-w-6xl mx-auto px-4"
+      >
+        {testimonials.map((t) => (
           <div
             key={t.id}
-            className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center hover:shadow-xl transition"
+            className="flex-shrink-0 w-full sm:w-[300px] md:w-[350px] snap-center bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center hover:shadow-2xl hover:scale-105 transition-transform duration-300"
           >
             <img
               src={t.image}
@@ -110,7 +99,6 @@ export default function TestimonialsCards() {
           </div>
         ))}
       </div>
-      
     </section>
   );
 }

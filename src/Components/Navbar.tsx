@@ -13,7 +13,6 @@ import {
 import { useCart } from "../AuthContext/CartContext";
 import { allProducts } from "../Data/AllProduct";
 
-
 interface SubLink {
   name: string;
   href: string;
@@ -31,27 +30,26 @@ interface Product {
 }
 
 const Navbar = () => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
   const [dropdown, setDropdown] = useState<number | null>(null);
+  const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<Product[]>([]);
 
-  // ✅ useCart hook
   const { cart } = useCart();
 
-  // ✅ Delay opening/closing of submenu
+  // ✅ Hover delay (desktop dropdown)
   const handleMouseEnter = (idx: number) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDropdown(idx);
   };
 
   const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setDropdown(null);
-    }, 250);
+    timeoutRef.current = setTimeout(() => setDropdown(null), 250);
   };
 
+  // ✅ Search handling
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
     setQuery(value);
@@ -67,11 +65,11 @@ const Navbar = () => {
     setResult(filtered);
   };
 
+  // ✅ Links
   const links: NavLink[] = [
-    { name: "New & Best Sellers", href: "/NewArrivals" },
+    { name: "New & Best Sellers", href: "/newarrivals" },
     {
       name: "Customized Hampers",
-       href: "/hamper",
       submenu: [
         { name: "Birthday Hampers", href: "/BirthdayHamper" },
         { name: "Wedding Hampers", href: "/wedding" },
@@ -80,7 +78,6 @@ const Navbar = () => {
     },
     {
       name: "Photo Frames",
-      href: "/frames",
       submenu: [
         { name: "Wooden Frames", href: "/wooden" },
         { name: "Glass Frames", href: "/glass" },
@@ -89,7 +86,6 @@ const Navbar = () => {
     },
     {
       name: "Accessories",
-      href: "/accessories",
       submenu: [
         { name: "Women Accessories", href: "/womenAss" },
         { name: "Keychains", href: "/keychain" },
@@ -100,7 +96,6 @@ const Navbar = () => {
     },
     {
       name: "Resin Art",
-      href: "/resin",
       submenu: [
         { name: "Resin Jewelry", href: "/resinJwell" },
         { name: "Resin Keychains", href: "/resinKeychain" },
@@ -108,12 +103,20 @@ const Navbar = () => {
         { name: "Resin Name Plates", href: "/resinNameplate" },
         { name: "Resin Photo Frames", href: "/resinframe" },
         { name: "Resin Coasters Set", href: "/resincoasters" },
-        { name: "Resin Pooja Thale", href: "/resinthale"}
+        { name: "Resin Pooja Thale", href: "/resinthale" },
+      ],
+    },
+     {
+      name: "Wedding special",
+      submenu: [
+        { name: "Engagement Tray", href: "/resinJwell" },
+        { name: "Wedding Ring Platter", href: "/resinKeychain" },
+        { name: "wedding invitaion", href: "/resinclock" },
+        { name: "Varmala (garland) Preservation", href: "/resinNameplate" },
       ],
     },
     {
       name: "Festival",
-      href: "/festival",
       submenu: [
         { name: "Diwali Hampers", href: "/diwali" },
         { name: "Christmas Specials", href: "/festival/christmas" },
@@ -121,8 +124,8 @@ const Navbar = () => {
         { name: "Rakhi", href: "/festival/rakhi" },
       ],
     },
-    { name: "Customized", href: "/CustomerDemand" },
-    { name: "About", href: "/AboutUs" },
+    { name: "Customized", href: "/customerdemand" },
+    { name: "About", href: "/aboutus" },
     { name: "Contact", href: "/contactus" },
   ];
 
@@ -131,20 +134,16 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-10 py-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 cursor-pointer relative">
-  {/* Icon with sparkle */}
-  <div className="relative flex items-center justify-center">
-    <Gift className="w-8 h-8 text-[#432818]" />
-    <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-500 animate-ping" />
-  </div>
+          <div className="relative flex items-center justify-center">
+            <Gift className="w-8 h-8 text-[#432818]" />
+            <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-500 animate-ping" />
+          </div>
+          <span className="font-bold text-3xl text-[#432818] tracking-wide hover:text-[#7f5539] transition-colors">
+            CraftiCrazy
+          </span>
+        </Link>
 
-  {/* Brand Name */}
-  <span className="font-bold text-3xl text-[#432818] tracking-wide hover:text-[#7f5539] transition-colors">
-    CraftiCrazy
-  </span>
-</Link>
-
-
-        {/* Search Bar (Desktop Only) */}
+        {/* Search Bar (Desktop) */}
         <div className="hidden md:flex flex-1 justify-center px-6">
           <div className="relative w-full max-w-lg">
             <input
@@ -152,11 +151,7 @@ const Navbar = () => {
               value={query}
               onChange={handleSearch}
               placeholder="Search for gifts..."
-              className="w-full rounded-full py-2.5 pl-5 pr-14 
-                        border border-gray-700 
-                        text-[#432818] placeholder-gray-400
-                        shadow-lg backdrop-blur-md
-                        focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+              className="w-full rounded-full py-2.5 pl-5 pr-14 border border-gray-700 text-[#432818] placeholder-gray-400 shadow-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             />
             {result.length > 0 && (
               <div className="absolute mt-2 w-full bg-white shadow-lg rounded-xl max-h-60 overflow-y-auto z-50">
@@ -165,15 +160,20 @@ const Navbar = () => {
                     key={idx}
                     to={item.href}
                     className="block px-4 py-2 hover:bg-gray-100 text-gray-700"
+                    onClick={() => {
+                      setQuery("");
+                      setResult([]);
+                    }}
                   >
                     {item.name}
                   </Link>
                 ))}
               </div>
             )}
-            {/* Search Button */}
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 text-[#432818] 
-                               rounded-full p-2 shadow-md transition">
+            <button
+              aria-label="Search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#432818] rounded-full p-2 shadow-md transition"
+            >
               <Search className="w-5 h-5" />
             </button>
           </div>
@@ -181,17 +181,11 @@ const Navbar = () => {
 
         {/* Desktop Icons */}
         <div className="hidden md:flex items-center gap-6">
-          <Link
-            to="/login"
-            className="text-[#432818] hover:text-yellow-200 transition transform hover:scale-110"
-          >
-            <User size={22} />
+          <Link to="/login" aria-label="Login">
+            <User size={22} className="text-[#432818] hover:text-yellow-600 transition" />
           </Link>
-          <Link
-            to="/cart"
-            className="text-[#432818] hover:text-yellow-200 transition relative transform hover:scale-110"
-          >
-            <ShoppingCart size={22} />
+          <Link to="/cart" aria-label="Cart" className="relative">
+            <ShoppingCart size={22} className="text-[#432818] hover:text-yellow-600 transition" />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
                 {cart.length}
@@ -202,21 +196,15 @@ const Navbar = () => {
 
         {/* Mobile Cart + Hamburger */}
         <div className="md:hidden flex items-center gap-4">
-          {/* Cart Icon in Mobile */}
-          <Link to="/cart" className="text-[#432818] hover:text-yellow-200 relative">
-            <ShoppingCart size={26} />
+          <Link to="/cart" aria-label="Cart" className="relative">
+            <ShoppingCart size={26} className="text-[#432818]" />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
                 {cart.length}
               </span>
             )}
           </Link>
-
-          {/* Hamburger Button */}
-          <button
-            className="text-[#432818]"
-            onClick={() => setOpen(!open)}
-          >
+          <button className="text-[#432818]" onClick={() => setOpen(!open)}>
             {open ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -238,8 +226,6 @@ const Navbar = () => {
               {link.name}
               {link.submenu && <ChevronDown size={16} />}
             </Link>
-
-            {/* Dropdown */}
             {link.submenu && dropdown === idx && (
               <div className="absolute top-full left-0 bg-white/95 shadow-lg rounded-xl mt-2 py-3 w-56 z-50 border border-gray-100">
                 {link.submenu.map((sublink, subIdx) => (
@@ -257,38 +243,54 @@ const Navbar = () => {
         ))}
       </nav>
 
-      {/* Mobile Nav */}
-      {open && (
-        <nav className="md:hidden bg-[#fbfaf8] px-6 py-4 space-y-4 shadow-md">
-          {links.map((link, idx) => (
-            <div key={idx}>
-              <Link
-                to={link.href ?? "#"}
-                className="block py-2 text-[#432818] font-medium border-b border-gray-200"
-                onClick={() => setOpen(false)} // close menu on click
-              >
-                {link.name}
-              </Link>
+     {open && (
+  <nav className="md:hidden bg-[#fbfaf8] px-6 py-4 shadow-md space-y-2">
+    {links.map((link, idx) => (
+      <div key={idx} className="flex flex-col">
+        {link.submenu ? (
+          // If link has submenu, show a toggle button
+          <>
+            <button
+              onClick={() =>
+                setMobileDropdown(mobileDropdown === idx ? null : idx)
+              }
+              className="flex justify-between items-center w-full py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
+            >
+              <span>{link.name}</span>
+              <ChevronDown size={16} />
+            </button>
 
-              {/* Submenu for mobile */}
-              {link.submenu && (
-                <div className="pl-4 space-y-2">
-                  {link.submenu.map((sublink, subIdx) => (
-                    <Link
-                      key={subIdx}
-                      to={sublink.href}
-                      className="block py-1 text-gray-700 hover:text-[#6b705c]"
-                      onClick={() => setOpen(false)}
-                    >
-                      {sublink.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
-      )}
+            {mobileDropdown === idx && (
+              <div className="flex flex-col pl-4 mt-2 space-y-1">
+                {link.submenu.map((sublink, subIdx) => (
+                  <Link
+                    key={subIdx}
+                    to={sublink.href}
+                    className="py-1 text-gray-700 hover:text-[#6b705c] transition"
+                    onClick={() => setOpen(false)}
+                  >
+                    {sublink.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          // If no submenu, directly render as Link
+          <Link
+            to={link.href ?? "#"}
+            className="py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
+            onClick={() => setOpen(false)}
+          >
+            {link.name}
+          </Link>
+        )}
+      </div>
+    ))}
+  </nav>
+)}
+
+
     </header>
   );
 };

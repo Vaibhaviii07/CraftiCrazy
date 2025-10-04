@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
-import { resinPhotoFrames, ResinPhotoFrame } from "../Data/ResinPhotoFramesData";
+import { resinFrames, ResinFrame } from "../Data/ResinFramedata"; // corrected imports
 import { useCart } from "../AuthContext/CartContext";
 
 export default function ResinPhotoFrameDetailPage() {
@@ -11,7 +11,8 @@ export default function ResinPhotoFrameDetailPage() {
   const { cart, addToCart } = useCart();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const frame: ResinPhotoFrame | undefined = resinPhotoFrames.find((f) => f.id === id);
+  // Proper typing for the find callback
+  const frame: ResinFrame | undefined = resinFrames.find((f: ResinFrame) => f.id === id);
 
   if (!frame) {
     return (
@@ -22,23 +23,23 @@ export default function ResinPhotoFrameDetailPage() {
   }
 
   const handleAddToCart = () => {
-  const product = { 
-    ...frame, 
-    quantity: 1, 
-    price: frame.price.toString() // convert number to string
+    const product = {
+      ...frame,
+      quantity: 1,
+      price: frame.price.toString(),
+    };
+
+    const exists = cart.find((c) => c.id === product.id);
+
+    if (!exists) {
+      addToCart(product);
+      setToastMessage(`${product.name} added to cart ✅`);
+    } else {
+      setToastMessage(`${product.name} is already in your cart 🛒`);
+    }
+
+    setTimeout(() => setToastMessage(null), 2500);
   };
-  const exists = cart.find((c) => c.id === product.id);
-
-  if (!exists) {
-    addToCart(product);
-    setToastMessage(`${product.name} added to cart ✅`);
-  } else {
-    setToastMessage(`${product.name} is already in your cart 🛒`);
-  }
-
-  setTimeout(() => setToastMessage(null), 2500);
-};
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,7 +72,7 @@ export default function ResinPhotoFrameDetailPage() {
         </div>
       </div>
 
-      {/* Toast */}
+      {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div

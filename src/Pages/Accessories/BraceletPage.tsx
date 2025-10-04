@@ -1,5 +1,5 @@
-// src/Pages/Accessories/BraceletPage.tsx
-import { useState } from "react";
+// src/Pages/Bracelets/BraceletPage.tsx
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { bracelets, Bracelet } from "../../Data/BraceletData";
 import { Link } from "react-router-dom";
@@ -18,41 +18,43 @@ export default function BraceletPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(bracelets.map(item => item.category))];
 
-  // Filter items based on category & highlight
-  const filteredItems = bracelets.filter((item: Bracelet) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+  const filteredItems = useMemo(() => {
+    return bracelets.filter((item: Bracelet) => {
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
-    let highlightMatch = true;
-    switch (highlight) {
-      case "Best Seller":
-       highlightMatch = item.popularity! > 80; // popularity must exist in Bracelet type
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = (item.rating ?? 0) >= 5;
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+        default:
+          highlightMatch = true;
+      }
+      return categoryMatch && highlightMatch;
+    });
+  }, [selectedCategories, highlight]);
+
+  const sortedItems = useMemo(() => {
+    const sorted = [...filteredItems];
+    switch (sortOption) {
+      case "Price: Low to High":
+        sorted.sort((a, b) => a.price - b.price);
         break;
-      case "Discounted":
-        highlightMatch = item.discount > 0;
+      case "Price: High to Low":
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case "Rating":
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       default:
-        highlightMatch = true;
+        break;
     }
-    return categoryMatch && highlightMatch;
-  });
-
-  // Sort items based on price
-  const getPriceValue = (price: string) =>
-  parseFloat(price.replace(/[^0-9.-]+/g, "")) || 0;
-
-const sortedItems = [...filteredItems].sort((a, b) => {
-  switch (sortOption) {
-    case "Price: Low to High":
-      return getPriceValue(a.price) - getPriceValue(b.price);
-    case "Price: High to Low":
-      return getPriceValue(b.price) - getPriceValue(a.price);
-    default:
-      return 0;
-  }
-});
-
-
+    return sorted;
+  }, [filteredItems, sortOption]);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -84,10 +86,10 @@ const sortedItems = [...filteredItems].sort((a, b) => {
         </motion.p>
       </div>
 
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 grid grid-cols-1 md:grid-cols-5 gap-8">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 h-[400px] rounded-lg shadow mt-2">
+        <aside className="flex-shrink-0 w-full md:w-1/4 bg-white p-4 rounded-lg shadow">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -119,9 +121,7 @@ const sortedItems = [...filteredItems].sort((a, b) => {
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
-                  }`}
+                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
                 >
                   {opt}
                 </li>
@@ -131,14 +131,14 @@ const sortedItems = [...filteredItems].sort((a, b) => {
         </aside>
 
         {/* Products */}
-        <div className="md:col-span-4 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col gap-6">
           <div className="flex justify-between items-center mb-3">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <AnimatePresence>
               {sortedItems.map(item => (
                 <motion.div
@@ -150,22 +150,31 @@ const sortedItems = [...filteredItems].sort((a, b) => {
                   className="group flex justify-center"
                 >
                   <Link to={`/braceletdetail/${item.id}`} className="w-full max-w-[360px] flex flex-col">
-                    <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
+                    <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
+                      {item.discount && (
+                        <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
+                          {item.discount}% OFF
+                        </span>
+                      )}
                     </div>
 
                     <div className="mt-4 text-center">
-                      <p className="text-xl text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
+                      <p className="text-xl text-gray-900 font-playfair leading-snug">{item.name}</p>
+                      {item.description && (
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                      )}
                       <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#b46029] font-cinzel">
-                          {item.price}
-                        </span>
+                        <span className="text-2xl text-[#b46029] font-cinzel">₹{item.price}</span>
+                        {item.discount && (
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{Math.round(item.price + (item.price * item.discount) / 100)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </Link>

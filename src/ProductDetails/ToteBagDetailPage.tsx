@@ -1,100 +1,270 @@
 // src/ProductDetails/ToteBagDetailPage.tsx
 import { useParams } from "react-router-dom";
-import { toteBags, ToteBag } from "../Data/ToteBagData";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { toteBags, ToteBag, Variant } from "../Data/ToteBagData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+type Params = { id: string };
 
 export default function ToteBagDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<Params>();
   const { addToCart, cart } = useCart();
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [toast, setToast] = useState<string | null>(null);
 
-  const bag: ToteBag | undefined = toteBags.find((b) => b.id.toString() === id);
+  const productFromParams: ToteBag | undefined = toteBags.find(
+    (b: ToteBag) => b.id.toString() === id
+  );
 
-  if (!bag) {
-    return <p className="text-center mt-20 text-gray-700">Tote Bag not found.</p>;
+  if (!productFromParams) {
+    return (
+      <p className="text-center mt-20 text-lg text-gray-400">
+        Tote Bag not found
+      </p>
+    );
   }
+
+  const [currentProduct] = useState<ToteBag>(productFromParams);
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant>({
+    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
+    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+  });
+
+  useEffect(() => {
+    setSelectedVariant({
+      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
+      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+    });
+    setQuantity(1);
+  }, [currentProduct]);
 
   const handleAddToCart = () => {
-  const exists = cart.find((c) => c.id === bag.id);
-  if (!exists) {
-    addToCart({ ...bag, price: bag.price.toString(), quantity: 1 });
-    setToastMessage(`${bag.name} added to cart ✅`);
-  } else {
-    setToastMessage(`${bag.name} is already in your cart 🛒`);
-  }
-  setTimeout(() => setToastMessage(null), 2500);
-};
+    const exists = cart.find((c) => c.id === currentProduct.id);
+    if (!exists) {
+      addToCart({
+        id: currentProduct.id,
+        name: currentProduct.name,
+        price: `₹${selectedVariant.price}`,
+        quantity,
+        image: selectedVariant.image,
+        discount: selectedVariant.discount,
+        category: currentProduct.category,
+      });
+      setToast(`${currentProduct.name} added to cart ✅`);
+    } else {
+      setToast(`${currentProduct.name} is already in your cart 🛒`);
+    }
+    setTimeout(() => setToast(null), 2500);
+  };
 
   return (
-    <div className="bg-gray-50 min-h-screen px-6 sm:px-10 py-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Image */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full h-[500px] rounded-3xl overflow-hidden shadow-lg"
-        >
-          <img
-            src={bag.image}
-            alt={bag.name}
-            className="w-full h-full object-cover"
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* Left: Image */}
+        <div className="flex-1 relative">
+          <motion.img
+            src={selectedVariant.image}
+            alt={currentProduct.name}
+            className="w-full rounded-3xl shadow-xl object-cover"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.5 }}
           />
-        </motion.div>
+          {selectedVariant.discount && (
+            <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
+              {selectedVariant.discount}% OFF
+            </span>
+          )}
 
-        {/* Details */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col justify-start"
-        >
-          <h1 className="text-4xl font-playfair font-semibold text-gray-900 mb-4">
-            {bag.name}
+          {/* Variant thumbnails */}
+          {currentProduct.variants && currentProduct.variants.length > 1 && (
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1">
+              {currentProduct.variants.map((v: Variant, i: number) => (
+                <motion.div
+                  key={i}
+                  onClick={() => setSelectedVariant(v)}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
+                    selectedVariant.image === v.image
+                      ? "border-[#C45A36] ring-2 ring-[#C45A36]"
+                      : "border-gray-300"
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <img
+                    src={v.image}
+                    alt={`thumb-${i}`}
+                    className="h-20 w-20 object-cover rounded-lg"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Product Info */}
+        <div className="flex-1 flex flex-col gap-4 sm:gap-5">
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">
+            {currentProduct.name}
           </h1>
 
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-2xl text-[#C45A36] font-cinzel">
-              ₹{bag.price}
+          {/* Price row */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">
+              ₹{selectedVariant.price}
             </span>
-            <span className="text-sm text-gray-600">Category: {bag.category}</span>
+            {selectedVariant.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">
+                ₹{currentProduct.price}
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-4 mb-6">
-            <span className="text-sm text-gray-700">
-              Rating: {bag.rating} ⭐
-            </span>
-            <span className="text-sm text-gray-700">
-              Popularity: {bag.popularity}%
-            </span>
+          {/* Description */}
+          <p className="text-gray-700 leading-relaxed">
+            {currentProduct.description}
+          </p>
+
+          {/* Structured Info */}
+          <div className="space-y-3 text-gray-700 mt-2">
+            {currentProduct.material && (
+              <p>
+                <span className="font-semibold text-gray-900">Material:</span>{" "}
+                {currentProduct.material}
+              </p>
+            )}
+            {currentProduct.dimensions && (
+              <p>
+                <span className="font-semibold text-gray-900">Dimensions:</span>{" "}
+                {currentProduct.dimensions}
+              </p>
+            )}
+            {currentProduct.weight && (
+              <p>
+                <span className="font-semibold text-gray-900">Weight:</span>{" "}
+                {currentProduct.weight}
+              </p>
+            )}
+            {currentProduct.careInstructions && (
+              <p>
+                <span className="font-semibold text-gray-900">Care:</span>{" "}
+                {currentProduct.careInstructions}
+              </p>
+            )}
+            {currentProduct.delivery && (
+              <p>
+                <span className="font-semibold text-gray-900">Delivery:</span>{" "}
+                {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated{" "}
+                {currentProduct.delivery.estimated}
+              </p>
+            )}
           </div>
 
-          <p className="text-gray-700 mb-6">{bag.description}</p>
+          {/* Tags / Brand / Stock / Warranty */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.brand && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>
+            )}
+            {currentProduct.seller && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>
+            )}
+            <span
+              className={`px-2 py-1 rounded ${
+                currentProduct.inStock
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
+            </span>
+            {currentProduct.warranty && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
+            )}
+            {currentProduct.returnPolicy && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>
+            )}
+          </div>
 
-          <button
-            onClick={handleAddToCart}
-            className="w-max flex items-center gap-2 px-6 py-3 bg-[#C45A36] text-white font-medium rounded-md shadow hover:bg-[#a1472c] transition"
-          >
-            <ShoppingCart className="w-5 h-5" /> Add to Cart
-          </button>
-        </motion.div>
+          {/* Quantity + Add to Cart */}
+          <div className="flex flex-wrap gap-3 mt-4 items-center">
+            <div className="flex items-center border rounded-full overflow-hidden">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                -
+              </button>
+              <span className="px-6 py-2">{quantity}</span>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                +
+              </button>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              className="flex items-center gap-2 px-6 py-3 bg-[#C45A36] hover:bg-[#a1472c] text-white rounded-full font-medium shadow-lg"
+            >
+              <ShoppingCart className="w-5 h-5" /> Add to Cart
+            </button>
+          </div>
+
+          {/* Additional Sections */}
+          <div className="mt-6 flex flex-col gap-4">
+            {currentProduct.contents && (
+              <div>
+                <h3 className="font-semibold text-gray-800">Contents</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {currentProduct.contents.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {currentProduct.customization?.available && (
+              <div>
+                <h3 className="font-semibold text-gray-800">Customization Options</h3>
+                <p className="text-gray-600">
+                  {currentProduct.customization.options?.join(", ")}
+                </p>
+              </div>
+            )}
+            {currentProduct.specifications && (
+              <div>
+                <h3 className="font-semibold text-gray-800">Specifications</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
+                    <li key={idx}>
+                      <span className="font-medium">{key}:</span> {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Toast */}
-      {toastMessage && (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 50 }}
-          transition={{ duration: 0.3 }}
-          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base z-50"
-        >
-          {toastMessage}
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
+                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

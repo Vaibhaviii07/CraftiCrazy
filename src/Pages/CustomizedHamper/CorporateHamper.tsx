@@ -1,5 +1,5 @@
 // src/Pages/Hampers/CorporateHamper.tsx
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { corporateHampers } from "../../Data/CorporateData";
 import { Link } from "react-router-dom";
@@ -9,60 +9,55 @@ export default function CorporateHamper() {
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
 
-  // ✅ Toggle category selection
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
 
-  // ✅ Sidebar options
   const highlightOptions = ["All", "Top Rated", "Best Seller", "New Arrival"];
   const categories = [...new Set(corporateHampers.map((item) => item.category))];
 
-  // ✅ Filtering
-  const filteredHampers = corporateHampers.filter((item) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+  // Filter hampers based on selected categories & highlight
+  const filteredHampers = useMemo(() => {
+    return corporateHampers.filter((hamper) => {
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(hamper.category);
 
-    let highlightMatch = true;
-switch (highlight) {
-  case "Top Rated":
-    highlightMatch = (item.rating ?? 0) > 4;
-    break;
-  case "Best Seller":
-    highlightMatch = (item.popularity ?? 0) > 80;
-    break;
-  case "New Arrival":
-    highlightMatch = !!item.newArrival;
-    break;
-  default:
-    highlightMatch = true;
-}
+      const highlightMatch =
+        highlight === "All" ||
+        (highlight === "Top Rated" && (hamper.rating || 0) >= 4.5) ||
+        (highlight === "Best Seller" && hamper.reviews && hamper.reviews > 80) ||
+        (highlight === "New Arrival" && hamper.tags?.includes("new"));
 
+      return categoryMatch && highlightMatch;
+    });
+  }, [selectedCategories, highlight]);
 
-    return categoryMatch && highlightMatch;
-  });
-
-  // ✅ Sorting
-  const sortedHampers = [...filteredHampers].sort((a, b) => {
+  // Sort hampers
+  const sortedHampers = useMemo(() => {
+    const sorted = [...filteredHampers];
     switch (sortOption) {
       case "Price: Low to High":
-        return Number(a.price) - Number(b.price);
+        sorted.sort((a, b) => a.price - b.price);
+        break;
       case "Price: High to Low":
-        return Number(b.price) - Number(a.price);
+        sorted.sort((a, b) => b.price - a.price);
+        break;
       case "Rating":
-        return (b.rating || 0) - (a.rating || 0);
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
       default:
-        return 0;
+        break;
     }
-  });
+    return sorted;
+  }, [filteredHampers, sortOption]);
 
   return (
-    <div className="bg-gray-50 relative min-h-screen">
-      {/* ✅ Hero Section */}
+    <section className="bg-gray-50 min-h-screen">
+      {/* Hero Section */}
       <div
-        className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
+        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
         style={{
           backgroundImage: "url('/corporatebanner.jpg')",
           backgroundSize: "cover",
@@ -71,7 +66,7 @@ switch (highlight) {
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <motion.h1
-          className="relative text-4xl md:text-5xl font-serif font-semibold text-white mb-4"
+          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -79,7 +74,7 @@ switch (highlight) {
           Corporate Hampers
         </motion.h1>
         <motion.p
-          className="relative text-gray-200 text-lg max-w-2xl"
+          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -88,10 +83,10 @@ switch (highlight) {
         </motion.p>
       </div>
 
-      {/* ✅ Main Layout */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 grid grid-cols-1 md:grid-cols-5 gap-8">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar Filters */}
-        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
@@ -107,10 +102,7 @@ switch (highlight) {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label
-                    htmlFor={cat}
-                    className="text-gray-700 text-sm cursor-pointer"
-                  >
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
                     {cat}
                   </label>
                 </li>
@@ -139,10 +131,10 @@ switch (highlight) {
           </div>
         </aside>
 
-        {/* ✅ Products Grid */}
+        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
               Showing {sortedHampers.length} results
             </p>
@@ -158,52 +150,56 @@ switch (highlight) {
             </select>
           </div>
 
-          {/* Products */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
               {sortedHampers.map((hamper) => (
                 <motion.div
                   key={hamper.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ duration: 0.5 }}
-                  className="group flex justify-center"
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex justify-center"
                 >
                   <Link
                     to={`/corporatedetail/${hamper.id}`}
-                    className="w-full max-w-[360px] flex flex-col"
+                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
-                    <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
+                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
                       <img
                         src={hamper.image}
                         alt={hamper.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-
                       {hamper.discount && (
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute top-4 right-4 bg-[#b46029] text-white text-sm font-semibold px-3 py-1 rounded-md shadow"
+                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {hamper.discount}% OFF
                         </motion.span>
                       )}
                     </div>
 
-                    <div className="mt-4 text-center">
-                      <p className="text-xl text-gray-900 font-playfair leading-snug">
+                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
                         {hamper.name}
                       </p>
+                      {hamper.rating && (
+                        <p className="text-yellow-500 text-sm mt-1">
+                          {"⭐".repeat(Math.round(hamper.rating))} ({hamper.reviews || 0})
+                        </p>
+                      )}
                       {hamper.description && (
-                        <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
                           {hamper.description}
                         </p>
                       )}
-                      <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#b46029] font-cinzel">
+                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
                           ₹{hamper.price}
                         </span>
                       </div>
@@ -215,6 +211,6 @@ switch (highlight) {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

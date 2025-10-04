@@ -22,7 +22,6 @@ import WeddingHamper from "./Pages/CustomizedHamper/WeddingHamper";
 import CorporateHamper from "./Pages/CustomizedHamper/CorporateHamper.js";
 import WoodenPhotoFrames from "./Pages/PhotoFrames/WoodenFrame.js";
 import GlassPhotoFrames from "./Pages/PhotoFrames/GlassFrame.js";
-import ResinPhotoFrames from "./Pages/PhotoFrames/ResinFrame.js";
 import WomenAccessories from "./Pages/Accessories/WomenAccessories.js";
 import KeyChainPage from "./Pages/Accessories/KeyChain.js";
 import WalletPage from "./Pages/Accessories/WalletPage.js";
@@ -48,11 +47,13 @@ import ResinFrameDetailPage from "./ProductDetails/ResinFrameDetailPage.tsx";
 import WoodenFrameDetailPage from "./ProductDetails/WoodenFrameDetailPage.tsx";
 import ResinClockDetailPage from "./ProductDetails/ResinClockDetailPage.tsx";
 import ResinCoasterDetailPage from "./ProductDetails/ResinCoasterDetailPage.tsx";
-import ResinJewelryDetailPage from "./ProductDetails/ResinJewelryPage.tsx";
+import ResinJewelryDetailPage from "./ProductDetails/ResinJewelryPageDetail.tsx";
 import ResinKeychainDetailPage from "./ProductDetails/ResinKeychainDetailPage.tsx";
 import ResinNameplateDetailPage from "./ProductDetails/ResinNameplateDetailPage.tsx";
 import ResinPhotoFrameDetailPage from "./ProductDetails/ResinPhotoFrameDetailPage.tsx";
 import ResinPujaThaleDetailPage from "./ProductDetails/ResinPujaThaleDetailPage.tsx";
+import WeddingHamperDetailPage from "./ProductDetails/WeddingHamperDetailPage.tsx";
+import ResinFramePage from "./Pages/PhotoFrames/ResinFrame.tsx";
 
 function App() {
   const [showPrompt, setShowPrompt] = useState(false);
@@ -88,7 +89,7 @@ function App() {
         <Route path="/corporate" element={<CorporateHamper />} />
         <Route path="/wooden" element={<WoodenPhotoFrames/>}/>
         <Route path="/glass" element={<GlassPhotoFrames/>} />
-        <Route path="/resin" element={<ResinPhotoFrames/>} />
+        <Route path="/resin" element={<ResinFramePage/>} />
         <Route path="/womenAss" element={<WomenAccessories />}/>
         <Route path="/keychain" element={<KeyChainPage />} />
         <Route path="/wallet" element={<WalletPage />} />
@@ -102,6 +103,7 @@ function App() {
         <Route path="/resincoasters" element={<ResinCoasterSetPage/>} />
         <Route path="/resinthale" element={<ResinPujaThalePage/>} />
         <Route path="/diwali" element={<DiwaliHamperPage/>} />
+        
        {/*Product Details */}
        <Route path="/keydetail/:id" element={<KeyChainDetails/>}/>
        <Route path="/braceletdetail/:id" element={<BraceletDetails/>}/>
@@ -110,6 +112,7 @@ function App() {
        <Route path="/accessorydetail/:id" element={<WomenAccessoryDetailPage/>}/>
        <Route path="/birthdaydetail/:id" element={<BirthdayHamperDetails/>}/>
        <Route path="/corporatedetail/:id" element={<CorporateHamperDetails/>}/>
+       <Route path="/weddingDetail/:id" element={<WeddingHamperDetailPage/>}/>
        <Route path="/Glassdetail/:id" element={<GlassFrameDetails/>}/>
        <Route path="/Framedetail/:id" element={<ResinFrameDetailPage/>}/>
        <Route path="/woodendetail/:id" element={<WoodenFrameDetailPage/>}/>

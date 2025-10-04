@@ -1,261 +1,284 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+// src/Pages/CustomerDemandPremium.tsx
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type FormData = {
   name: string;
   email: string;
   phone: string;
-  demand: string;
+  product: string;
+  customization: string;
   image: File | null;
 };
 
-const creations = [
-  { id: 1, name: "Knitting", image: "craft.jpeg" },
-  { id: 2, name: "Engagement Tray", image: "tray.jpeg" },
-  { id: 3, name: "Memories Preservation", image: "rose.jpeg" },
-];
-// Add this array above your component
 const howItWorksSteps = [
-  {
-    id: 1,
-    title: "Share Your Idea",
-    description: "Tell us what you want – any special requests or creative ideas.",
-    icon: "💡",
-  },
-  {
-    id: 2,
-    title: "Choose Customization",
-    description: "Select colors, materials, and design options to match your vision.",
-    icon: "🎨",
-  },
-  {
-    id: 3,
-    title: "We Craft It",
-    description: "Our skilled artisans carefully craft your unique creation.",
-    icon: "🛠️",
-  },
-  {
-    id: 4,
-    title: "Enjoy Your Gift",
-    description: "Receive your personalized creation and enjoy your special gift!",
-    icon: "🎁",
-  },
+  { id: 1, title: "Share Your Idea", description: "Tell us your vision, from trays to keepsakes.", icon: "💡" },
+  { id: 2, title: "Select Customization", description: "Choose colors, materials, and design.", icon: "🎨" },
+  { id: 3, title: "Crafted with Love", description: "Our artisans handcraft your bespoke piece.", icon: "🛠️" },
+  { id: 4, title: "Receive with Elegance", description: "Enjoy your premium creation delivered with care.", icon: "🎁" },
 ];
 
+const reels = [
+  { id: 1, video: "holder.mp4" },
+  { id: 2, video: "blood.mp4" },
+  { id: 3, video: "mug.mp4" },
+  { id: 4, video: "reel1.mp4" },
+  { id: 5, video: "reel2.mp4" },
+  { id: 6, video: "reel3.mp4" },
+];
 
-const CustomerDemand = () => {
+const CustomerDemandPremium = () => {
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    phone: "",
-    demand: "",
-    image: null,
+    name: "", email: "", phone: "", product: "", customization: "", image: null
   });
-
   const [submitted, setSubmitted] = useState(false);
 
- const handleChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = e.target;
+  const reelContainerRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Check if it's a file input
-  if (e.target instanceof HTMLInputElement && e.target.type === "file") {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      setFormData((prev) => ({ ...prev, image: files[0] }));
-    }
-  } else {
-    // For text, email, tel, textarea inputs
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }
-};
+  // Auto reel scrolling
+  const startScrolling = () => {
+    const scrollContainer = reelContainerRef.current;
+    if (!scrollContainer) return;
+    let scrollAmount = scrollContainer.scrollLeft;
 
+    intervalRef.current = setInterval(() => {
+      if (!scrollContainer) return;
+      scrollAmount += 1.5; // smoother on mobile
+      if (scrollAmount >= scrollContainer.scrollWidth / 2) {
+        scrollAmount = 0;
+        scrollContainer.scrollTo({ left: 0, behavior: "auto" });
+      } else {
+        scrollContainer.scrollTo({ left: scrollAmount, behavior: "smooth" });
+      }
+    }, 20);
+  };
 
+  useEffect(() => {
+    startScrolling();
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (e.target instanceof HTMLInputElement && e.target.type === "file") {
+      const files = e.target.files;
+      if (files && files.length > 0) setFormData(prev => ({ ...prev, image: files[0] }));
+    } else setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Customer Demand submitted:", formData);
     setSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", demand: "", image: null });
+    setFormData({ name: "", email: "", phone: "", product: "", customization: "", image: null });
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center px-6 md:px-20 py-2 gap-12 ">
-       {/* How It Works Section */}
-        <motion.div
-          className="w-full py-12 bg-white rounded-2xl px-6 md:px-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h2 className="text-3xl md:text-5xl font-bold text-[#583101] text-center mb-12">
-            How It Works
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {howItWorksSteps.map((step) => (
-              <motion.div
-                key={step.id}
-                className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition"
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="text-5xl mb-4">{step.icon}</div>
-                <h3 className="font-semibold text-lg text-gray-700 mb-2">{step.title}</h3>
-                <p className="text-gray-500 text-sm">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      {/* Customer Demand Section */}
-      <div className="flex flex-col md:flex-row items-center gap-12 w-full ">
-        {/* Form */}
-        <motion.div 
-          className="w-full md:w-1/2 bg-white p-6 rounded-2xl shadow-lg"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className="text-3xl md:text-4xl font-bold text-[#583101] text-center mb-4">
-            Customer Demands
+    <section className="min-h-screen">
+      {/* Hero Banner */}
+      <div className="relative w-screen h-[220px] sm:h-[350px] md:h-[500px] flex items-center justify-center text-center">
+        <img src="banner.jpg" alt="Crafting" className="w-screen h-full object-cover brightness-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-3">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-serif text-white drop-shadow-lg">
+            Customize Your Demand
           </h1>
-          <p className="text-center text-gray-600 text-base md:text-lg mb-10 font-[Playfair_Display]">
-            Share your ideas or requests! We love crafting something special for you.
+          <p className="mt-2 text-base sm:text-lg md:text-2xl italic text-white drop-shadow-md">
+            With CraftiCrazy, Crafted With Care
           </p>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Your Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full mb-7 px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Your Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 mb-7 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone Number"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mb-7 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none"
-            />
-            <textarea
-              name="demand"
-              placeholder="Describe your demand"
-              value={formData.demand}
-              onChange={handleChange}
-              required
-              rows={4}
-              className="w-full px-4 py-2 mb-7 rounded-lg border border-gray-300 focus:ring-1 focus:ring-orange-300 focus:outline-none resize-none"
-            />
-            <input
-              key={formData.image ? formData.image.name : "file-input"}
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full py-2 px-4 rounded-lg border border-gray-300 cursor-pointer focus:outline-none focus:ring-1 focus:ring-orange-300"
-            />
-
-            {formData.image && (
-              <div className="relative mt-1 -mb-5 w-30 h-30 mx-auto">
-                <img
-                  src={URL.createObjectURL(formData.image)}
-                  alt="Preview"
-                  className="w-full h-full object-cover rounded-lg shadow"
-                />
-                {/* Cross Button */}
-                <button
-                  type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, image: null }))}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow hover:bg-red-600 transition"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-
-
-            <motion.button
-              type="submit"
-              className="w-40 py-2 mb-7 mt-8 bg-[#8b5e34] text-white font-medium rounded-lg hover:bg-orange-600 transition"
-              whileHover={{ scale: 1.03 }}
-            >
-              Submit
-            </motion.button>
-          </form>
-
-          {submitted && (
-            <motion.p
-              className="mt-4 text-center text-green-600 font-medium"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              ✅ Your demand has been recorded!
-            </motion.p>
-          )}
-        </motion.div>
-
-        {/* Image */}
-        <motion.div 
-          className="w-full md:w-1/2 flex justify-center"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <img
-            src="customer_bg.jpg"
-            alt="Crafting"
-            className="rounded-2xl object-cover w-full max-w-sm"
-          />
-        </motion.div>
+        </div>
       </div>
 
-      {/* Our Creations Section */}
-      <motion.div
-        className="w-full mt-16 py-12  rounded-2xl px-6 md:px-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-      <h2 className="text-3xl md:text-4xl font-bold text-[#8b5e34] text-center mb-8">
-          Our Creations
+      {/* Auto Sliding Reels */}
+      <motion.div className="relative w-full py-8 sm:py-12 rounded-3xl shadow-lg mt-6 sm:mt-9 border border-gray-200 bg-gray-50">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#8b5e34] font-serif text-center mb-6 sm:mb-8">
+          Sanika&apos;s Creations
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {creations.map((item, index) => (
+
+        <div
+          ref={reelContainerRef}
+          className="flex gap-4 sm:gap-6 overflow-x-hidden no-scrollbar px-2 scroll-smooth relative"
+          onMouseEnter={() => { if (intervalRef.current) clearInterval(intervalRef.current); }}
+          onMouseLeave={startScrolling}
+        >
+          {[...reels, ...reels].map((reel, index) => (
             <motion.div
-              key={item.id}
-              className="relative rounded-2xl shadow-lg overflow-hidden cursor-pointer group"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.5 }}
+              key={index}
+              whileHover={{ scale: 1.05 }}
+              className="min-w-[200px] sm:min-w-[240px] md:min-w-[300px] rounded-2xl shadow-xl overflow-hidden bg-white border border-gray-200 transition-transform duration-300"
             >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-80 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+              <video
+                src={reel.video}
+                className="w-full h-40 sm:h-56 md:h-95 object-cover"
+                autoPlay loop muted playsInline
               />
-              
             </motion.div>
           ))}
         </div>
-        
+
+        {/* Gradient fades for smooth edges */}
+        <div className="absolute top-0 left-0 h-full w-10 bg-gradient-to-r from-gray-50 via-white/80 to-transparent pointer-events-none rounded-l-3xl"></div>
+      </motion.div>
+
+      {/* Form & Motivation */}
+     <motion.div
+  initial={{ y: 30, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ duration: 0.6 }}
+  className="flex flex-col lg:flex-row justify-center items-center gap-10 w-full md:w-4/5 mx-auto mb-12 mt-12 px-3 sm:px-5"
+>
+  {/* Form */}
+  <div className="w-full lg:w-5/12 bg-white p-4 sm:p-6 rounded-2xl shadow-2xl border border-gray-200 flex flex-col items-center lg:items-start text-center lg:text-left">
+    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#8b5e34] mb-3 sm:mb-4">
+      Share Your Dream
+    </h2>
+    <p className="text-gray-600 mb-5 sm:mb-6 font-[Playfair_Display] text-sm sm:text-base">
+      Your vision, our craftsmanship.
+    </p>
+
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3 w-full"
+    >
+      {["name", "email", "phone", "product"].map((field) => (
+        <input
+          key={field}
+          type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
+          name={field}
+          value={formData[field as keyof FormData] as string}
+          onChange={handleChange}
+          placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+          required
+          className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#c9a26d] focus:outline-none text-sm sm:text-base"
+        />
+      ))}
+
+      <textarea
+        name="customization"
+        value={formData.customization}
+        onChange={handleChange}
+        placeholder="How do you want to customize it?"
+        rows={3}
+        required
+        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#c9a26d] resize-none text-sm sm:text-base"
+      />
+
+      <input
+        type="file"
+        name="image"
+        accept="image/*"
+        onChange={handleChange}
+        className="w-full py-2 px-3 rounded-xl border border-gray-300 cursor-pointer focus:ring-2 focus:ring-[#c9a26d] text-sm"
+      />
+
+      {formData.image && (
+        <div className="relative mt-2 w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-lg overflow-hidden shadow-md border border-gray-200">
+          <img
+            src={URL.createObjectURL(formData.image)}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={() => setFormData((prev) => ({ ...prev, image: null }))}
+            className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      <motion.button
+        type="submit"
+        whileHover={{ scale: 1.05 }}
+        className="mt-4 py-2 w-full bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl shadow-md text-sm sm:text-base"
+      >
+        Submit
+      </motion.button>
+    </form>
+
+    <AnimatePresence>
+      {submitted && (
+        <motion.p
+          className="mt-3 text-green-600 font-medium text-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          ✅ Your request has been recorded!
+        </motion.p>
+      )}
+    </AnimatePresence>
+  </div>
+
+  {/* Right Side */}
+  <div className="w-full lg:w-5/12 flex flex-col justify-center items-center bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200 text-center lg:text-left">
+    <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#8b5e34] mb-3 sm:mb-4">
+      Why We Create
+    </h3>
+    <p className="text-gray-700 text-base sm:text-lg italic font-[Playfair_Display] mb-5 sm:mb-6 max-w-lg">
+      Behind every piece we craft lies a story waiting to be told. From delicate keepsakes to stunning wedding treasures, each creation is infused with passion, artistry, and a touch of magic.
+    </p>
+
+    {/* Social Media */}
+    <div className="flex gap-4 sm:gap-5 mt-2 sm:mt-4 justify-center">
+      {/* Instagram */}
+      <a
+        href="https://www.instagram.com/crafticrazy_710/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:scale-110 transition-transform"
+      >
+        <svg
+          className="w-7 h-7 sm:w-8 sm:h-8 text-pink-500"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M7.75 2C4.13 2 1.25 4.88 1.25 8.5v7c0 3.62 2.88 6.5 6.5 6.5h7c3.62 0 6.5-2.88 6.5-6.5v-7c0-3.62-2.88-6.5-6.5-6.5h-7zM12 7.25a4.75 4.75 0 1 1 0 9.5 4.75 4.75 0 0 1 0-9.5zm0 1.5a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5zm5.25-.25a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"></path>
+        </svg>
+      </a>
+
+      {/* WhatsApp */}
+      <a
+        href="https://wa.me/7721028815"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:scale-110 transition-transform"
+      >
+        <svg
+          className="w-7 h-7 sm:w-8 sm:h-8 text-green-500"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12.04 2C6.55 2 2 6.55 2 12.04c0 2.11.55 4.17 1.59 6L2 22l4.1-1.55a10.04 10.04 0 0 0 5.94 1.9h.01c5.49 0 10.04-4.55 10.04-10.04S17.53 2 12.04 2zm5.92 14.55c-.25.7-1.45 1.34-2 1.43-.51.09-1.17.13-1.89-.12a8.3 8.3 0 0 1-1.86-.89c-3.27-1.95-5.18-5.43-5.34-5.68-.15-.25-1.27-1.7-1.27-3.24 0-1.54.8-2.29 1.09-2.61.29-.32.63-.4.84-.4.21 0 .42.01.6.01.19 0 .45-.07.7.53.25.61.84 2.1.92 2.25.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.45.54-.15.15-.3.31-.13.6.17.29.75 1.23 1.61 2 .99.88 1.83 1.15 2.12 1.3.29.15.46.13.64-.08.18-.21.74-.86.94-1.16.2-.29.4-.25.67-.15.28.09 1.77.84 2.07 1 .3.15.5.25.57.39.07.14.07.79-.18 1.49z"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+</motion.div>
+
+
+      {/* How It Works */}
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 px-3 sm:px-6 mb-9 mt-9"
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 0.8 }}
+      >
+        {howItWorksSteps.map(step => (
+          <motion.div
+            key={step.id}
+            whileHover={{ scale: 1.08, y: -5 }}
+            className="flex flex-col items-center text-center p-4 sm:p-6 rounded-3xl bg-white shadow-xl border border-gray-200"
+          >
+            <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">{step.icon}</div>
+            <h3 className="font-semibold text-base sm:text-lg text-[#8b5e34] mb-1 sm:mb-2">{step.title}</h3>
+            <p className="text-gray-700 text-sm sm:text-base">{step.description}</p>
+          </motion.div>
+        ))}
       </motion.div>
     </section>
   );
 };
 
-export default CustomerDemand;
+export default CustomerDemandPremium;
