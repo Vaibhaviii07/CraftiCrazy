@@ -1,7 +1,7 @@
 // src/Pages/GlassFrames/GlassFramePage.tsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { glassFrames, GlassFrame } from "../../Data/GlassFrameData";
+import { glassFrames, GlassFrame } from "../../Data/GlassFramedata";
 import { Link } from "react-router-dom";
 
 export default function GlassFramePage() {

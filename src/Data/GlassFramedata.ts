@@ -1,4 +1,3 @@
-// src/Data/GlassFrameData.ts
 
 export type Variant = {
   image: string;
