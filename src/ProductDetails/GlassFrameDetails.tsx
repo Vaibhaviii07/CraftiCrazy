@@ -1,7 +1,7 @@
 // src/ProductDetails/GlassFrameDetailPage.tsx
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { glassFrames, GlassFrame, Variant } from "../Data/GlassFrameData";
+import { glassFrames, GlassFrame, Variant } from "../Data/GlassFramedata";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
