@@ -5,7 +5,11 @@ export type Variant = {
   price: number;
   discount?: number;
 };
-
+export interface Customization {
+  available: boolean;
+  options?: string[];
+  userInput?: string; // <-- add this
+}
 export type BirthdayHamper = {
   id: string;
   sku: string;
@@ -32,10 +36,8 @@ export type BirthdayHamper = {
     availability: string;
     estimated: string;
   };
-  customization?: {
-    available: boolean;
-    options?: string[];
-  };
+  customization?: Customization;
+
   material?: string;
   dimensions?: string;
   weight?: string;

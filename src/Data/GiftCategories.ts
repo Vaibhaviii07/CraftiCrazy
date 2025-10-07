@@ -34,10 +34,10 @@ export const giftCategories = [
       name: "Festival Special",
       tagline: "Celebrate with Joy | Limited Edition",
       variants: [
-        { id: 401, name: "Diwali Special Hamper", image: "DiwaliHamper.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/festival/diwali" },
-        { id: 402, name: "Christmas Joy Pack", image: "ChristmasHamper.jpeg", oldPrice: 2299, price: 1899, discount: "17%", link: "/festival/christmas" },
-        { id: 403, name: "Holi Special", image: "HoliHamper.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/festival/holi" },
-        // { id: 404, name: "Raksha Bandhan", image: "RakhiHamper.jpeg", oldPrice: 1599, price: 1299, discount: "19%", link: "/festival/rakhi" },
+        { id: 401, name: "Diwali Special Hamper", image: "DiwaliHamper.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/diwali" },
+        { id: 402, name: "Christmas Joy Pack", image: "ChristmasHamper.jpeg", oldPrice: 2299, price: 1899, discount: "17%", link: "/christmas" },
+        { id: 403, name: "Holi Special", image: "HoliHamper.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/Holi" },
+        { id: 404, name: "Raksha Bandhan", image: "RakhiHamper.jpeg", oldPrice: 1599, price: 1299, discount: "19%", link: "/rakhi" },
       ],
     },
     {

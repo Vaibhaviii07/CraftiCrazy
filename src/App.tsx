@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 import Navbar from "./Components/Navbar";
 import HeroPage from "./Pages/HeroPage";
@@ -8,16 +7,13 @@ import AboutUs from "./Components/AboutUs";
 import Footer from "./Components/Footer";
 import CustomerDemand from "./Pages/CustomerDemand";
 import NewArrivals from "./Components/NewArrival";
-import BirthdayHamperPage from "./Pages/CustomizedHamper/BirthdayHamper"
+import BirthdayHamperPage from "./Pages/CustomizedHamper/BirthdayHamper";
 import ContactUs from "./Pages/ContactUs";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
-import Cart from "./Pages/Cart.tsx";
-import ParallaxSection from "./Components/ParallaxSection.js";
-import LoginPromptModal from "./Components/LoginPromptModal"; //  Import modal
 
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+// Product Pages
+import CartSidebar from "./Pages/Cart.tsx";
 import WeddingHamper from "./Pages/CustomizedHamper/WeddingHamper";
 import CorporateHamper from "./Pages/CustomizedHamper/CorporateHamper.js";
 import WoodenPhotoFrames from "./Pages/PhotoFrames/WoodenFrame.js";
@@ -35,6 +31,10 @@ import ResinPhotoFramesPage from "./Pages/ResinArt/ResinPhotoFramesPage.js";
 import ResinCoasterSetPage from "./Pages/ResinArt/ResinCoasterSetPage.js";
 import ResinPujaThalePage from "./Pages/ResinArt/ResinPujaThalePage.js";
 import DiwaliHamperPage from "./Pages/Festivel/DiwaliHamperPage.js";
+
+
+
+// Product Details
 import KeyChainDetails from "./ProductDetails/KeyChainDetails.tsx";
 import BraceletDetails from "./ProductDetails/BraceletDetails.tsx";
 import ToteBagDetailPage from "./ProductDetails/ToteBagDetailPage.tsx";
@@ -53,15 +53,32 @@ import ResinNameplateDetailPage from "./ProductDetails/ResinNameplateDetailPage.
 import ResinPhotoFrameDetailPage from "./ProductDetails/ResinPhotoFrameDetailPage.tsx";
 import ResinPujaThaleDetailPage from "./ProductDetails/ResinPujaThaleDetailPage.tsx";
 import WeddingHamperDetailPage from "./ProductDetails/WeddingHamperDetailPage.tsx";
-import ResinFramePage from "./Pages/PhotoFrames/ResinFrame.tsx";
+import EngagementTrayPage from "./Pages/WeddingSpecial/EngagementTrayPage.tsx";
+import EngagementTrayDetailPage from "./ProductDetails/EngagementTrayDetail.tsx";
+import VarmalaPreservationPage from "./Pages/WeddingSpecial/VarmalaPreservationPage.tsx";
+import HaldiPlatterPage from "./Pages/WeddingSpecial/HaldiPlatterpage.tsx";
+import HaldiPlatterDetail from "./ProductDetails/HaldiPlatterDetail.tsx";
+import DiwaliHamperDetail from "./ProductDetails/DiwaliHamperDetail.tsx";
+import HoliKitPage from "./Pages/Festivel/HoliKitPage.tsx"
+
+// Other Components
+import ParallaxSection from "./Components/ParallaxSection.js";
+import LoginPromptModal from "./Components/LoginPromptModal"; 
+import CheckoutPage from "./Pages/CheckoutPage.tsx";
+import VarmalaPreservationDetail from "./ProductDetails/VarmalaPreservationDetail.tsx";
+import ChristmasSpecialDetail from "./ProductDetails/ChristmasSpecialDetail.tsx";
+import ChristmasSpecialPage from "./Pages/Festivel/ChristmasSpecialPage.tsx";
+import HoliKitDetail from "./ProductDetails/HoliKitDetail.tsx";
+import RakhiPage from "./Pages/Festivel/RakhiPage.tsx";
+import RakhiDetailPage from "./ProductDetails/RakhiDetail.tsx";
 
 function App() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [cartOpen, setCartOpen] = useState(false); // For Sidebar
 
   useEffect(() => {
     if (!isLoggedIn) {
-      // Show login popup after 1 second of visiting
       const timer = setTimeout(() => setShowPrompt(true), 5000);
       return () => clearTimeout(timer);
     }
@@ -69,27 +86,32 @@ function App() {
 
   return (
     <Router>
-      <Navbar />
+      {/* Navbar with cart toggle */}
+      <Navbar setCartOpen={setCartOpen} />
+
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={cartOpen} setIsOpen={setCartOpen} />
 
       <Routes>
-        {/* Home Page */}
+        {/* Home & Static Pages */}
         <Route path="/" element={<HeroPage />} />
-
-        {/* About Us */}
         <Route path="/aboutus" element={<AboutUs />} />
+        <Route path="/contactus" element={<ContactUs />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/checkout" element={<CheckoutPage/>} />
 
-        {/* New Arrivals */}
-        <Route path="/newarrivals" element={<NewArrivals />} />
+        
 
-        {/* Customer Demand */}
+        {/* Product Pages */}
         <Route path="/customerdemand" element={<CustomerDemand />} />
-
+        <Route path="/newarrivals" element={<NewArrivals />} />
         <Route path="/BirthdayHamper" element={<BirthdayHamperPage />}/>
         <Route path="/wedding" element={<WeddingHamper />} />
         <Route path="/corporate" element={<CorporateHamper />} />
         <Route path="/wooden" element={<WoodenPhotoFrames/>}/>
         <Route path="/glass" element={<GlassPhotoFrames/>} />
-        <Route path="/resin" element={<ResinFramePage/>} />
+        <Route path="/resin" element={<ResinPhotoFramesPage/>} />
         <Route path="/womenAss" element={<WomenAccessories />}/>
         <Route path="/keychain" element={<KeyChainPage />} />
         <Route path="/wallet" element={<WalletPage />} />
@@ -103,54 +125,51 @@ function App() {
         <Route path="/resincoasters" element={<ResinCoasterSetPage/>} />
         <Route path="/resinthale" element={<ResinPujaThalePage/>} />
         <Route path="/diwali" element={<DiwaliHamperPage/>} />
-        
-       {/*Product Details */}
-       <Route path="/keydetail/:id" element={<KeyChainDetails/>}/>
-       <Route path="/braceletdetail/:id" element={<BraceletDetails/>}/>
-       <Route path="/totebagdetail/:id" element={<ToteBagDetailPage/>}/>
-       <Route path="/walletdetail/:id" element={<WalletDetailPage/>}/>
-       <Route path="/accessorydetail/:id" element={<WomenAccessoryDetailPage/>}/>
-       <Route path="/birthdaydetail/:id" element={<BirthdayHamperDetails/>}/>
-       <Route path="/corporatedetail/:id" element={<CorporateHamperDetails/>}/>
-       <Route path="/weddingDetail/:id" element={<WeddingHamperDetailPage/>}/>
-       <Route path="/Glassdetail/:id" element={<GlassFrameDetails/>}/>
-       <Route path="/Framedetail/:id" element={<ResinFrameDetailPage/>}/>
-       <Route path="/woodendetail/:id" element={<WoodenFrameDetailPage/>}/>
-       <Route path="/clockdetail/:id" element={<ResinClockDetailPage/>}/>
-       <Route path="/caosterdetail/:id" element={<ResinCoasterDetailPage/>}/>
-       <Route path="/jewelarydetail/:id" element={<ResinJewelryDetailPage/>}/>
-       <Route path="/keychaindetail/:id" element={<ResinKeychainDetailPage/>}/>
-       <Route path="/Nameplatedetail/:id" element={<ResinNameplateDetailPage/>}/>
-       <Route path="/photoframedetail/:id" element={<ResinPhotoFrameDetailPage/>}/>
-       <Route path="/pujathale/:id" element={<ResinPujaThaleDetailPage/>}/>
+        <Route path="/Tray" element={<EngagementTrayPage/>} />
+        <Route path="/varmala" element={<VarmalaPreservationPage/>} />
+        <Route path="/HaldiPlatter" element={<HaldiPlatterPage/>} />
+        <Route path="/christmas" element={<ChristmasSpecialPage/>} />
+        <Route path="/Holi" element={<HoliKitPage/>} />
+        <Route path="/rakhi" element={<RakhiPage/>} />
 
 
 
 
+        {/* Product Details */}
+        <Route path="/keydetail/:id" element={<KeyChainDetails/>}/>
+        <Route path="/braceletdetail/:id" element={<BraceletDetails/>}/>
+        <Route path="/totebagdetail/:id" element={<ToteBagDetailPage/>}/>
+        <Route path="/walletdetail/:id" element={<WalletDetailPage/>}/>
+        <Route path="/accessorydetail/:id" element={<WomenAccessoryDetailPage/>}/>
+        <Route path="/birthdaydetail/:id" element={<BirthdayHamperDetails/>}/>
+        <Route path="/corporatedetail/:id" element={<CorporateHamperDetails/>}/>
+        <Route path="/weddingDetail/:id" element={<WeddingHamperDetailPage/>}/>
+        <Route path="/Glassdetail/:id" element={<GlassFrameDetails/>}/>
+        <Route path="/Framedetail/:id" element={<ResinFrameDetailPage/>}/>
+        <Route path="/woodendetail/:id" element={<WoodenFrameDetailPage/>}/>
+        <Route path="/clockdetail/:id" element={<ResinClockDetailPage/>}/>
+        <Route path="/caosterdetail/:id" element={<ResinCoasterDetailPage/>}/>
+        <Route path="/jewelarydetail/:id" element={<ResinJewelryDetailPage/>}/>
+        <Route path="/keychaindetail/:id" element={<ResinKeychainDetailPage/>}/>
+        <Route path="/Nameplatedetail/:id" element={<ResinNameplateDetailPage/>}/>
+        <Route path="/photoframedetail/:id" element={<ResinPhotoFrameDetailPage/>}/>
+        <Route path="/pujathale/:id" element={<ResinPujaThaleDetailPage/>}/>
+        <Route path="/Tray/:id" element={<EngagementTrayDetailPage/>}/>
+        <Route path="/varmaladetail/:id" element={<VarmalaPreservationDetail/>}/>
+        <Route path="/HaldiDetail/:id" element={<HaldiPlatterDetail/>}/>
+        <Route path="/DiwaliDetail/:id" element={<DiwaliHamperDetail/>}/>
+        <Route path="/ChristmasDetail/:id" element={<ChristmasSpecialDetail/>}/>
+        <Route path="/HoliDetail/:id" element={<HoliKitDetail/>}/>
+        <Route path="/RakhiDetail/:id" element={<RakhiDetailPage/>}/>
 
 
 
-
-
-       
-
-
-
-
-        {/* Contact Us */}
-        <Route path="/contactus" element={<ContactUs />} />
-
-        {/* Auth Pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-
-        {/* Cart */}
-        <Route path="/cart" element={<Cart />} />
       </Routes>
+
       <ParallaxSection />
       <Footer />
 
-      {/* 🔑 Show login prompt if not logged in */}
+      {/* Login Prompt Modal */}
       {showPrompt && !isLoggedIn && (
         <LoginPromptModal onClose={() => setShowPrompt(false)} />
       )}

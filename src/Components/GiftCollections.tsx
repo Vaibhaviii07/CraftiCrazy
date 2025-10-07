@@ -167,9 +167,9 @@ export default function GiftCollections() {
       </div>
 
       {/* Categories */}
-      <div className="max-w-7xl mx-auto space-y-20 sm:space-y-28">
+      <div className="max-w-7xl mx-auto space-y-20 sm:space-y-23">
         {giftCategories.map((category) => (
-          <div key={category.id} className="space-y-8 sm:space-y-12">
+          <div key={category.id} className="space-y-8 sm:space-y-10">
             {/* Category Header */}
             <div className="text-center">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#603808] flex items-center justify-center gap-2">
@@ -194,9 +194,9 @@ export default function GiftCollections() {
                       transition={{ duration: 0.4 }}
                       className="group flex-shrink-0 w-[260px] sm:w-[300px] md:w-[320px] snap-center"
                     >
-                      <Link to={variant.link} className="w-full">
+                      <Link to={variant.link} className="w-full ">
                         {/* Card */}
-                        <div className="relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
+                        <div className="relative w-full h-72 sm:h-80 ml-10 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
                           <img
                             src={variant.image}
                             alt={variant.name}
@@ -212,7 +212,7 @@ export default function GiftCollections() {
                           </div>
                         </div>
                         {/* Card Text */}
-                        <div className="mt-3 text-center">
+                        <div className="mt-3 text-center ml-10">
                           <p className="text-lg sm:text-xl text-gray-900 font-playfair leading-snug">
                             {variant.name}
                           </p>

@@ -52,35 +52,16 @@ export default function WalletPage() {
   });
 
   return (
-    <section className="bg-gray-50 min-h-screen">
-      {/* Hero Section */}
-      <div
-        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/wallets/banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
+    <section className="min-h-screen">
+       <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Wallets
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Explore handcrafted leather, fabric, and resin wallets designed for durability and style.
-        </motion.p>
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-lg italic max-w-md mx-auto">
+          Discover our most-loved creations, handcrafted with care and style.
+        </p>
       </div>
-
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}

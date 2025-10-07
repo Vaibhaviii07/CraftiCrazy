@@ -57,43 +57,25 @@ export default function BraceletPage() {
   }, [filteredItems, sortOption]);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {/* Hero Section */}
-      <div
-        className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/bracelets/banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-4xl md:text-5xl font-serif font-semibold text-white mb-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
+    <div className=" min-h-screen">
+      {/* Page Header */}
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Bracelets
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-lg max-w-2xl"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Stylish handmade bracelets crafted for your style and comfort.
-        </motion.p>
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-lg italic max-w-md mx-auto">
+          Discover our most-loved creations, handcrafted with care and style.
+        </p>
       </div>
 
-      {/* Main Layout */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 flex flex-col md:flex-row gap-8">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 flex flex-col md:flex-row gap-10">
         {/* Sidebar */}
-        <aside className="flex-shrink-0 w-full md:w-1/4 bg-white p-4 rounded-lg shadow">
+        <aside className="w-full md:w-1/4 bg-white p-5 rounded-xl shadow-md sticky top-6 h-fit">
+          {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Categories
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
               {categories.map(cat => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -104,24 +86,23 @@ export default function BraceletPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
-                    {cat}
-                  </label>
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Highlight
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
               {highlightOptions.map(opt => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
+                  className={`text-sm cursor-pointer transition-colors duration-300 ${
+                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700 hover:text-[#b46029]"
+                  }`}
                 >
                   {opt}
                 </li>
@@ -130,15 +111,13 @@ export default function BraceletPage() {
           </div>
         </aside>
 
-        {/* Products */}
+        {/* Products Grid */}
         <div className="flex-1 flex flex-col gap-6">
-          <div className="flex justify-between items-center mb-3">
-            <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results
-            </p>
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
               {sortedItems.map(item => (
                 <motion.div
@@ -150,14 +129,14 @@ export default function BraceletPage() {
                   className="group flex justify-center"
                 >
                   <Link to={`/braceletdetail/${item.id}`} className="w-full max-w-[360px] flex flex-col">
-                    <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
+                    <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-3xl overflow-hidden hover:shadow-2xl transition-shadow duration-500 hover:-translate-y-2">
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {item.discount && (
-                        <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
+                        <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-sm">
                           {item.discount}% OFF
                         </span>
                       )}

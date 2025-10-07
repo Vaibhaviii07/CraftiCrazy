@@ -1,10 +1,10 @@
-// src/Pages/ResinFrames/ResinFramePage.tsx
+// src/Pages/WoodenFrames/WoodenFramePage.tsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { resinFrames, Variant } from "../../Data/ResinFramedata";
+import { woodenFrames, Variant } from "../../Data/WoodenFramedata";
 import { Link } from "react-router-dom";
 
-export default function ResinFramePage() {
+export default function WoodenFramePage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
@@ -16,10 +16,10 @@ export default function ResinFramePage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinFrames.map((i) => i.category))];
+  const categories = [...new Set(woodenFrames.map((i) => i.category))];
 
   const filteredFrames = useMemo(() => {
-    return resinFrames.filter((item) => {
+    return woodenFrames.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 ||
         selectedCategories.includes(item.category);
@@ -60,31 +60,14 @@ export default function ResinFramePage() {
   return (
     <section className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <div
-        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/resinframebanner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Resin Photo Frames
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Explore handcrafted resin frames designed to preserve your memories beautifully.
-        </motion.p>
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          Wooden Frame
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Classic wooden frames that bring warmth and timeless charm.
+        </p>
       </div>
 
       {/* Main Layout */}
@@ -171,7 +154,7 @@ export default function ResinFramePage() {
                   className="flex justify-center"
                 >
                   <Link
-                    to={`/Framedetail/${item.id}`}
+                    to={`/woodendetail/${item.id}`}
                     className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">

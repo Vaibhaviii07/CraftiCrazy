@@ -1,51 +1,56 @@
-// src/Pages/Hampers/CorporateHamper.tsx
+// src/Pages/Hampers/CorporateHamperPage.tsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { corporateHampers } from "../../Data/CorporateData";
+import { corporateHampers, Variant, CorporateHamper } from "../../Data/CorporateData";
 import { Link } from "react-router-dom";
 
-export default function CorporateHamper() {
+export default function CorporateHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    setSelectedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
 
-  const highlightOptions = ["All", "Top Rated", "Best Seller", "New Arrival"];
-  const categories = [...new Set(corporateHampers.map((item) => item.category))];
+  const highlightOptions = ["All", "Best Seller", "Discounted"];
+  const categories = [...new Set(corporateHampers.map(item => item.category))];
 
-  // Filter hampers based on selected categories & highlight
+  // Filtered Hampers
   const filteredHampers = useMemo(() => {
-    return corporateHampers.filter((hamper) => {
+    return corporateHampers.filter((item: CorporateHamper) => {
       const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(hamper.category);
+        selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
-      const highlightMatch =
-        highlight === "All" ||
-        (highlight === "Top Rated" && (hamper.rating || 0) >= 4.5) ||
-        (highlight === "Best Seller" && hamper.reviews && hamper.reviews > 80) ||
-        (highlight === "New Arrival" && hamper.tags?.includes("new"));
-
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = item.highlight === "Best Seller";
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+        default:
+          highlightMatch = true;
+      }
       return categoryMatch && highlightMatch;
     });
   }, [selectedCategories, highlight]);
 
-  // Sort hampers
+  // Sorted Hampers
   const sortedHampers = useMemo(() => {
     const sorted = [...filteredHampers];
     switch (sortOption) {
       case "Price: Low to High":
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => Number(a.price) - Number(b.price));
         break;
       case "Price: High to Low":
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => Number(b.price) - Number(a.price));
         break;
       case "Rating":
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       default:
         break;
@@ -54,57 +59,36 @@ export default function CorporateHamper() {
   }, [filteredHampers, sortOption]);
 
   return (
-    <section className="bg-gray-50 min-h-screen">
+    <section className="min-h-screen">
       {/* Hero Section */}
-      <div
-        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/corporatebanner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Corporate Hampers
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Thoughtful & premium hampers curated for clients and partners.
-        </motion.p>
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Luxurious corporate hampers designed to impress and express appreciation with elegance.
+        </p>
       </div>
 
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-        {/* Sidebar Filters */}
+        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Categories
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
+                    className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
-                    {cat}
-                  </label>
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
                 </li>
               ))}
             </ul>
@@ -112,17 +96,13 @@ export default function CorporateHamper() {
 
           {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Highlight
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
-              {highlightOptions.map((opt) => (
+              {highlightOptions.map(opt => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
-                  }`}
+                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"}`}
                 >
                   {opt}
                 </li>
@@ -131,17 +111,15 @@ export default function CorporateHamper() {
           </div>
         </aside>
 
-        {/* Products Grid */}
+        {/* Product Cards */}
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">
-              Showing {sortedHampers.length} results
-            </p>
+            <p className="text-sm text-gray-600">Showing {sortedHampers.length} results</p>
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
-              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36] focus:border-[#C45A36]"
             >
               <option>Default sorting</option>
               <option>Price: Low to High</option>
@@ -150,63 +128,62 @@ export default function CorporateHamper() {
             </select>
           </div>
 
-          {/* Product Cards */}
+          {/* Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedHampers.map((hamper) => (
-                <motion.div
-                  key={hamper.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/corporatedetail/${hamper.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+              {sortedHampers.map((item: CorporateHamper) => {
+                const variant: Variant = item.variants?.[0] ?? {
+                  image: item.image,
+                  price: item.price,
+                  discount: item.discount,
+                };
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex justify-center"
                   >
-                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      <img
-                        src={hamper.image}
-                        alt={hamper.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {hamper.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {hamper.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
-
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {hamper.name}
-                      </p>
-                      {hamper.rating && (
-                        <p className="text-yellow-500 text-sm mt-1">
-                          {"⭐".repeat(Math.round(hamper.rating))} ({hamper.reviews || 0})
-                        </p>
-                      )}
-                      {hamper.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {hamper.description}
-                        </p>
-                      )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
-                          ₹{hamper.price}
-                        </span>
+                    <Link
+                      to={`/corporatedetail/${item.id}`}
+                      className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+                    >
+                      <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                        <img
+                          src={variant.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {variant.discount && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                          >
+                            {variant.discount}% OFF
+                          </motion.span>
+                        )}
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+
+                      <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                        <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                        {item.description && (
+                          <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                        )}
+                        <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                          <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">₹{variant.price}</span>
+                          {variant.discount && (
+                            <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">₹{item.price}</span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

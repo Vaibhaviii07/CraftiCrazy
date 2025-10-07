@@ -53,35 +53,17 @@ export default function ToteBagPage() {
   });
 
   return (
-    <section className="bg-gray-50 min-h-screen">
+    <section className=" min-h-screen">
       {/* Hero Section */}
-      <div
-        className="relative w-full h-[220px] sm:h-[300px] md:h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/totebag/banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-2xl sm:text-3xl md:text-5xl font-serif font-semibold text-white mb-1 sm:mb-2 md:mb-4 px-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Tote Bags
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-xs sm:text-sm md:text-lg max-w-xs sm:max-w-md md:max-w-2xl px-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Stylish and durable handmade tote bags for everyday use.
-        </motion.p>
-      </div>
-
+     <div className="text-center mt-10 mb-8">
+      <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+        Tote Bags
+        <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-24 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+      </h2>
+      <p className="mt-3 text-gray-600 text-sm sm:text-base italic max-w-sm mx-auto">
+        Stylish totes, crafted for elegance and everyday charm.
+      </p>
+    </div>
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-6 sm:mt-12 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8">
         {/* Sidebar */}

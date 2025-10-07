@@ -1,49 +1,33 @@
 // src/Pages/Hampers/DiwaliHamperPage.tsx
-import { useState, ChangeEvent } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
-import { diwaliHampers, DiwaliHamper } from "../../Data/DiwaliHamperdata";
-import { useCart } from "../../AuthContext/CartContext";
+import { diwaliHampers } from "../../Data/DiwaliHamperdata";
+import { Link } from "react-router-dom";
 
 export default function DiwaliHamperPage() {
-  const { cart, addToCart } = useCart();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const handleAddToCart = (item: DiwaliHamper) => {
-    const product = { ...item, quantity: 1 };
-    const exists = cart.find((c) => c.id === product.id);
-    if (!exists) {
-      addToCart(product);
-      setToastMessage(`${product.name} added to cart!`);
-    } else {
-      setToastMessage(`${product.name} is already in the cart`);
-    }
-    setTimeout(() => setToastMessage(null), 2500);
-  };
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    setSelectedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(diwaliHampers.map((item) => item.category))];
+  const categories = [...new Set(diwaliHampers.map(item => item.category))];
 
-  const filteredItems: DiwaliHamper[] = diwaliHampers.filter((item) => {
+  const filteredItems = diwaliHampers.filter(item => {
     const categoryMatch =
       selectedCategories.length === 0 || selectedCategories.includes(item.category);
-
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = item.price > 1500;
+        highlightMatch = item.highlight === "Best Seller";
         break;
       case "Discounted":
-        highlightMatch = item.price <= 1500;
+        highlightMatch = (item.discount ?? 0) > 0;
         break;
       default:
         highlightMatch = true;
@@ -51,66 +35,51 @@ export default function DiwaliHamperPage() {
     return categoryMatch && highlightMatch;
   });
 
-  const sortedItems: DiwaliHamper[] = [...filteredItems].sort((a, b) => {
+  const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
         return a.price - b.price;
       case "Price: High to Low":
         return b.price - a.price;
+      case "Rating":
+        return (b.rating ?? 0) - (a.rating ?? 0);
       default:
         return 0;
     }
   });
 
-  const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSortOption(e.target.value);
-  };
-
   return (
-    <div className="min-h-screen relative">
-      {/* Hero */}
-      <div
-        className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/images/diwali/diwali-banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-4xl md:text-5xl font-serif font-semibold text-yellow-200 mb-2"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          ✨ Diwali Hampers ✨
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-lg max-w-2xl"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          Celebrate the festival of lights with our premium festive gift hampers.
-        </motion.p>
+    <section className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="text-center mt-10 mb-8 px-4">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          Diwali Hampers
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 
+            bg-gradient-to-r from-[#F7B77A] via-[#C45A36] to-[#F7B77A] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Celebrate the festival of lights with premium festive gift hampers.
+        </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 grid grid-cols-1 md:grid-cols-5 gap-8">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 h-[500px] rounded-lg shadow mt-2">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg shadow h-fit mb-6 md:mb-0">
+          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
             </h3>
             <ul className="space-y-2">
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-yellow-600 border-gray-300 rounded"
+                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
                   <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
                     {cat}
@@ -120,17 +89,18 @@ export default function DiwaliHamperPage() {
             </ul>
           </div>
 
+          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
             </h3>
             <ul className="space-y-2">
-              {highlightOptions.map((opt) => (
+              {highlightOptions.map(opt => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-yellow-700 font-semibold" : "text-gray-700"
+                    highlight === opt ? "text-[#F7B77A] font-semibold" : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -140,104 +110,84 @@ export default function DiwaliHamperPage() {
           </div>
         </aside>
 
-        {/* Products */}
+        {/* Product Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="flex justify-between items-center mb-3">
-            <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results • Cart:{" "}
-              <span className="font-semibold">
-                {cart.reduce((acc, i) => acc + i.quantity, 0)}
-              </span>
-            </p>
-
-            <div className="flex items-center gap-2">
-              <label htmlFor="sorting" className="text-sm font-medium text-gray-700">
-                Sort:
-              </label>
-              <select
-                id="sorting"
-                value={sortOption}
-                onChange={handleSortChange}
-                className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-yellow-600 focus:border-yellow-600"
-              >
-                <option>Default sorting</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-              </select>
-            </div>
+          {/* Top Bar */}
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
+            <select
+              value={sortOption}
+              onChange={e => setSortOption(e.target.value)}
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#F7B77A] focus:border-[#F7B77A]"
+            >
+              <option>Default sorting</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Rating</option>
+            </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
+          {/* Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             <AnimatePresence>
-              {sortedItems.map((item: DiwaliHamper) => (
+              {sortedItems.map(item => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ duration: 0.5 }}
-                  className="group flex justify-center"
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex justify-center"
                 >
-                  <div className="w-full max-w-[360px] flex flex-col">
-                    <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3 cursor-pointer">
+                  <Link
+                    to={`/DiwaliDetail/${item.id}`}
+                    className="w-full max-w-[330px] flex flex-col"
+                  >
+                    <div className="relative w-full h-[360px] sm:h-[400px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleAddToCart(item);
-                        }}
-                        className="absolute bottom-4 right-4 px-3 py-1 rounded-md shadow text-sm font-medium flex items-center gap-1 transition bg-yellow-600 text-white hover:bg-yellow-700"
-                      >
-                        <ShoppingCart className="w-4 h-4" /> Add to Cart
-                      </button>
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-[#F7B77A] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
                     </div>
 
-                    <div className="mt-4 text-center">
-                      <p className="text-xl text-black font-playfair leading-snug">{item.name}</p>
+                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                        {item.name}
+                      </p>
                       {item.description && (
-                        <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
                           {item.description}
                         </p>
                       )}
-                      <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-yellow-700 font-cinzel">
+                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                        <span className="text-lg sm:text-2xl text-[#F7B77A] font-cinzel">
                           ₹{item.price}
                         </span>
+                        {item.discount && (
+                          <span className="line-through text-gray-400 text-sm sm:text-lg ml-1">
+                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </AnimatePresence>
-
-            {sortedItems.length === 0 && (
-              <p className="text-center text-gray-500 col-span-full">
-                No hampers found. Try different filters.
-              </p>
-            )}
           </div>
         </div>
       </div>
-
-      {/* Toast */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-yellow-200 text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base z-50"
-          >
-            {toastMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    </section>
   );
 }

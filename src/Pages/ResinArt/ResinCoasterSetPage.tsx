@@ -1,6 +1,7 @@
-import { useState } from "react";
+// src/Pages/ResinCoasterSet/ResinCoasterSetPage.tsx
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { resinCoasterSets, ResinCoaster } from "../../Data/ResinCoasterSetData";
+import { resinCoasterSets } from "../../Data/ResinCoasterSetData";
 import { Link } from "react-router-dom";
 
 export default function ResinCoasterSetPage() {
@@ -15,75 +16,69 @@ export default function ResinCoasterSetPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinCoasterSets.map((item) => item.category))];
+  const categories = [...new Set(resinCoasterSets.map((i) => i.category))];
 
-  const filteredItems = resinCoasterSets.filter((item) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+  // Filtered items
+  const filteredItems = useMemo(() => {
+    return resinCoasterSets.filter((item) => {
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
-    let highlightMatch = true;
-    switch (highlight) {
-      case "Best Seller":
-        highlightMatch = item.popularity >= 90;
-        break;
-      case "Discounted":
-        highlightMatch = item.price <= 800;
-        break;
-      default:
-        highlightMatch = true;
-    }
-    return categoryMatch && highlightMatch;
-  });
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = (item.rating ?? 0) >= 4.5;
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+        default:
+          highlightMatch = true;
+      }
+      return categoryMatch && highlightMatch;
+    });
+  }, [selectedCategories, highlight]);
 
-  const sortedItems = [...filteredItems].sort((a, b) => {
+  // Sorted items
+  const sortedItems = useMemo(() => {
+    const sorted = [...filteredItems];
     switch (sortOption) {
       case "Price: Low to High":
-        return a.price - b.price;
+        sorted.sort((a, b) => a.price - b.price);
+        break;
       case "Price: High to Low":
-        return b.price - a.price;
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case "Rating":
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
       default:
-        return 0;
+        break;
     }
-  });
+    return sorted;
+  }, [filteredItems, sortOption]);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <section className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <div
-        className="relative w-full h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/resincoasters/banner.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-4xl md:text-5xl font-serif font-semibold text-white mb-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Resin Coaster Sets
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-lg max-w-2xl"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Handcrafted resin coasters — perfect for elevating your dining & decor.
-        </motion.p>
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          Resin Coaster Set
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 
+            bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse">
+          </span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Beautifully handcrafted resin coaster sets bringing art, shine, and elegance to every table.
+        </p>
       </div>
-
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 mt-16 grid grid-cols-1 md:grid-cols-5 gap-8">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 h-[350px] rounded-lg shadow mt-2">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+          {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Categories
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
               {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -102,10 +97,9 @@ export default function ResinCoasterSetPage() {
             </ul>
           </div>
 
+          {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Highlight
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
               {highlightOptions.map((opt) => (
                 <li
@@ -122,46 +116,66 @@ export default function ResinCoasterSetPage() {
           </div>
         </aside>
 
-        {/* Products */}
+        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="flex justify-between items-center mb-3">
+          {/* Top Bar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
             </p>
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
+            >
+              <option>Default sorting</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Rating</option>
+            </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-16">
             <AnimatePresence>
               {sortedItems.map((item) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ duration: 0.5 }}
-                  className="group flex justify-center"
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex justify-center"
                 >
                   <Link
                     to={`/caosterdetail/${item.id}`}
-                    className="w-full max-w-[360px] flex flex-col"
+                    className="w-full max-w-[300px] sm:max-w-[340px] flex flex-col"
                   >
-                    <div className="relative w-full h-[420px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
+                    <div className="relative w-full h-[260px] sm:h-[320px] lg:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
                       <img
                         src={item.image}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
                     </div>
 
-                    <div className="mt-4 text-center">
-                      <p className="text-xl text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
-                      <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                    <div className="mt-2 sm:mt-3 text-center">
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
                         {item.description}
                       </p>
-                      <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#b46029] font-cinzel">
+                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
                           ₹{item.price}
                         </span>
                       </div>
@@ -173,6 +187,6 @@ export default function ResinCoasterSetPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

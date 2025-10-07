@@ -1,5 +1,5 @@
 // src/Pages/ResinJewelry/ResinJewelryPage.tsx
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinJewelry } from "../../Data/ResinJewelryData";
 import { Link } from "react-router-dom";
@@ -18,67 +18,59 @@ export default function ResinJewelryPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinJewelry.map((i) => i.category))];
 
-  // Filtering
-  const filteredItems = resinJewelry.filter((item) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+  // Filtered Items
+  const filteredItems = useMemo(() => {
+    return resinJewelry.filter((item) => {
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
-    let highlightMatch = true;
-    switch (highlight) {
-      case "Best Seller":
-        highlightMatch = (item.rating ?? 0) >= 4.5;
-        break;
-      case "Discounted":
-        highlightMatch = (item.discount ?? 0) > 0;
-        break;
-      default:
-        highlightMatch = true;
-    }
-    return categoryMatch && highlightMatch;
-  });
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = (item.rating ?? 0) >= 4.5;
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+        default:
+          highlightMatch = true;
+      }
+      return categoryMatch && highlightMatch;
+    });
+  }, [selectedCategories, highlight]);
 
-  // Sorting
-  const sortedItems = [...filteredItems].sort((a, b) => {
+  // Sorted Items
+  const sortedItems = useMemo(() => {
+    const sorted = [...filteredItems];
     switch (sortOption) {
       case "Price: Low to High":
-        return a.price - b.price;
+        sorted.sort((a, b) => a.price - b.price);
+        break;
       case "Price: High to Low":
-        return b.price - a.price;
+        sorted.sort((a, b) => b.price - a.price);
+        break;
       case "Rating":
-        return (b.rating || 0) - (a.rating || 0);
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
       default:
-        return 0;
+        break;
     }
-  });
+    return sorted;
+  }, [filteredItems, sortOption]);
 
   return (
     <section className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <div
-        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/resin/jewelry-banner.jpg')", // replace with your banner
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Resin Jewelry
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Beautiful resin jewelry crafted with love and elegance.
-        </motion.p>
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          ResinJewelry
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 
+            bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse">
+          </span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Handcrafted resin jewelry pieces designed to add elegance and charm to your style.
+        </p>
       </div>
 
       {/* Main Layout */}
@@ -88,9 +80,7 @@ export default function ResinJewelryPage() {
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Categories
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
               {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -101,9 +91,7 @@ export default function ResinJewelryPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
-                    {cat}
-                  </label>
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
                 </li>
               ))}
             </ul>
@@ -111,17 +99,13 @@ export default function ResinJewelryPage() {
 
           {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Highlight
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
               {highlightOptions.map((opt) => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
-                  }`}
+                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"}`}
                 >
                   {opt}
                 </li>
@@ -183,18 +167,12 @@ export default function ResinJewelryPage() {
                     </div>
 
                     <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
                       {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
                       )}
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
-                          ₹{item.price}
-                        </span>
+                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">₹{item.price}</span>
                       </div>
                     </div>
                   </Link>

@@ -27,10 +27,10 @@ const ContactUs: React.FC = () => {
     <div className="bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="bg-gray-50 text-center py-13 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 shadow-md">
-        <h1 className="text-4xl md:text-5xl font-semibold text-[#603808] tracking-tight mb-3">
+        <h1 className="text-4xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Contact Us
         </h1>
-        <h3 className="text-2xl font-semibold text-amber-600 mb-2">Sanika Milmile</h3>
+        <h3 className="text-xl font-semibold text-amber-600 mb-2">Sanika Milmile</h3>
         <p className="text-lg text-[#8b5e34] italic max-w-xl mx-auto">
           “Turning your craft dreams into reality!”
         </p>

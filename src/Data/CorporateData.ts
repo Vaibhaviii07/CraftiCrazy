@@ -148,6 +148,9 @@ export const corporateHampers: CorporateHamper[] = [
     variants: [
       { image: "/corporate1.jpg", price: 1999, discount: 15 },
       { image: "/corporate1-1.jpg", price: 2199, discount: 10 },
+      { image: "/corporate1-2.jpg", price: 2199, discount: 10 },
+      { image: "/corporate1-3.jpg", price: 2199, discount: 10 },
+
     ],
     contents: ["Healthy Snacks", "Premium Tea Pack", "Thank-you Note", "Eco-Friendly Packaging"],
     occasion: ["Employee Rewards", "Festive Gifts", "Team Appreciation"],
@@ -186,6 +189,9 @@ export const corporateHampers: CorporateHamper[] = [
     variants: [
       { image: "/corporate6.jpg", price: 3999, discount: 15 },
       { image: "/corporate6-1.jpg", price: 4199, discount: 12 },
+      { image: "/corporate6-2.jpg", price: 4199, discount: 12 },
+      { image: "/corporate6-3.jpg", price: 4199, discount: 12 },
+
     ],
     contents: ["Premium Dry Fruits", "Indian Sweets", "Sparkling Juice Bottle", "Festive Packaging Box"],
     occasion: ["Diwali", "New Year", "Festive Gifting"],
@@ -224,6 +230,10 @@ export const corporateHampers: CorporateHamper[] = [
     variants: [
       { image: "/corporate7.jpg", price: 2499, discount: 10 },
       { image: "/corporate7-1.jpg", price: 2699, discount: 8 },
+      { image: "/corporate7-2.jpg", price: 2699, discount: 8 },
+      { image: "/corporate7-3.jpg", price: 2699, discount: 8 },
+      { image: "/corporate7-4.jpg", price: 2699, discount: 8 },
+
     ],
     contents: ["Fresh Flowers", "Protein Bars", "Seasonal Fruits", "Wellness Note"],
     occasion: ["Employee Care", "Festivals", "Wellbeing Initiatives"],
@@ -249,7 +259,7 @@ export const corporateHampers: CorporateHamper[] = [
     price: 3499,
     rating: 5,
     reviews: 70,
-    discount: 0,
+    discount: 1,
     highlight: "Executive",
     category: "Luxury Gifts",
     tags: ["business", "luxury", "executive", "gift"],
@@ -260,8 +270,10 @@ export const corporateHampers: CorporateHamper[] = [
     returnPolicy: "7-day easy returns",
     image: "/corporate14.jpg",
     variants: [
-      { image: "/corporate14.jpg", price: 3499, discount: 0 },
+      { image: "/corporate14.jpg", price: 3499, discount: 1 },
       { image: "/corporate14-1.jpg", price: 3699, discount: 5 },
+      { image: "/corporate14-2.jpg", price: 3699, discount: 5 },
+
     ],
     contents: ["Assorted Chocolates", "Premium Coffee", "Engraved Keychain", "Luxury Box Packaging"],
     occasion: ["Corporate Events", "Festivals", "Business Meetings"],
@@ -300,6 +312,9 @@ export const corporateHampers: CorporateHamper[] = [
     variants: [
       { image: "/corporate9.jpg", price: 6499, discount: 18 },
       { image: "/corporate9-1.jpg", price: 6799, discount: 15 },
+      { image: "/corporate9-2.jpg", price: 6799, discount: 15 },
+      { image: "/corporate9-3.jpg", price: 6799, discount: 15 },
+
     ],
     contents: ["Imported Wine", "Artisanal Cheese", "Gourmet Crackers", "Luxury Packaging"],
     occasion: ["Business Deals", "Premium Gifting", "Celebrations"],
@@ -338,6 +353,10 @@ export const corporateHampers: CorporateHamper[] = [
     variants: [
       { image: "/corporate15.jpg", price: 1499, discount: 12 },
       { image: "/corporate15-1.jpg", price: 1699, discount: 8 },
+      { image: "/corporate15-2.jpg", price: 1699, discount: 8 },
+      { image: "/corporate15-3.jpg", price: 1699, discount: 8 },
+      { image: "/corporate15-4.jpg", price: 1699, discount: 8 },
+
     ],
     contents: ["Cupcakes", "Cookies", "Chips", "Soft Drinks", "Fun Packaging Box"],
     occasion: ["Team Parties", "Corporate Celebrations", "Milestone Events"],
@@ -377,6 +396,9 @@ export const corporateHampers: CorporateHamper[] = [
     variants: [
       { image: "/corporate11.jpg", price: 2799, discount: 10 },
       { image: "/corporate11-1.jpg", price: 2999, discount: 8 },
+      { image: "/corporate11-2.jpg", price: 2999, discount: 8 },
+      { image: "/corporate11-3.jpg", price: 2999, discount: 8 },
+
     ],
     contents: ["Jute Bag", "Bamboo Bottle", "Organic Snacks", "Eco Packaging Box"],
     occasion: ["Eco Gifting", "Festivals", "Corporate Sustainability"],
@@ -393,42 +415,50 @@ export const corporateHampers: CorporateHamper[] = [
       Snacks: "Organic trail mix, 200g",
     },
   },
-  {
-    id: "c10",
-    sku: "CH-GOL-010",
-    name: "Golden Corporate Treat Box",
-    description:
-      "Luxury golden gift box with fine dry fruits, chocolate truffles — designed to impress clients and partners with elegance.",
-    price: 5599,
-    rating: 5,
-    reviews: 105,
-    discount: 15,
-    highlight: "Luxury",
-    category: "Luxury Gifts",
-    tags: ["golden", "corporate", "gift", "premium"],
-    brand: "CraftiCrazy",
-    seller: "Handmade by CraftiCrazy",
-    inStock: true,
-    warranty: "7 days replacement guarantee",
-    returnPolicy: "7-day easy returns",
-    image: "/corporate16.jpg",
-    variants: [
-      { image: "/corporate16.jpg", price: 5599, discount: 15 },
-      { image: "/corporate16-1.jpg", price: 5799, discount: 10 },
-    ],
-    contents: ["Dry Fruits Box", "Chocolate Truffles", "Luxury Golden Box", "Greeting Card"],
-    occasion: ["Corporate Gifting", "Festive Gifts", "VIP Clients"],
-    delivery: { type: "Express", availability: "Across India", estimated: "2–3 business days" },
-    customization: { available: true, options: ["Custom Message Card", "Company Logo"] },
-    material: "Dry Fruits, Chocolate, Cardboard, Foil",
-    dimensions: "30 x 20 x 12 cm",
-    weight: "2.5 kg",
-    careInstructions: "Keep dry fruits in cool place; chocolates away from sunlight.",
-    maxOrderQuantity: 5,
-    specifications: {
-      DryFruits: "Assorted premium nuts, 250g",
-      Chocolates: "Chocolate truffles, 150g",
-      Packaging: "Luxury golden gift box",
-    },
+ {
+  id: "c10",
+  sku: "CH-ODO-010",
+  name: "Office Desk Organizer",
+  description:
+    "Keep your workspace elegant and organized with this  featuring a stylish desk organizer, pen holder, notebook set, and motivational card — perfect for corporate gifting or employee rewards.",
+  price: 1999,
+  rating: 4,
+  reviews: 50,
+  discount: 12,
+  highlight: "Productivity",
+  category: "Office ",
+  tags: ["office", "desk", "organizer", "productivity", "corporate"],
+  brand: "CraftiCrazy",
+  seller: "Handmade by CraftiCrazy",
+  inStock: true,
+  warranty: "7 days replacement guarantee",
+  returnPolicy: "7-day easy returns",
+  image: "/DeskOrganizer.jpeg",
+  variants: [
+    { image: "/DeskOrganizer.jpeg", price: 1999, discount: 12 },
+    { image: "/corporateDeskOrganizer-1.jpg", price: 2099, discount: 10 },
+    { image: "/corporateDeskOrganizer-2.jpg", price: 2199, discount: 8 },
+    { image: "/corporateDeskOrganizer-3.jpg", price: 2199, discount: 8 },
+    { image: "/corporateDeskOrganizer-4.jpg", price: 2199, discount: 8 },
+    { image: "/corporateDeskOrganizer-5.jpg", price: 2199, discount: 8 },
+    { image: "/corporateDeskOrganizer-6.jpg", price: 2199, discount: 8 },
+    { image: "/corporateDeskOrganizer-7.jpg", price: 2199, discount: 8 },
+
+  ],
+  contents: ["Desk Organizer", "Pen Holder", "Notebook Set", "Motivational Card"],
+  occasion: ["Corporate Gifting", "Employee Rewards", "Workspace Upgrade"],
+  delivery: { type: "Standard", availability: "Across India", estimated: "3–5 business days" },
+  customization: { available: true, options: ["Add Company Logo", "Custom Note"] },
+  material: "Wood, Metal, Paper",
+  dimensions: "30 x 20 x 12 cm",
+  weight: "1.2 kg",
+  careInstructions: "Wipe with a dry cloth; avoid water and sunlight exposure.",
+  maxOrderQuantity: 10,
+  specifications: {
+    DeskOrganizer: "Wooden multi-compartment organizer for stationery",
+    PenHolder: "Metal pen holder for 10 pens",
+    NotebookSet: "Set of 2 notebooks, 80 pages each",
+    Card: "Motivational card with corporate message",
   },
+}
 ];

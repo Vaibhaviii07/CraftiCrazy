@@ -45,7 +45,7 @@ export default function BraceletDetails() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: `₹${selectedVariant.price}`,
+      price: selectedVariant.price.toString(),
       quantity,
       image: selectedVariant.image,
       discount: selectedVariant.discount,

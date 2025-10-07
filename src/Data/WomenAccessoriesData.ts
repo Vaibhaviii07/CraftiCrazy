@@ -447,9 +447,6 @@ export const womenAccessories: WomenAccessory[] = [
       { image: "/Access13-14.jpg", price: 4200, discount: 10 },
       { image: "/Access13-15.jpg", price: 4200, discount: 10 },
       { image: "/Access13-16.jpg", price: 4200, discount: 10 },
-
-
-
     ],
     contents: ["Bracelet", "Earrings", "Pendant", "Ring"],
     delivery: { type: "Express", availability: "Across India", estimated: "2–4 days" },
@@ -462,6 +459,45 @@ export const womenAccessories: WomenAccessory[] = [
     maxOrderQuantity: 3,
     occasion: ["Weddings", "Anniversaries", "Festivals"],
   },
+  {
+  id: "w12",
+  sku: "WA-GH-012",
+  name: "Girls Hamper",
+  description: "Charming Girls Hamper with gift pouch, and cute accessories.",
+  price: 1800,
+  rating: 4.6,
+  reviews: 40,
+  discount: 8,
+  highlight: "Premium Pick",
+  category: "Gifts",
+  tags: ["modern", "gift", "premium"],
+  brand: "CraftiCrazy",
+  seller: "Handmade by CraftiCrazy",
+  inStock: true,
+  warranty: "7 days replacement guarantee",
+  returnPolicy: "7-day easy returns",
+  image: "/Acess.jpeg",
+  variants: [
+    { image: "/Acess.jpeg", price: 1800, discount: 8 },
+    { image: "/Acess-1.jpeg", price: 1850, discount: 5 },
+    { image: "/Acess-2.jpg", price: 1850, discount: 5 },
+    { image: "/Acess-3.jpg", price: 1850, discount: 5 },
+    { image: "/Acess-4.jpg", price: 1850, discount: 5 },
+    { image: "/Acess-5.jpg", price: 1850, discount: 5 },
+
+   
+  ],
+  contents: ["Hairclips","Hairband","Bracelet","Earring","Greeting Card","Chain","Nail Paint","Gift Pouch"],
+  delivery: { type: "Express", availability: "Metro Cities", estimated: "2–4 days" },
+  customization: { available: true, options: ["Initials Embroidery"] },
+  material: "Accessories, Packaging Box",
+  dimensions: "32 x 22 x 15 cm",
+    weight: "2.0 kg",
+    careInstructions: "Keep accessories and perfume in cool dry place.",
+  maxOrderQuantity: 3,
+  occasion: ["Festivals", "Gifting"]
+}
+
 ];
 
 

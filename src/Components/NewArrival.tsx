@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../AuthContext/CartContext";
 import { newArrivalsData } from "../Data/NewArrivalsData";
-import { Plus, Minus, ShoppingCart } from "lucide-react";
 
 const NewArrivals = () => {
   const [loaded, setLoaded] = useState(false);
@@ -13,7 +12,6 @@ const NewArrivals = () => {
   const [highlight, setHighlight] = useState("All Products");
   const [sortOption, setSortOption] = useState("Default sorting");
   const [cartQuantities, setCartQuantities] = useState<{ [key: number]: number }>({});
-
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -41,14 +39,6 @@ const NewArrivals = () => {
 
     setToast(`${item.name || item.heading} added to cart`);
     setTimeout(() => setToast(null), 2500);
-  };
-
-  const handleQuantity = (item: any, type: "inc" | "dec") => {
-    setCartQuantities((prev) => {
-      const current = prev[item.id] || 1;
-      const updated = type === "inc" ? current + 1 : Math.max(current - 1, 1);
-      return { ...prev, [item.id]: updated };
-    });
   };
 
   const toggleCategory = (cat: string) => {
@@ -101,6 +91,7 @@ const NewArrivals = () => {
 
   const SidebarContent = () => (
     <>
+      {/* Category Filter */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
           Filter By Categories
@@ -123,10 +114,9 @@ const NewArrivals = () => {
         </ul>
       </div>
 
+      {/* Highlight Filter */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-          Highlight
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
         <ul className="space-y-2">
           {highlightOptions.map((opt) => (
             <li
@@ -146,56 +136,89 @@ const NewArrivals = () => {
 
   return (
     <section className="mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* =================== Best Sellers Section (UNCHANGED) =================== */}
-      <div className="text-center mb-10">
+      {/* BEST SELLER SECTION */}
+      <div className="text-center mb-">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900">
           Best Sellers
         </h2>
-        <p className="mt-2 text-gray-600 text-lg italic">Discover our most-loved creations</p>
+        <p className="mt-2 text-gray-600 text-lg italic">
+          Discover our most-loved creations
+        </p>
       </div>
+
+      {/* Best Sellers Grid */}
       <section className="py-12 px-6 sm:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
           {[
             { id: 1, type: "image", image: "/Diya3.jpg" },
-            { id: 2, type: "text", title: "Elegant Table Essentials", heading: "HANDCRAFTED COASTER", button: "Add to Cart", price: 299 },
+            {
+              id: 2,
+              type: "text",
+              title: "Elegant Table Essentials",
+              heading: "HANDCRAFTED COASTER",
+              button: "Shop Now",
+              price: 299,
+              link: "/resincoasters",
+            },
             { id: 3, type: "image", image: "/ResinPoojaThali.jpeg" },
-            { id: 4, type: "text", title: "Beautiful & Elegant", heading: "Candles", button: "Add to Cart", price: 399 },
+            {
+              id: 4,
+              type: "text",
+              title: "Beautiful & Elegant",
+              heading: "Candles",
+              button: "Shop Now",
+              price: 399,
+              link: "/product/candles",
+            },
             { id: 5, type: "image", image: "/Coaster.jpeg" },
-            { id: 6, type: "text", title: "Traditional Craft for Your Rituals", heading: "POOJA THALE", button: "Add to Cart", price: 599 },
+            {
+              id: 6,
+              type: "text",
+              title: "Traditional Craft for Your Rituals",
+              heading: "POOJA THALE",
+              button: "Shop Now",
+              price: 599,
+              link: "/resinthale",
+            },
           ].map((item) =>
             item.type === "image" ? (
-              <div key={item.id} className="overflow-hidden">
-                <img
-                  src={item.image}
-                  alt="product"
-                  className="w-full h-64 object-cover md:h-72 lg:h-90"
-                />
+              <div key={item.id} className="overflow-hidden  shadow-md w-full aspect-[1/1.1]">
+                <img src={item.image} alt="product" className="w-full h-full object-cover" />
               </div>
             ) : (
-              <div key={item.id} className="flex flex-col justify-center items-center bg-white text-center p-6">
+              <div
+                key={item.id}
+                className="flex flex-col justify-center items-center bg-white text-center p-6 shadow-md w-full aspect-[1/1.1]"
+              >
                 <p className="text-gray-600 text-base italic">{item.title}</p>
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mt-2">{item.heading}</h3>
                 <p className="mt-1 text-gray-700 text-sm">₹{item.price}</p>
-                <button
-                  onClick={() => handleAddToCart(item)}
-                  className="mt-4 px-5 py-2 bg-[#C45A36] text-white text-sm font-medium"
+                <a
+                  href={item.link}
+                  className="mt-4 px-5 py-2 bg-[#C45A36] hover:bg-[#8c341f] text-white text-sm font-medium rounded-md transition-all duration-300"
                 >
                   {item.button}
-                </button>
+                </a>
               </div>
             )
           )}
         </div>
       </section>
 
-      {/* =================== New Arrivals / Product Grid =================== */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-9 mt-12">
+      {/* PRODUCTS SECTION */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
         {/* Sidebar */}
         <aside className="md:col-span-1 relative">
           <div className="md:hidden flex justify-between items-center mb-2">
             <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-[#C45A36]">
-              <motion.span animate={{ rotate: sidebarOpen ? 180 : 0 }} transition={{ duration: 0.3 }} className="inline-block text-xl">❯</motion.span>
+              <motion.span
+                animate={{ rotate: sidebarOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="inline-block text-xl"
+              >
+                ❯
+              </motion.span>
             </button>
           </div>
           <div className="hidden md:block bg-white p-4 rounded-lg shadow">
@@ -226,11 +249,13 @@ const NewArrivals = () => {
         </aside>
 
         {/* Product Grid */}
-        <div className="md:col-span-3 mb-9">
-          <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+        <div className="md:col-span-3 ">
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-2 ml-4">
             <p className="text-sm text-gray-600">Showing {sortedProducts.length} results</p>
             <div className="flex items-center gap-2">
-              <label htmlFor="sorting" className="text-sm font-medium text-gray-700">Sort:</label>
+              <label htmlFor="sorting" className="text-sm font-medium text-gray-700">
+                Sort:
+              </label>
               <select
                 id="sorting"
                 value={sortOption}
@@ -247,50 +272,69 @@ const NewArrivals = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 mb-9 lg:grid-cols-3 ml-5 gap-6">
             <AnimatePresence>
               {loaded
                 ? sortedProducts.map((item, index) => (
-                    <motion.div key={item.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} transition={{ duration: 0.4, delay: index * 0.1 }}
-                      className="group flex flex-col bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition"
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4 }}
+                      className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg overflow-hidden flex flex-col transition-all duration-300"
                     >
-                      <div className="relative w-full h-44 sm:h-56">
-                        {!imagesLoaded[index] && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                            <div className="w-8 h-8 border-4 border-t-[#C45A36] border-b-transparent rounded-full animate-spin"></div>
-                          </div>
-                        )}
-                        <img src={item.image} alt={item.name} className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${imagesLoaded[index] ? "opacity-100" : "opacity-0"}`} onLoad={() => handleImageLoad(index)} />
-                        {item.discount && <span className="absolute top-2 right-2 bg-[#C45A36] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow">{item.discount} OFF</span>}
+                      <div className="w-full aspect-[1.3/1] bg-gray-100 relative overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className={`w-full h-full object-cover transition-opacity duration-500 ${
+                            imagesLoaded[index] ? "opacity-100" : "opacity-0"
+                          }`}
+                          onLoad={() => handleImageLoad(index)}
+                        />
                       </div>
 
-                      <div className="p-3 flex flex-col flex-1">
-                        <p className="text-xs sm:text-sm font-medium text-gray-800 truncate">{item.name}</p>
-                        <div className="mt-1 flex items-center gap-2">
-                          {item.oldPrice && <span className="text-gray-400 text-[11px] sm:text-xs line-through">₹{item.oldPrice}</span>}
-                          <span className="text-sm sm:text-base font-semibold text-[#C45A36]">₹{item.price}</span>
-                        </div>
+                      <div className="p-3 sm:p-4 text-center flex flex-col flex-1 justify-between">
+                        <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-1 truncate">
+                          {item.name}
+                        </h3>
+                        <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-2">
+                          {item.description || "Beautiful handmade creation"}
+                        </p>
+                        <span className="text-[#C45A36] font-semibold text-sm sm:text-base mb-2">
+                          ₹{item.price}
+                        </span>
 
-                        {cartQuantities[item.id] ? (
-                          <div className="flex items-center justify-center gap-2 mt-2 sm:mt-3">
-                            <button onClick={() => handleQuantity(item, "dec")} className="px-2 py-1 bg-gray-200 rounded"><Minus size={16} /></button>
-                            <span className="font-medium">{cartQuantities[item.id]}</span>
-                            <button onClick={() => handleQuantity(item, "inc")} className="px-2 py-1 bg-gray-200 rounded"><Plus size={16} /></button>
-                          </div>
-                        ) : (
-                          <button onClick={() => handleAddToCart(item)} className="mt-2 sm:mt-3 bg-[#C45A36] hover:bg-[#8c341f] text-white text-[11px] sm:text-sm px-3 py-1.5 rounded-md flex items-center justify-center gap-1">
-                            <ShoppingCart size={16} /> Add to Cart
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleAddToCart(item)}
+                          className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition ${
+                            cartQuantities[item.id]
+                              ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                              : "bg-[#C45A36] text-white hover:bg-[#8c341f]"
+                          }`}
+                          disabled={!!cartQuantities[item.id]}
+                        >
+                          {cartQuantities[item.id] ? "Added" : "Add"}
+                        </button>
                       </div>
                     </motion.div>
                   ))
-                : Array(8).fill(0).map((_, i) => <div key={i} className="animate-pulse bg-gray-200 rounded-xl h-52 sm:h-60"></div>)}
+                : Array(6)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="animate-pulse bg-gray-200 rounded-2xl aspect-[1/1.1] w-full"
+                      ></div>
+                    ))}
             </AnimatePresence>
           </div>
         </div>
       </div>
 
+      {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
           <motion.div

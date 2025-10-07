@@ -43,18 +43,17 @@ export default function ResinFrameDetailPage() {
     setQuantity(1);
   }, [currentProduct]);
 
-  const handleAddToCart = () => {
+   const handleAddToCart = () => {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: `₹${selectedVariant.price}`,
+      price: selectedVariant.price.toString(),
       quantity,
       image: selectedVariant.image,
       discount: selectedVariant.discount,
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
-
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };

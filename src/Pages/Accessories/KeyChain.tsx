@@ -53,33 +53,16 @@ export default function KeyChainPage() {
   });
 
   return (
-    <section className="bg-gray-50 min-h-screen">
+    <section className="min-h-screen">
       {/* Hero Section */}
-      <div
-        className="relative w-full h-[300px] sm:h-[400px] flex flex-col items-center justify-center text-center"
-        style={{
-          backgroundImage: "url('/keychainbanner.jpg')", // 🔹 Add keychain banner
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
-        <motion.h1
-          className="relative text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-white mb-2 sm:mb-4 px-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Designer Keychains
-        </motion.h1>
-        <motion.p
-          className="relative text-gray-200 text-sm sm:text-lg max-w-md sm:max-w-2xl px-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Explore handcrafted keychains to accessorize your style.
-        </motion.p>
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          KeyChainPage
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Handcrafted creations made with care and style.
+        </p>
       </div>
 
       {/* Main Layout */}
@@ -168,9 +151,9 @@ export default function KeyChainPage() {
                 >
                   <Link
                     to={`/keydetail/${item.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+                    className="w-full max-w-[330px] flex flex-col"
                   >
-                    <div className="relative w-full h-[200px] sm:h-[280px] lg:h-[320px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                    <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
                       <img
                         src={item.image}
                         alt={item.name}

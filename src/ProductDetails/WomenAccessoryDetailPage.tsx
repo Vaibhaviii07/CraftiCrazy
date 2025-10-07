@@ -47,18 +47,16 @@ export default function WomenAccessoryDetailPage() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: `₹${selectedVariant.price}`,
+      price: selectedVariant.price.toString(),
       quantity,
       image: selectedVariant.image,
       discount: selectedVariant.discount,
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
-
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
-
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">

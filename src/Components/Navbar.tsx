@@ -29,7 +29,11 @@ interface Product {
   href: string;
 }
 
-const Navbar = () => {
+interface NavbarProps {
+  setCartOpen: (open: boolean) => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
   const [open, setOpen] = useState(false);
   const [dropdown, setDropdown] = useState<number | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
@@ -39,17 +43,14 @@ const Navbar = () => {
 
   const { cart } = useCart();
 
-  // ✅ Hover delay (desktop dropdown)
   const handleMouseEnter = (idx: number) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDropdown(idx);
   };
-
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => setDropdown(null), 250);
   };
 
-  // ✅ Search handling
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
     setQuery(value);
@@ -65,7 +66,6 @@ const Navbar = () => {
     setResult(filtered);
   };
 
-  // ✅ Links
   const links: NavLink[] = [
     { name: "New & Best Sellers", href: "/newarrivals" },
     {
@@ -106,22 +106,21 @@ const Navbar = () => {
         { name: "Resin Pooja Thale", href: "/resinthale" },
       ],
     },
-     {
+    {
       name: "Wedding special",
       submenu: [
-        { name: "Engagement Tray", href: "/resinJwell" },
-        { name: "Wedding Ring Platter", href: "/resinKeychain" },
-        { name: "wedding invitaion", href: "/resinclock" },
-        { name: "Varmala (garland) Preservation", href: "/resinNameplate" },
+        { name: "Engagement Tray", href: "/Tray" },
+        { name: "Haldi Platter", href: "/HaldiPlatter" },
+        { name: "Varmala Preservation", href: "/varmala" },
       ],
     },
     {
       name: "Festival",
       submenu: [
         { name: "Diwali Hampers", href: "/diwali" },
-        { name: "Christmas Specials", href: "/festival/christmas" },
-        { name: "Holi Kits", href: "/festival/holi" },
-        { name: "Rakhi", href: "/festival/rakhi" },
+        { name: "Christmas Specials", href: "/christmas" },
+        { name: "Holi Kits", href: "/Holi" },
+        { name: "Rakhi", href: "/rakhi" },
       ],
     },
     { name: "Customized", href: "/customerdemand" },
@@ -143,7 +142,7 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Search Bar (Desktop) */}
+        {/* Search */}
         <div className="hidden md:flex flex-1 justify-center px-6">
           <div className="relative w-full max-w-lg">
             <input
@@ -184,26 +183,37 @@ const Navbar = () => {
           <Link to="/login" aria-label="Login">
             <User size={22} className="text-[#432818] hover:text-yellow-600 transition" />
           </Link>
-          <Link to="/cart" aria-label="Cart" className="relative">
+          <button
+            onClick={() => setCartOpen(true)}
+            className="relative"
+            aria-label="Cart"
+          >
             <ShoppingCart size={22} className="text-[#432818] hover:text-yellow-600 transition" />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
                 {cart.length}
               </span>
             )}
-          </Link>
+          </button>
         </div>
 
-        {/* Mobile Cart + Hamburger */}
-        <div className="md:hidden flex items-center gap-4">
-          <Link to="/cart" aria-label="Cart" className="relative">
+        {/* Mobile Hamburger + Login + Cart */}
+        <div className="flex md:hidden items-center gap-4">
+          <Link to="/login" aria-label="Login">
+            <User size={26} className="text-[#432818]" />
+          </Link>
+          <button
+            onClick={() => setCartOpen(true)}
+            className="relative"
+            aria-label="Cart"
+          >
             <ShoppingCart size={26} className="text-[#432818]" />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
                 {cart.length}
               </span>
             )}
-          </Link>
+          </button>
           <button className="text-[#432818]" onClick={() => setOpen(!open)}>
             {open ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -243,54 +253,50 @@ const Navbar = () => {
         ))}
       </nav>
 
-     {open && (
-  <nav className="md:hidden bg-[#fbfaf8] px-6 py-4 shadow-md space-y-2">
-    {links.map((link, idx) => (
-      <div key={idx} className="flex flex-col">
-        {link.submenu ? (
-          // If link has submenu, show a toggle button
-          <>
-            <button
-              onClick={() =>
-                setMobileDropdown(mobileDropdown === idx ? null : idx)
-              }
-              className="flex justify-between items-center w-full py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
-            >
-              <span>{link.name}</span>
-              <ChevronDown size={16} />
-            </button>
-
-            {mobileDropdown === idx && (
-              <div className="flex flex-col pl-4 mt-2 space-y-1">
-                {link.submenu.map((sublink, subIdx) => (
-                  <Link
-                    key={subIdx}
-                    to={sublink.href}
-                    className="py-1 text-gray-700 hover:text-[#6b705c] transition"
-                    onClick={() => setOpen(false)}
+      {/* Mobile Nav */}
+      {open && (
+        <nav className="md:hidden bg-[#fbfaf8] px-6 py-4 shadow-md space-y-2">
+          {links.map((link, idx) => (
+            <div key={idx} className="flex flex-col">
+              {link.submenu ? (
+                <>
+                  <button
+                    onClick={() =>
+                      setMobileDropdown(mobileDropdown === idx ? null : idx)
+                    }
+                    className="flex justify-between items-center w-full py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
                   >
-                    {sublink.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </>
-        ) : (
-          // If no submenu, directly render as Link
-          <Link
-            to={link.href ?? "#"}
-            className="py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
-            onClick={() => setOpen(false)}
-          >
-            {link.name}
-          </Link>
-        )}
-      </div>
-    ))}
-  </nav>
-)}
-
-
+                    <span>{link.name}</span>
+                    <ChevronDown size={16} />
+                  </button>
+                  {mobileDropdown === idx && (
+                    <div className="flex flex-col pl-4 mt-2 space-y-1">
+                      {link.submenu.map((sublink, subIdx) => (
+                        <Link
+                          key={subIdx}
+                          to={sublink.href}
+                          className="py-1 text-gray-700 hover:text-[#6b705c] transition"
+                          onClick={() => setOpen(false)}
+                        >
+                          {sublink.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  to={link.href ?? "#"}
+                  className="py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
+                  onClick={() => setOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
+      )}
     </header>
   );
 };

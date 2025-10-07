@@ -43,23 +43,19 @@ export default function ToteBagDetailPage() {
     setQuantity(1);
   }, [currentProduct]);
 
-  const handleAddToCart = () => {
-    const exists = cart.find((c) => c.id === currentProduct.id);
-    if (!exists) {
-      addToCart({
-        id: currentProduct.id,
-        name: currentProduct.name,
-        price: `₹${selectedVariant.price}`,
-        quantity,
-        image: selectedVariant.image,
-        discount: selectedVariant.discount,
-        category: currentProduct.category,
-      });
-      setToast(`${currentProduct.name} added to cart ✅`);
-    } else {
-      setToast(`${currentProduct.name} is already in your cart 🛒`);
-    }
-    setTimeout(() => setToast(null), 2500);
+   const handleAddToCart = () => {
+    addToCart({
+      id: currentProduct.id,
+      name: currentProduct.name,
+      price: selectedVariant.price.toString(),
+      quantity,
+      image: selectedVariant.image,
+      discount: selectedVariant.discount,
+      category: currentProduct.category,
+      highlight: currentProduct.highlight,
+    });
+    setToast(`${currentProduct.name} added to cart`);
+    setTimeout(() => setToast(null), 2000);
   };
 
   return (

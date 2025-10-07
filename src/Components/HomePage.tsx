@@ -6,7 +6,6 @@ const HomePage = () => {
     <div className="bg-[#FBFAF7]">
       {/* Hero Section */}
       <section className="relative w-full min-h-[80vh] flex items-center justify-center">
-        {/* Background Image with Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('./hero5.jpg')" }}
