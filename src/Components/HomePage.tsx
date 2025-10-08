@@ -14,7 +14,7 @@ const HomePage = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 flex items-center justify-center h-full w-full px-4 sm:px-8 md:px-16">
+        <div className="relative z-10 flex items-center  justify-center h-full w-full px-4 sm:px-8 md:px-16">
           <motion.div
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
