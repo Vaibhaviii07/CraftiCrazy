@@ -150,7 +150,7 @@ const NewArrivals = () => {
       <section className="py-12 px-6 sm:px-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
           {[
-            { id: 1, type: "image", image: "/Diya3.jpg" },
+            { id: 1, type: "image", image: "/Diya3.jpg " },
             {
               id: 2,
               type: "text",
@@ -168,7 +168,7 @@ const NewArrivals = () => {
               heading: "Candles",
               button: "Shop Now",
               price: 399,
-              link: "/product/candles",
+              link: "/candles",
             },
             { id: 5, type: "image", image: "/Coaster.jpeg" },
             {
