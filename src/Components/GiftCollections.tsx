@@ -39,21 +39,21 @@ export default function GiftCollections() {
       title: "Flat Discount 30%",
       subtitle: "Custom Resin Ring Tray",
       image: "ringTray.jpeg",
-      link: "/resin",
+      link: "/Tray",
     },
     {
       id: 2,
       title: "20% Off",
       subtitle: "Handmade Candles",
       image: "diya.jpeg",
-      link: "/festival",
+      link: "/diwali",
     },
     {
       id: 3,
       title: "Limited Offer",
       subtitle: "Gift Hampers for All Festivals",
       image: "DiwaliHamper.jpeg",
-      link: "/hamper",
+      link: "/diwali",
     },
   ];
 
@@ -84,18 +84,18 @@ export default function GiftCollections() {
       {/* OFFERS SECTION */}
       <section className="py-6">
         <div className="grid lg:grid-cols-2 gap-5 max-w-7xl mx-auto">
-          {/* Left Big Card */}
+          {/* Left Big Offer */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="relative rounded-xl overflow-hidden shadow-md group cursor-pointer"
+            className="relative rounded-xl overflow-hidden shadow-md group cursor-pointer h-[260px] sm:h-[380px] md:h-[500px]"
           >
             <img
               src={offers[0].image}
               alt={offers[0].subtitle}
-              className="w-full h-56 sm:h-[500px] object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-end p-3 sm:p-6 text-white">
               <p className="text-xs uppercase tracking-wide">{offers[0].title}</p>
@@ -120,12 +120,12 @@ export default function GiftCollections() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="relative rounded-xl overflow-hidden shadow-md group cursor-pointer"
+                className="relative rounded-xl overflow-hidden shadow-md group cursor-pointer h-[180px] sm:h-[260px] md:h-[320px]"
               >
                 <img
                   src={offer.image}
                   alt={offer.subtitle}
-                  className="w-full h-36 sm:h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-end p-3 sm:p-4 text-white">
                   <p className="text-[10px] sm:text-xs uppercase tracking-wide">
@@ -190,10 +190,10 @@ export default function GiftCollections() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 20 }}
                       transition={{ duration: 0.4 }}
-                      className="group flex-shrink-0 w-[220px] sm:w-[280px] md:w-[300px] snap-center"
+                      className="group flex-shrink-0 w-[200px] sm:w-[260px] md:w-[300px] h-[260px] sm:h-[380px] md:h-[500px] snap-center"
                     >
-                      <Link to={variant.link} className="block">
-                        <div className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
+                      <Link to={variant.link} className="block h-full">
+                        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
                           <img
                             src={variant.image}
                             alt={variant.name}
