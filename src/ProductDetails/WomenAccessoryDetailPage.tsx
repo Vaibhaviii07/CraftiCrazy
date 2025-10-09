@@ -14,37 +14,48 @@ export default function WomenAccessoryDetailPage() {
 
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: WomenAccessory | undefined = womenAccessories.find((p) => p.id === id);
-  if (!productFromParams) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
-  const [currentProduct] = useState<WomenAccessory>(productFromParams);
+  // Loading simulation
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Compute default variant
-  const selectedVariant = useMemo<Variant>(() => ({
-    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-  }), [currentProduct]);
+  // Product not found
+  if (!productFromParams && !loading)
+    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
-  const [currentVariant, setCurrentVariant] = useState<Variant>(selectedVariant);
+  const [currentProduct, setCurrentProduct] = useState<WomenAccessory | null>(productFromParams ?? null);
 
-  // Reset variant and quantity on variant change
+  // Compute selected variant
+  const selectedVariant = useMemo<Variant | null>(() => {
+    if (!currentProduct) return null;
+    return {
+      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
+      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+    };
+  }, [currentProduct]);
+
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
+
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
     setImgLoaded(false);
-    setThumbsLoaded({});
   }, [selectedVariant]);
 
-  // Scroll to top on variant change
+  // Reset image & scroll on variant change
   useEffect(() => {
     setImgLoaded(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentVariant]);
 
+  // Add to cart
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
 
@@ -63,30 +74,45 @@ export default function WomenAccessoryDetailPage() {
     setTimeout(() => setToast(null), 2000);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Main Image + Thumbnails */}
         <div className="flex-1 relative">
           {!imgLoaded && (
-            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+            </div>
           )}
-          <motion.img
-            src={currentVariant.image}
-            alt={currentProduct.name}
-            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-            onLoad={() => setImgLoaded(true)}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-          />
-          {currentVariant.discount && (
+          {currentVariant && (
+            <motion.img
+              src={currentVariant.image}
+              alt={currentProduct?.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImgLoaded(true)}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+            />
+          )}
+          {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
             </span>
           )}
 
           {/* Thumbnails */}
-          {currentProduct.variants && currentProduct.variants.length > 1 && (
+          {currentProduct?.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
@@ -114,41 +140,45 @@ export default function WomenAccessoryDetailPage() {
 
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct?.name}</h1>
 
-          {/* Rating + Price */}
+          {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+              {Array.from({ length: Math.floor(currentProduct?.rating || 0) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">{currentVariant.price}</span>
-            {currentVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">{currentProduct.price}</span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{currentVariant?.price}</span>
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">{currentProduct?.price}</span>
             )}
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
+          <p className="text-gray-600 leading-relaxed">{currentProduct?.description}</p>
 
-          {/* Tags / Stock / Warranty */}
-          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
+          {/* Info Tags */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
+            {currentProduct?.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
+            {currentProduct?.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
+            <span
+              className={`px-2 py-1 rounded ${
+                currentProduct?.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
+              {currentProduct?.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
-            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
+            {currentProduct?.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+            {currentProduct?.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
           </div>
 
-          {/* Additional details */}
+          {/* Additional Details */}
           <div className="mt-4 space-y-2 text-gray-700">
-            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
-            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
-            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
-            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct?.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
+            {currentProduct?.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct?.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct?.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
           </div>
 
           {/* Quantity & Add to Cart */}
@@ -160,9 +190,9 @@ export default function WomenAccessoryDetailPage() {
             </div>
             <button
               onClick={handleAddToCart}
-              disabled={!currentProduct.inStock}
+              disabled={!currentProduct?.inStock}
               className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                currentProduct?.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
               }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
@@ -171,13 +201,13 @@ export default function WomenAccessoryDetailPage() {
 
           {/* Structured Sections */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.tags && (
+            {currentProduct?.tags && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Tags</h3>
                 <p className="text-gray-600">{currentProduct.tags.join(", ")}</p>
               </div>
             )}
-            {currentProduct.contents && (
+            {currentProduct?.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
@@ -185,18 +215,16 @@ export default function WomenAccessoryDetailPage() {
                 </ul>
               </div>
             )}
-            {currentProduct.customization?.available && (
+            {currentProduct?.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
-            {currentProduct.delivery && (
+            {currentProduct?.delivery && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Delivery</h3>
-                <p className="text-gray-600">
-                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
-                </p>
+                <p className="text-gray-600">{currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>
               </div>
             )}
           </div>

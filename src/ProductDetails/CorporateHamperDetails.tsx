@@ -1,6 +1,6 @@
 // src/Pages/CustomizedHamper/CorporateHamperDetails.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { corporateHampers, CorporateHamper, Variant } from "../Data/CorporateData";
 import { useCart } from "../AuthContext/CartContext";
 import { Star, ShoppingCart } from "lucide-react";
@@ -12,21 +12,34 @@ export default function CorporateHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
 
-  const [quantity, setQuantity] = useState<number>(1);
+  // States
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
+  const [loading, setLoading] = useState(true);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  const productFromParams: CorporateHamper | undefined = corporateHampers.find(
-    (p: CorporateHamper) => p.id === id
-  );
+ const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (!productFromParams)
+
+  // Find product
+  const productFromParams: CorporateHamper | undefined = corporateHampers.find((p) => p.id === id);
+
+  // Loading simulation
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Product not found
+  if (!productFromParams && !loading) {
     return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  }
 
-  const [currentProduct] = useState<CorporateHamper>(productFromParams);
+  const [currentProduct] = useState<CorporateHamper | null>(productFromParams ?? null);
 
-  const selectedVariant = useMemo<Variant>(() => {
+  // Selected Variant
+  const selectedVariant = useMemo(() => {
+    if (!currentProduct) return null;
     return {
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
@@ -34,21 +47,25 @@ export default function CorporateHamperDetails() {
     };
   }, [currentProduct]);
 
-  const [currentVariant, setCurrentVariant] = useState<Variant>(selectedVariant);
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
 
+  // Update variant on selection change
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
-    setImageLoaded(false);
-    setThumbsLoaded({});
+    setImgLoaded(false);
   }, [selectedVariant]);
 
+  // Reset image fade-in & scroll to top
   useEffect(() => {
-    setImageLoaded(false);
+    setImgLoaded(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentVariant]);
 
+  // Add to cart
   const handleAddToCart = () => {
+    if (!currentProduct || !currentVariant) return;
+
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -59,36 +76,58 @@ export default function CorporateHamperDetails() {
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
+
     setToast(`${currentProduct.name} added to cart`);
-    setTimeout(() => setToast(null), 2000);
+
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 2000);
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Main Image + Thumbnails */}
+        {/* Left: Hero Image */}
         <div className="flex-1 relative">
-          {!imageLoaded && (
-            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+            </div>
           )}
-          <motion.img
-            src={currentVariant.image}
-            alt={currentProduct.name}
-            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-            onLoad={() => setImageLoaded(true)}
-          />
-          {currentVariant.discount && (
+          {currentVariant && (
+            <motion.img
+              src={currentVariant.image}
+              alt={currentProduct?.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImgLoaded(true)}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+            />
+          )}
+          {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
             </span>
           )}
 
-         {/* Thumbnails */}
-          {currentProduct.variants && currentProduct.variants.length > 1 && (
+          {/* Thumbnails */}
+          {currentProduct?.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
@@ -116,38 +155,49 @@ export default function CorporateHamperDetails() {
 
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct?.name}</h1>
 
           {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+              {Array.from({ length: Math.floor(currentProduct?.rating || 0) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
             <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
-              ₹{currentVariant.price}
+              ₹{currentVariant?.price}
             </span>
-            {currentVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct?.price}</span>
             )}
           </div>
 
           {/* Description */}
-          <p className="text-gray-600 leading-relaxed">{currentProduct.description}</p>
-          
-           {/* Additional details */}
+          <p className="text-gray-600 leading-relaxed">{currentProduct?.description}</p>
+
+          {/* Info Tags */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
+            {currentProduct?.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
+            {currentProduct?.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
+            <span
+              className={`px-2 py-1 rounded ${
+                currentProduct?.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
+              {currentProduct?.inStock ? "In Stock" : "Out of Stock"}
+            </span>
+            {currentProduct?.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+            {currentProduct?.returnPolicy && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>
+            )}
+          </div>
+
+          {/* Additional details */}
           <div className="mt-4 space-y-2 text-gray-700">
-            {currentProduct.material && (
-              <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>
-            )}
-            {currentProduct.dimensions && (
-              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>
-            )}
-            {currentProduct.weight && (
-              <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>
-            )}
-            {currentProduct.careInstructions && (
+            {currentProduct?.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
+            {currentProduct?.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct?.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct?.careInstructions && (
               <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>
             )}
           </div>
@@ -169,7 +219,6 @@ export default function CorporateHamperDetails() {
                 +
               </button>
             </div>
-
             <button
               onClick={handleAddToCart}
               className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg"
@@ -178,15 +227,15 @@ export default function CorporateHamperDetails() {
             </button>
           </div>
 
-          {/* Additional Sections */}
+          {/* Structured Sections */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.tags && (
+            {currentProduct?.tags && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Tags</h3>
                 <p className="text-gray-600">{currentProduct.tags.join(", ")}</p>
               </div>
             )}
-            {currentProduct.contents && (
+            {currentProduct?.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
@@ -196,18 +245,17 @@ export default function CorporateHamperDetails() {
                 </ul>
               </div>
             )}
-            {currentProduct.customization?.available && (
+            {currentProduct?.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
-            {currentProduct.delivery && (
+            {currentProduct?.delivery && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Delivery</h3>
                 <p className="text-gray-600">
-                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated{" "}
-                  {currentProduct.delivery.estimated}
+                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
                 </p>
               </div>
             )}
@@ -215,7 +263,7 @@ export default function CorporateHamperDetails() {
         </div>
       </div>
 
-      {/* Toast Notification */}
+      {/* Toast */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -223,8 +271,7 @@ export default function CorporateHamperDetails() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
           >
             {toast}
           </motion.div>
