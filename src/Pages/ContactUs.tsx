@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Mail, Phone, MapPin, Clock, Send, Instagram, MessageCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Mail, Phone, MapPin, Instagram, MessageCircle, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type FormState = { name: string; email: string; phone: string; message: string; };
@@ -17,11 +17,18 @@ const ContactUs: React.FC = () => {
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
-    await new Promise((res) => setTimeout(res, 1000));
+    await new Promise((res) => setTimeout(res, 1000)); // Simulate async send
     setForm(initialForm);
     setSent(true);
-    setTimeout(() => setSent(false), 3000);
   };
+
+  // Auto-hide toast using useEffect
+  useEffect(() => {
+    if (sent) {
+      const timer = setTimeout(() => setSent(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [sent]);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -34,9 +41,7 @@ const ContactUs: React.FC = () => {
         <p className="text-lg text-[#8b5e34] italic max-w-xl mx-auto">
           “Turning your craft dreams into reality!”
         </p>
-        
       </div>
-
 
       {/* Main Grid */}
       <div className="max-w-7xl mx-auto py-14 px-6 grid md:grid-cols-2 gap-10">
@@ -67,12 +72,12 @@ const ContactUs: React.FC = () => {
         >
           {/* Form */}
           <div>
-           <h2 className="text-3xl md:text-3xl font-extrabold text-gray-900 mb-6 flex items-center justify-center gap-3">
-          <span className="text-[#AB420A] animate-bounce">
-            <Send className="w-6 h-6" />
-          </span>
-          Let’s Craft Together
-        </h2>
+            <h2 className="text-3xl md:text-3xl font-extrabold text-gray-900 mb-6 flex items-center justify-center gap-3">
+              <span className="text-[#AB420A] animate-bounce">
+                <Send className="w-6 h-6" />
+              </span>
+              Let’s Craft Together
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
@@ -110,53 +115,47 @@ const ContactUs: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="w-40 bg-gradient-to-r from-[#AB420A] to-[#D98B4A]  text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-[#ddbea9] transition"
+                className="w-40 bg-gradient-to-r from-[#AB420A] to-[#D98B4A] text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-[#ddbea9] transition"
               >
                 Send Message
               </motion.button>
             </form>
           </div>
-
         </motion.div>
       </div>
-     
-  <div className=" max-w-full grid sm:grid-cols-2 lg:grid-cols-5 rounded-3xl p-9 mb-9 mt-2">
-    {/* Address */}
-    <div className="flex flex-col items-center text-center p-4 bg-gray-200  shadow-sm hover:shadow-md transition-shadow duration-300">
-      <MapPin className="w-8 h-8 text-amber-500 mb-2" />
-      <h4 className="font-semibold text-gray-800">Our Address</h4>
-      <p className="text-sm text-gray-600 mt-1">Chandrapur, Maharashtra, India</p>
-    </div>
 
-    {/* Phone */}
-    <div className="flex flex-col items-center text-center p-4 bg-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <Phone className="w-8 h-8 text-green-500 mb-2" />
-      <h4 className="font-semibold text-gray-800">Phone</h4>
-      <p className="text-sm text-gray-600 mt-1">+91 7721028815</p>
-    </div>
+      {/* Contact Cards */}
+      <div className="max-w-full grid sm:grid-cols-2 lg:grid-cols-5 rounded-3xl p-9 mb-9 mt-2 gap-4">
+        <div className="flex flex-col items-center text-center p-4 bg-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <MapPin className="w-8 h-8 text-amber-500 mb-2" />
+          <h4 className="font-semibold text-gray-800">Our Address</h4>
+          <p className="text-sm text-gray-600 mt-1">Chandrapur, Maharashtra, India</p>
+        </div>
 
-    {/* Email */}
-    <div className="flex flex-col items-center text-center p-4 bg-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <Mail className="w-8 h-8 text-red-600 mb-2" />
-      <h4 className="font-semibold text-gray-800">Email</h4>
-      <p className="text-sm text-gray-600 mt-1">crafticrazy@gmail.com</p>
-    </div>
+        <div className="flex flex-col items-center text-center p-4 bg-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <Phone className="w-8 h-8 text-green-500 mb-2" />
+          <h4 className="font-semibold text-gray-800">Phone</h4>
+          <p className="text-sm text-gray-600 mt-1">+91 7721028815</p>
+        </div>
 
-     {/* Instagram */}
-    <div className="flex flex-col items-center text-center p-4 bg-gray-100  shadow-sm hover:shadow-md transition-shadow duration-300">
-      <Instagram className="w-8 h-8 text-pink-500 mb-2" />
-      <h4 className="font-semibold text-gray-800">Instagram</h4>
-      <p className="text-sm text-gray-600 mt-1">@crafticrazy_710</p>
-    </div>
+        <div className="flex flex-col items-center text-center p-4 bg-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <Mail className="w-8 h-8 text-red-600 mb-2" />
+          <h4 className="font-semibold text-gray-800">Email</h4>
+          <p className="text-sm text-gray-600 mt-1">crafticrazy@gmail.com</p>
+        </div>
 
-    {/* WhatsApp */}
-    <div className="flex flex-col items-center text-center p-4 bg-gray-200  shadow-sm hover:shadow-md transition-shadow duration-300">
-      <MessageCircle className="w-8 h-8 text-green-500 mb-2" />
-      <h4 className="font-semibold text-gray-800">WhatsApp</h4>
-      <p className="text-sm text-gray-600 mt-1">+91 7721028815</p>
-    </div>
-    </div>
+        <div className="flex flex-col items-center text-center p-4 bg-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <Instagram className="w-8 h-8 text-pink-500 mb-2" />
+          <h4 className="font-semibold text-gray-800">Instagram</h4>
+          <p className="text-sm text-gray-600 mt-1">@crafticrazy_710</p>
+        </div>
 
+        <div className="flex flex-col items-center text-center p-4 bg-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <MessageCircle className="w-8 h-8 text-green-500 mb-2" />
+          <h4 className="font-semibold text-gray-800">WhatsApp</h4>
+          <p className="text-sm text-gray-600 mt-1">+91 7721028815</p>
+        </div>
+      </div>
 
       {/* Success Toast */}
       <AnimatePresence>

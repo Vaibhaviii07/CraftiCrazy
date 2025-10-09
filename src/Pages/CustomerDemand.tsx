@@ -37,7 +37,7 @@ const CustomerDemandPremium = () => {
   const reelContainerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
 
-  // 🎞️ Smooth infinite auto-scroll using requestAnimationFrame
+  // 🎞️ Smooth infinite auto-scroll
   const startScrolling = () => {
     const scrollContainer = reelContainerRef.current;
     if (!scrollContainer) return;
@@ -48,12 +48,8 @@ const CustomerDemandPremium = () => {
     const scroll = () => {
       if (!scrollContainer) return;
       scrollAmount += speed;
-      if (scrollAmount >= scrollContainer.scrollWidth / 2) {
-        scrollAmount = 0;
-        scrollContainer.scrollLeft = 0;
-      } else {
-        scrollContainer.scrollLeft = scrollAmount;
-      }
+      if (scrollAmount >= scrollContainer.scrollWidth / 2) scrollAmount = 0;
+      scrollContainer.scrollLeft = scrollAmount;
       rafRef.current = requestAnimationFrame(scroll);
     };
 
@@ -64,21 +60,30 @@ const CustomerDemandPremium = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
   };
 
+  // Start auto-scroll on mount
   useEffect(() => {
     startScrolling();
     return () => stopScrolling();
   }, []);
 
-  // Handle image preview safely
+  // Image preview with cleanup
   useEffect(() => {
-    if (formData.image) {
-      const objectUrl = URL.createObjectURL(formData.image);
-      setImagePreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
-    } else {
+    if (!formData.image) {
       setImagePreview(null);
+      return;
     }
+    const objectUrl = URL.createObjectURL(formData.image);
+    setImagePreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
   }, [formData.image]);
+
+  // Auto-hide submitted message
+  useEffect(() => {
+    if (submitted) {
+      const timer = setTimeout(() => setSubmitted(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [submitted]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -92,15 +97,13 @@ const CustomerDemandPremium = () => {
     e.preventDefault();
     setSubmitted(true);
     setFormData({ name: "", email: "", phone: "", product: "", customization: "", image: null });
-    setTimeout(() => setSubmitted(false), 3000); // reset submission message after 3s
   };
 
   return (
     <section className="min-h-screen bg-[#FFFDF9] overflow-hidden">
-      {/* HERO SECTION */}
+      {/* HERO */}
       <div className="relative w-full h-[260px] sm:h-[380px] md:h-[500px] flex items-center justify-center text-center">
         <img src="banner.jpg" alt="Crafting" className="w-full h-full object-cover" />
-        {/* Removed fade overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center px-3">
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-serif text-white drop-shadow-xl font-bold">
             Customize Your Demand
@@ -116,7 +119,6 @@ const CustomerDemandPremium = () => {
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#8b5e34] font-serif text-center mb-6 sm:mb-8">
           Sanika&apos;s Creations
         </h2>
-
         <div
           ref={reelContainerRef}
           className="flex gap-4 sm:gap-6 overflow-x-hidden no-scrollbar px-3 sm:px-6 relative"
@@ -131,24 +133,23 @@ const CustomerDemandPremium = () => {
               whileHover={{ scale: 1.05 }}
               className="min-w-[180px] sm:min-w-[220px] md:min-w-[280px] rounded-2xl shadow-lg overflow-hidden bg-white border border-gray-100 transition-all duration-300"
             >
-             <div className="relative w-full h-60 sm:h-62 md:h-74 rounded-2xl overflow-hidden">
-              <video
-                src={reel.video}
-                className="absolute top-0 left-0 w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                aria-label={`Reel ${index + 1}`}
-              />
-            </div>
-
+              <div className="relative w-full h-60 sm:h-62 md:h-74 rounded-2xl overflow-hidden">
+                <video
+                  src={reel.video}
+                  className="absolute top-0 left-0 w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  aria-label={`Reel ${index + 1}`}
+                />
+              </div>
             </motion.div>
           ))}
         </div>
       </motion.div>
 
-      {/* FORM + WHY WE CREATE SECTION */}
+      {/* FORM + WHY WE CREATE */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -157,9 +158,7 @@ const CustomerDemandPremium = () => {
       >
         {/* FORM */}
         <div className="w-full lg:w-5/12 bg-white p-5 sm:p-8 rounded-2xl shadow-2xl border border-gray-100 text-center lg:text-left">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#8b5e34] mb-3">
-            Share Your Dream
-          </h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#8b5e34] mb-3">Share Your Dream</h2>
           <p className="text-gray-600 mb-5 sm:mb-7 font-[Playfair_Display] text-sm sm:text-base">
             Your vision, our craftsmanship.
           </p>
@@ -239,28 +238,11 @@ const CustomerDemandPremium = () => {
 
         {/* WHY WE CREATE */}
         <div className="w-full lg:w-5/12 bg-[#FFF8F1] p-5 sm:p-8 rounded-2xl shadow-lg border border-gray-100 text-center lg:text-left">
-          <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#8b5e34] mb-3">
-            Why We Create
-          </h3>
+          <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#8b5e34] mb-3">Why We Create</h3>
           <p className="text-gray-700 text-sm sm:text-base md:text-lg italic font-[Playfair_Display] mb-6 max-w-lg mx-auto">
             Behind every piece we craft lies a story waiting to be told. From delicate keepsakes to stunning wedding
             treasures, each creation is infused with passion, artistry, and a touch of magic.
           </p>
-
-          <div className="flex gap-5 justify-center sm:justify-start mt-3">
-            {/* Instagram */}
-            <a href="https://www.instagram.com/crafticrazy_710/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-              <svg className="w-8 h-8 text-pink-500 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7.75 2C4.13 2 1.25 4.88 1.25 8.5v7c0 3.62 2.88 6.5 6.5 6.5h7c3.62 0 6.5-2.88 6.5-6.5v-7c0-3.62-2.88-6.5-6.5-6.5h-7zM12 7.25a4.75 4.75 0 1 1 0 9.5 4.75 4.75 0 0 1 0-9.5zm0 1.5a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5zm5.25-.25a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"></path>
-              </svg>
-            </a>
-            {/* WhatsApp */}
-            <a href="https://wa.me/7721028815" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-              <svg className="w-8 h-8 text-green-500 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.04 2C6.55 2 2 6.55 2 12.04c0 2.11.55 4.17 1.59 6L2 22l4.1-1.55a10.04 10.04 0 0 0 5.94 1.9h.01c5.49 0 10.04-4.55 10.04-10.04S17.53 2 12.04 2zm5.92 14.55c-.25.7-1.45 1.34-2 1.43-.51.09-1.17.13-1.89-.12a8.3 8.3 0 0 1-1.86-.89c-3.27-1.95-5.18-5.43-5.34-5.68-.15-.25-1.27-1.7-1.27-3.24 0-1.54.8-2.29 1.09-2.61.29-.32.63-.4.84-.4.21 0 .42.01.6.01.19 0 .45-.07.7.53.25.61.84 2.1.92 2.25.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.45.54-.15.15-.3.31-.13.6.17.29.75 1.23 1.61 2 .99.88 1.83 1.15 2.12 1.3.29.15.46.13.64-.08.18-.21.74-.86.94-1.16.2-.29.4-.25.67-.15.28.09 1.77.84 2.07 1 .3.15.5.25.57.39.07.14.07.79-.18 1.49z"></path>
-              </svg>
-            </a>
-          </div>
         </div>
       </motion.div>
 

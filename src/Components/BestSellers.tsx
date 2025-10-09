@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Star } from "lucide-react";
 
 const bestSellers = [
@@ -11,6 +11,15 @@ const bestSellers = [
 ];
 
 export default function BestSeller() {
+  useEffect(() => {
+    console.log("BestSeller component mounted");
+
+    // Example: could trigger analytics or animations here
+    return () => {
+      console.log("BestSeller component unmounted");
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
       {/* Floating Gradient Blobs */}
@@ -45,7 +54,7 @@ export default function BestSeller() {
               <img
                 src={item.image}
                 alt={item.name}
-                loading="lazy" // <-- Lazy loading added
+                loading="lazy"
                 className="w-full h-56 sm:h-72 md:h-80 object-cover rounded-t-2xl sm:rounded-t-3xl transform group-hover:scale-110 transition-transform duration-700"
               />
             </div>

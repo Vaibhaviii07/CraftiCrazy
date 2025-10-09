@@ -1,21 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Lock, LogIn } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Auto-focus the email input when component mounts
+    emailRef.current?.focus();
+    console.log("Login component mounted");
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    // 🔗 Replace with real authentication logic
     console.log("Login submitted:", { email, password });
-    // 🔗 Hook up authentication logic here
+    alert(`Logged in with email: ${email}`);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6">
       <div className="w-full max-w-sm bg-white shadow-lg rounded-2xl p-6 sm:p-8">
-        
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-5">
           <img
@@ -36,7 +43,9 @@ const Login = () => {
         <form onSubmit={handleLogin} className="mt-5 space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-gray-700 font-medium text-sm sm:text-base">Email</label>
+            <label className="block text-gray-700 font-medium text-sm sm:text-base">
+              Email
+            </label>
             <div className="relative mt-1">
               <Mail className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <input
@@ -44,6 +53,7 @@ const Login = () => {
                 required
                 placeholder="you@example.com"
                 value={email}
+                ref={emailRef} // 👈 useEffect focuses this input
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
@@ -52,7 +62,9 @@ const Login = () => {
 
           {/* Password */}
           <div>
-            <label className="block text-gray-700 font-medium text-sm sm:text-base">Password</label>
+            <label className="block text-gray-700 font-medium text-sm sm:text-base">
+              Password
+            </label>
             <div className="relative mt-1">
               <Lock className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <input

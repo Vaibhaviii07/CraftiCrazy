@@ -43,10 +43,17 @@ export default function BirthdayHamperDetails() {
   // currentVariant state
   const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
 
+  // Update currentVariant when selectedVariant changes
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
   }, [selectedVariant]);
+
+  // Reset image fade-in and scroll to top on variant change
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
   // Add to cart handler
   const handleAddToCart = () => {
@@ -111,7 +118,7 @@ export default function BirthdayHamperDetails() {
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory ">
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}

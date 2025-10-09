@@ -1,5 +1,5 @@
 // src/Pages/CheckoutPage.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../AuthContext/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,8 +19,10 @@ const CheckoutPage = () => {
     paymentMethod: "cod",
   });
 
-  // Prefill customization with first item's customization if available
-  React.useEffect(() => {
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Prefill customization with cart items' customization if available
+  useEffect(() => {
     if (cart.length > 0) {
       setFormData((prev) => ({
         ...prev,
@@ -29,7 +31,21 @@ const CheckoutPage = () => {
     }
   }, [cart]);
 
-  const [toast, setToast] = useState<string | null>(null);
+  // Lock scroll while on checkout page
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Auto-focus email input
+    const firstInput = document.querySelector<HTMLInputElement>(
+      'input[name="email"]'
+    );
+    firstInput?.focus();
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   const totalPrice = cart.reduce(
     (total, item) => total + Number(item.price) * Number(item.quantity),
@@ -45,6 +61,7 @@ const CheckoutPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     // Update cart items with latest customization
     cart.forEach((item) => {
       updateCartItem(item.id, {
@@ -70,9 +87,7 @@ const CheckoutPage = () => {
           className="w-full lg:w-2/3 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4"
         >
           {/* Contact */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
-            Contact
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Contact</h2>
           <input
             type="email"
             name="email"
@@ -84,9 +99,7 @@ const CheckoutPage = () => {
           />
 
           {/* Delivery Section */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
-            Delivery
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Delivery</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <input
               type="text"
@@ -168,9 +181,7 @@ const CheckoutPage = () => {
           />
 
           {/* Customization */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
-            Customization
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Customization</h2>
           <textarea
             name="customization"
             value={formData.customization}
@@ -181,9 +192,7 @@ const CheckoutPage = () => {
           ></textarea>
 
           {/* Payment */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
-            Payment
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Payment</h2>
           <div className="border border-gray-300 rounded-md p-4 mb-4 space-y-2">
             <label className="flex items-center space-x-3">
               <input
@@ -219,9 +228,7 @@ const CheckoutPage = () => {
 
         {/* Right Order Summary */}
         <div className="w-full lg:w-1/3 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 mt-6 lg:mt-0">
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-4">
-            Order Summary
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-4">Order Summary</h2>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {cart.map((item) => (
               <div key={item.id} className="flex flex-col gap-1 border-b pb-2">

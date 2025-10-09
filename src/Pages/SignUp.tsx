@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { UserPlus } from "lucide-react";
 
@@ -10,14 +10,33 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
+  const [passwordMatch, setPasswordMatch] = useState(true);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "confirmPassword" || e.target.name === "password") {
+      setPasswordMatch(
+        e.target.name === "password"
+          ? e.target.value === formData.confirmPassword
+          : formData.password === e.target.value
+      );
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!passwordMatch) {
+      alert("Passwords do not match!");
+      return;
+    }
     console.log("SignUp Data:", formData);
+    alert("Account created successfully!");
+    setFormData({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
   };
 
   return (
@@ -55,6 +74,7 @@ const SignUp = () => {
             placeholder="Full Name"
             value={formData.name}
             onChange={handleChange}
+            ref={nameRef}
             className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:outline-none"
           />
 
@@ -91,12 +111,20 @@ const SignUp = () => {
             placeholder="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:outline-none"
+            className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 ${
+              passwordMatch ? "focus:ring-amber-500" : "focus:ring-red-500"
+            } focus:outline-none`}
           />
+          {!passwordMatch && (
+            <p className="text-red-500 text-xs sm:text-sm">Passwords do not match!</p>
+          )}
 
           <button
             type="submit"
-            className="w-full py-2 sm:py-3 bg-amber-600 text-white rounded-xl font-semibold shadow-md hover:bg-amber-700 transition text-sm sm:text-base"
+            disabled={!passwordMatch}
+            className={`w-full py-2 sm:py-3 bg-amber-600 text-white rounded-xl font-semibold shadow-md hover:bg-amber-700 transition text-sm sm:text-base ${
+              !passwordMatch ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
             Create Account
           </button>

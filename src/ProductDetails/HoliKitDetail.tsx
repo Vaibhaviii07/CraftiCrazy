@@ -1,5 +1,6 @@
+// src/ProductDetails/HoliKitDetail.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { holiKits, HoliKit, Variant } from "../Data/HoliKitData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -25,24 +26,31 @@ export default function HoliKitDetail() {
 
   const [currentProduct] = useState<HoliKit>(productFromParams);
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>({
+  // Default variant using useMemo
+  const currentVariant = useMemo<Variant>(() => ({
     image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
     price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
     discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-  });
+  }), [currentProduct]);
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(currentVariant);
 
   useEffect(() => {
-    setSelectedVariant({
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-    });
+    setSelectedVariant(currentVariant);
     setQuantity(1);
     setImageLoaded(false);
     setThumbsLoaded({});
-  }, [currentProduct]);
+  }, [currentVariant]);
+
+  // Scroll to top when variant changes
+  useEffect(() => {
+    setImageLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [selectedVariant]);
 
   const handleAddToCart = () => {
+    if (!currentProduct || !selectedVariant || !currentProduct.inStock) return;
+
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -53,6 +61,7 @@ export default function HoliKitDetail() {
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
+
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
@@ -68,9 +77,7 @@ export default function HoliKitDetail() {
           <motion.img
             src={selectedVariant.image}
             alt={currentProduct.name}
-            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5 }}
             onLoad={() => setImageLoaded(true)}
@@ -82,16 +89,15 @@ export default function HoliKitDetail() {
             </span>
           )}
 
+          {/* Variant Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1 scrollbar-hide">
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory scrollbar-hide">
               {currentProduct.variants.map((v: Variant, i: number) => (
                 <motion.div
                   key={i}
                   onClick={() => setSelectedVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
-                    selectedVariant.image === v.image
-                      ? "border-[#C45A36] ring-2 ring-[#C45A36]"
-                      : "border-gray-300"
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                    selectedVariant.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
@@ -101,9 +107,7 @@ export default function HoliKitDetail() {
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
-                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${
-                      thumbsLoaded[i] ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
                     onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
                   />
                   {v.discount && (
@@ -121,70 +125,43 @@ export default function HoliKitDetail() {
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
+          {/* Highlight */}
+          {currentProduct.highlight && (
+            <span className="inline-block bg-[#C45A36] text-white px-2 py-1 text-sm rounded-md">
+              {currentProduct.highlight}
+            </span>
+          )}
+
           {/* Rating + Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map(
-                (_, i: number) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400" />
-                )
-              )}
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+                <Star key={i} className="w-5 h-5 text-yellow-400" />
+              ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">
-              ₹{selectedVariant.price}
-            </span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{selectedVariant.price}</span>
             {selectedVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">
-                ₹{currentProduct.price}
-              </span>
+              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
             )}
           </div>
 
           {/* Description */}
-          {currentProduct.description && (
-            <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
-          )}
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
           {/* Structured Info */}
           <div className="space-y-3 text-gray-700">
-            {currentProduct.material && (
-              <p>
-                <span className="font-semibold text-gray-900">Material:</span> {currentProduct.material}
-              </p>
-            )}
-            {currentProduct.dimensions && (
-              <p>
-                <span className="font-semibold text-gray-900">Dimensions:</span> {currentProduct.dimensions}
-              </p>
-            )}
-            {currentProduct.weight && (
-              <p>
-                <span className="font-semibold text-gray-900">Weight:</span> {currentProduct.weight}
-              </p>
-            )}
-            {currentProduct.careInstructions && (
-              <p>
-                <span className="font-semibold text-gray-900">Care Instructions:</span> {currentProduct.careInstructions}
-              </p>
-            )}
-            {currentProduct.delivery && (
-              <p>
-                <span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
-              </p>
-            )}
+            {currentProduct.material && <p><span className="font-semibold text-gray-900">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold text-gray-900">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold text-gray-900">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold text-gray-900">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct.delivery && <p><span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
           {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>
-            ))}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
-            </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
-            )}
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{currentProduct.inStock ? "In Stock" : "Out of Stock"}</span>
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* Quantity + Add to Cart */}
@@ -194,7 +171,6 @@ export default function HoliKitDetail() {
               <span className="px-6 py-2">{quantity}</span>
               <button onClick={() => setQuantity((q) => q + 1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
             </div>
-
             <button onClick={handleAddToCart} className="flex items-center gap-2 px-6 py-3 bg-[#C45A36] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
@@ -210,7 +186,6 @@ export default function HoliKitDetail() {
                 </ul>
               </div>
             )}
-
             {currentProduct.customization?.available && (
               <div>
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>

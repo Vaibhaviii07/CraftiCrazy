@@ -29,12 +29,14 @@ export default function WoodenFrameDetailPage() {
   const productFromParams: WoodenFrame | undefined = woodenFrames.find((p) => p.id === id);
   const [currentProduct, setCurrentProduct] = useState<WoodenFrame | null>(productFromParams ?? null);
 
+  // Simulate loader
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
+    const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
 
-  const selectedVariant = useMemo(() => {
+  // Selected variant memo
+  const selectedVariant = useMemo<Variant | null>(() => {
     if (!currentProduct) return null;
     return {
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
@@ -45,11 +47,17 @@ export default function WoodenFrameDetailPage() {
 
   const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
 
+  // Reset variant and quantity when product changes
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
-    setImgLoaded(false);
   }, [selectedVariant]);
+
+  // Reset image fade-in on variant change
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
@@ -147,21 +155,22 @@ export default function WoodenFrameDetailPage() {
           {currentProduct.description && (
             <p className="text-gray-600 leading-relaxed">{currentProduct.description}</p>
           )}
-
-          {/* Structured Info */}
-          <div className="mt-2 space-y-2 text-gray-700">
-            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
-            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
-            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
-            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && (
-              <p>
-                <span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
-              </p>
+           {/* Additional details */}
+          <div className="mt-4 space-y-2 text-gray-700">
+            {currentProduct.material && (
+              <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>
+            )}
+            {currentProduct.dimensions && (
+              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>
+            )}
+            {currentProduct.weight && (
+              <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>
+            )}
+            {currentProduct.careInstructions && (
+              <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>
             )}
           </div>
-
-          {/* Tags / Stock / Brand / Seller / Warranty / Return */}
+          {/* Info Tags / Stock / Brand / Seller / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
             {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
@@ -188,10 +197,10 @@ export default function WoodenFrameDetailPage() {
             </button>
           </div>
 
-          {/* Additional Sections */}
+          {/* Additional Sections: Contents / Customization / Specifications */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
@@ -199,13 +208,13 @@ export default function WoodenFrameDetailPage() {
               </div>
             )}
             {currentProduct.customization?.available && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
             {currentProduct.specifications && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {Object.entries(currentProduct.specifications).map(([key, value], idx) => (

@@ -1,5 +1,4 @@
-// src/Pages/Rakhi/RakhiPage.tsx
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { rakhiKits, RakhiKit } from "../../Data/RakhiData";
@@ -18,39 +17,46 @@ export default function RakhiPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted", "Luxury Edition"];
   const categories = [...new Set(rakhiKits.map((i: RakhiKit) => i.category))];
 
-  const filteredItems = rakhiKits.filter((item: RakhiKit) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+  const filteredItems = useMemo(() => {
+    return rakhiKits.filter(item => {
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
-    let highlightMatch = true;
-    switch (highlight) {
-      case "Best Seller":
-        highlightMatch = (item.rating ?? 0) >= 4.5;
-        break;
-      case "Discounted":
-        highlightMatch = (item.discount ?? 0) > 0;
-        break;
-      case "Luxury Edition":
-        highlightMatch = item.highlight === "Luxury Edition";
-        break;
-      default:
-        highlightMatch = true;
-    }
-    return categoryMatch && highlightMatch;
-  });
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = (item.rating ?? 0) >= 4.5;
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+        case "Luxury Edition":
+          highlightMatch = item.highlight === "Luxury Edition";
+          break;
+        default:
+          highlightMatch = true;
+      }
+      return categoryMatch && highlightMatch;
+    });
+  }, [selectedCategories, highlight]);
 
-  const sortedItems = [...filteredItems].sort((a, b) => {
+  const sortedItems = useMemo(() => {
+    const sorted = [...filteredItems];
     switch (sortOption) {
       case "Price: Low to High":
-        return a.price - b.price;
+        sorted.sort((a, b) => a.price - b.price);
+        break;
       case "Price: High to Low":
-        return b.price - a.price;
+        sorted.sort((a, b) => b.price - a.price);
+        break;
       case "Rating":
-        return (b.rating ?? 0) - (a.rating ?? 0);
+        sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
       default:
-        return 0;
+        break;
     }
-  });
+    return sorted;
+  }, [filteredItems, sortOption]);
 
   return (
     <section className="min-h-screen bg-[#fffdfc]">
@@ -113,7 +119,7 @@ export default function RakhiPage() {
           </div>
         </aside>
 
-        {/* Product Grid */}
+        {/* Products */}
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
@@ -131,63 +137,65 @@ export default function RakhiPage() {
           </div>
 
           {/* Product Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedItems.map(item => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/RakhiDetail/${item.id}`}
-                    className="w-full max-w-[320px] flex flex-col"
-                  >
-                    <div className="relative w-full h-[350px] rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
-                      <motion.img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                        loading="lazy"
-                      />
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
+              {sortedItems.map(item => {
+                const [loaded, setLoaded] = useState(false);
 
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-serif leading-snug">
-                        {item.name}
-                      </p>
-                      {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#b46029] font-semibold">
-                          ₹{item.price}
-                        </span>
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex justify-center"
+                  >
+                    <Link
+                      to={`/RakhiDetail/${item.id}`}
+                      className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+                    >
+                      <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                        <motion.img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: loaded ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          onLoad={() => setLoaded(true)}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
                         {item.discount && (
-                          <span className="line-through text-gray-400 text-sm sm:text-lg ml-1">
-                            ₹{Math.round(item.price / (1 - item.discount / 100))}
-                          </span>
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                          >
+                            {item.discount}% OFF
+                          </motion.span>
                         )}
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+
+                      <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                        <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                        {item.description && (
+                          <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                        )}
+                        <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                          <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">₹{item.price}</span>
+                          {item.discount && (
+                            <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
+                              ₹{Math.round(item.price / (1 - item.discount / 100))}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

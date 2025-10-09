@@ -34,7 +34,7 @@ const ReelsRow = () => {
     return () => observer.disconnect();
   }, [visibleVideos]);
 
-  // Smooth infinite auto-scroll using requestAnimationFrame
+  // Smooth infinite auto-scroll
   const startScrolling = () => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
@@ -61,6 +61,7 @@ const ReelsRow = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
   };
 
+  // Start scrolling on mount, clean up on unmount
   useEffect(() => {
     startScrolling();
     return () => stopScrolling();

@@ -1,6 +1,6 @@
 // src/Pages/CustomizedHamper/WeddingHamperDetails.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { weddingHampers, WeddingHamper, Variant } from "../Data/WeddingData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -11,18 +11,26 @@ type Params = { id: string };
 export default function WeddingHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [imgLoaded, setImgLoaded] = useState<boolean>(false);
 
   const productFromParams: WeddingHamper | undefined = weddingHampers.find((p) => p.id === id);
-  const [currentProduct] = useState<WeddingHamper | null>(productFromParams ?? null);
+  const [currentProduct, setCurrentProduct] = useState<WeddingHamper | null>(productFromParams ?? null);
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>({
-    image: currentProduct?.variants?.[0]?.image ?? currentProduct?.image ?? "",
-    price: currentProduct?.variants?.[0]?.price ?? currentProduct?.price ?? 0,
-    discount: currentProduct?.variants?.[0]?.discount ?? currentProduct?.discount ?? 0,
-  });
+  // selectedVariant memo
+  const selectedVariant = useMemo<Variant | null>(() => {
+    if (!currentProduct) return null;
+    return {
+      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
+      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+    };
+  }, [currentProduct]);
+
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
 
   // Simulate loading
   useEffect(() => {
@@ -30,51 +38,44 @@ export default function WeddingHamperDetails() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Reset variant and quantity if product changes
+  // Reset variant and quantity when product or selectedVariant changes
   useEffect(() => {
-    if (!currentProduct) return;
-    setSelectedVariant({
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-    });
+    setCurrentVariant(selectedVariant);
     setQuantity(1);
-  }, [currentProduct]);
+  }, [selectedVariant]);
 
-  if (!currentProduct) {
-    return (
-      <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>
-    );
-  }
+  // Reset image fade-in and scroll to top on variant change
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-8 lg:gap-12 animate-pulse">
-        <div className="flex-1 bg-gray-200 rounded-3xl h-80 lg:h-[500px]" />
-        <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <div className="h-8 bg-gray-200 w-3/4 rounded"></div>
-          <div className="h-6 bg-gray-200 w-1/2 rounded mt-2"></div>
-          <div className="h-4 bg-gray-200 w-full rounded mt-2"></div>
-          <div className="h-4 bg-gray-200 w-full rounded mt-1"></div>
-          <div className="h-4 bg-gray-200 w-5/6 rounded mt-1"></div>
-          <div className="h-10 bg-gray-200 w-1/3 rounded mt-4"></div>
-        </div>
+      <div className="flex justify-center items-center h-96">
+        <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
       </div>
     );
   }
 
+  if (!currentProduct) {
+    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  }
+
   const handleAddToCart = () => {
-    if (!currentProduct.inStock) return;
+    if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
+
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: selectedVariant.price.toString(),
+      price: currentVariant.price.toString(),
       quantity,
-      image: selectedVariant.image,
-      discount: selectedVariant.discount,
+      image: currentVariant.image,
+      discount: currentVariant.discount,
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
+
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
@@ -84,38 +85,44 @@ export default function WeddingHamperDetails() {
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image */}
         <div className="flex-1 relative">
-          <motion.img
-            src={selectedVariant.image}
-            alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-          />
-          {selectedVariant.discount && (
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+            </div>
+          )}
+          {currentVariant && (
+            <motion.img
+              src={currentVariant.image}
+              alt={currentProduct.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImgLoaded(true)}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+            />
+          )}
+          {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
-              {selectedVariant.discount}% OFF
+              {currentVariant.discount}% OFF
             </span>
           )}
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-              {currentProduct.variants.map((v: Variant, i: number) => (
+              {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
+                  onClick={() => setCurrentVariant(v)}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    selectedVariant.image === v.image
+                    currentVariant?.image === v.image
                       ? "border-[#b46029] ring-2 ring-[#b46029]"
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <img
-                    src={v.image}
-                    alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
-                  />
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
@@ -138,20 +145,40 @@ export default function WeddingHamperDetails() {
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">{selectedVariant.price}</span>
-            {selectedVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">{currentProduct.price}</span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
+              ₹{currentVariant?.price}
+            </span>
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
             )}
           </div>
 
           {/* Description */}
           <p className="text-gray-600 leading-relaxed">{currentProduct.description}</p>
-
+            {/* Additional details */}
+          <div className="mt-4 space-y-2 text-gray-700">
+            {currentProduct.material && (
+              <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>
+            )}
+            {currentProduct.dimensions && (
+              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>
+            )}
+            {currentProduct.weight && (
+              <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>
+            )}
+            {currentProduct.careInstructions && (
+              <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>
+            )}
+          </div>
           {/* Info Tags */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
             {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
             {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+            <span
+              className={`px-2 py-1 rounded ${
+                currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
@@ -160,18 +187,27 @@ export default function WeddingHamperDetails() {
           {/* Quantity & Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <div className="flex items-center border rounded-full overflow-hidden">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                -
+              </button>
               <span className="px-6 py-2">{quantity}</span>
-              <button onClick={() => setQuantity((q) => q + 1)}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                +
+              </button>
             </div>
 
-            <button onClick={handleAddToCart}
-                    disabled={!currentProduct.inStock}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg text-white ${
-                      currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20]" : "bg-gray-300 cursor-not-allowed"
-                    }`}
+            <button
+              onClick={handleAddToCart}
+              disabled={!currentProduct.inStock}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
+                currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
@@ -189,7 +225,9 @@ export default function WeddingHamperDetails() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
+                  {currentProduct.contents.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
                 </ul>
               </div>
             )}

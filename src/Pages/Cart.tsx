@@ -21,10 +21,40 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
   const shippingCharge = subtotal > 0 ? 50 : 0;
   const total = subtotal + shippingCharge;
 
+  // Collapse sidebar when closing
   useEffect(() => {
     if (!isOpen) {
       const timeout = setTimeout(() => setIsExpanded(false), 300);
       return () => clearTimeout(timeout);
+    }
+  }, [isOpen]);
+
+  // Lock body scroll when cart is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  // Scroll to top when cart opens
+  useEffect(() => {
+    if (isOpen) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [isOpen]);
+
+  // Focus first customization input when cart opens
+  useEffect(() => {
+    if (isOpen) {
+      const firstInput = document.querySelector<HTMLInputElement>(
+        'input[placeholder="Enter your customization..."]'
+      );
+      firstInput?.focus();
     }
   }, [isOpen]);
 

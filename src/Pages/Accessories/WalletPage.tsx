@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { wallets, Wallet } from "../../Data/WalletData";
 import { Link } from "react-router-dom";
@@ -7,6 +7,7 @@ export default function WalletPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [displayedWallets, setDisplayedWallets] = useState<Wallet[]>(wallets);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -17,38 +18,42 @@ export default function WalletPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(wallets.map((item) => item.category))];
 
-  // Filtering logic
-  const filteredWallets = wallets.filter((item) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+  useEffect(() => {
+    // Filter wallets based on categories and highlight
+    let filtered = wallets.filter((item) => {
+      const categoryMatch =
+        selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
-    let highlightMatch = true;
-    switch (highlight) {
-      case "Best Seller":
-        highlightMatch = (item.rating ?? 0) >= 4.5;
-        break;
-      case "Discounted":
-        highlightMatch = (item.discount ?? 0) > 0;
-        break;
-      default:
-        highlightMatch = true;
-    }
-    return categoryMatch && highlightMatch;
-  });
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = (item.rating ?? 0) >= 4.5;
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+        default:
+          highlightMatch = true;
+      }
+      return categoryMatch && highlightMatch;
+    });
 
-  // Sorting logic
-  const sortedWallets = [...filteredWallets].sort((a, b) => {
-    switch (sortOption) {
-      case "Price: Low to High":
-        return a.price - b.price;
-      case "Price: High to Low":
-        return b.price - a.price;
-      case "Rating":
-        return (b.rating || 0) - (a.rating || 0);
-      default:
-        return 0;
-    }
-  });
+    // Sort filtered wallets
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortOption) {
+        case "Price: Low to High":
+          return a.price - b.price;
+        case "Price: High to Low":
+          return b.price - a.price;
+        case "Rating":
+          return (b.rating ?? 0) - (a.rating ?? 0);
+        default:
+          return 0;
+      }
+    });
+
+    setDisplayedWallets(filtered);
+  }, [selectedCategories, highlight, sortOption]);
 
   return (
     <section className="min-h-screen bg-[#FBFAF7]">
@@ -66,7 +71,7 @@ export default function WalletPage() {
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0  top-20">
           {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
@@ -82,10 +87,7 @@ export default function WalletPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label
-                    htmlFor={cat}
-                    className="text-gray-700 text-sm cursor-pointer"
-                  >
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
                     {cat}
                   </label>
                 </li>
@@ -104,9 +106,7 @@ export default function WalletPage() {
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt
-                      ? "text-[#C45A36] font-semibold"
-                      : "text-gray-700"
+                    highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -121,7 +121,7 @@ export default function WalletPage() {
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
-              Showing {sortedWallets.length} results
+              Showing {displayedWallets.length} results
             </p>
             <select
               value={sortOption}
@@ -138,7 +138,7 @@ export default function WalletPage() {
           {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedWallets.map((item) => (
+              {displayedWallets.map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -152,7 +152,6 @@ export default function WalletPage() {
                     className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      {/* 🔹 Lazy Loading Added Here */}
                       <img
                         src={item.image}
                         alt={item.name}

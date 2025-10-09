@@ -12,16 +12,17 @@ export default function BraceletDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
 
-  // ✅ All hooks initialized unconditionally
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: Bracelet | undefined = bracelets.find((b) => String(b.id) === id);
-  const [currentProduct] = useState<Bracelet | null>(productFromParams ?? null);
+  if (!productFromParams) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
-  const selectedVariant = useMemo(() => {
-    if (!currentProduct) return null;
+  const [currentProduct] = useState<Bracelet>(productFromParams);
+
+  const selectedVariant = useMemo<Variant>(() => {
     return {
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
@@ -29,16 +30,21 @@ export default function BraceletDetails() {
     };
   }, [currentProduct]);
 
-  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
+  const [currentVariant, setCurrentVariant] = useState<Variant>(selectedVariant);
 
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
+    setImgLoaded(false);
+    setThumbsLoaded({});
   }, [selectedVariant]);
 
-  const handleAddToCart = () => {
-    if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
+  const handleAddToCart = () => {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -49,39 +55,27 @@ export default function BraceletDetails() {
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
-
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
 
-  if (!currentProduct) {
-    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
-  }
-
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Hero Image */}
+        {/* Left: Main Image + Thumbnails */}
         <div className="flex-1 relative">
           {!imgLoaded && (
-            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
-              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
-            </div>
+            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
           )}
-          {currentVariant && (
-            <motion.img
-              src={currentVariant.image}
-              alt={currentProduct.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              onLoad={() => setImgLoaded(true)}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.5 }}
-              loading="lazy"
-            />
-          )}
-          {currentVariant?.discount && (
+          <motion.img
+            src={currentVariant.image}
+            alt={currentProduct.name}
+            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setImgLoaded(true)}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.5 }}
+          />
+          {currentVariant.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
             </span>
@@ -89,19 +83,30 @@ export default function BraceletDetails() {
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1">
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
                   onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
-                    currentVariant?.image === v.image
-                      ? "border-[#b46029] ring-2 ring-[#b46029]"
-                      : "border-gray-300"
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                    currentVariant.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" loading="lazy" />
+                  {!thumbsLoaded[i] && (
+                    <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>
+                  )}
+                  <img
+                    src={v.image}
+                    alt={`thumb-${i}`}
+                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
+                    onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
+                  />
+                  {v.discount && (
+                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                      {v.discount}% OFF
+                    </span>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -119,8 +124,8 @@ export default function BraceletDetails() {
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">{currentVariant?.price}</span>
-            {currentVariant?.discount && (
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">{currentVariant.price}</span>
+            {currentVariant.discount && (
               <span className="line-through text-gray-400 text-lg ml-2">{currentProduct.price}</span>
             )}
           </div>
@@ -134,9 +139,7 @@ export default function BraceletDetails() {
             {currentProduct.dimensions && <p><span className="font-semibold text-gray-900">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold text-gray-900">Weight:</span> {currentProduct.weight}</p>}
             {currentProduct.careInstructions && <p><span className="font-semibold text-gray-900">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && (
-              <p><span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>
-            )}
+            {currentProduct.delivery && <p><span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
           {/* Tags / Stock / Warranty */}
@@ -188,8 +191,7 @@ export default function BraceletDetails() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
           >
             {toast}
           </motion.div>

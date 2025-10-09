@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Heart, Gift, Star, Play } from "lucide-react";
 import { useInView } from "react-intersection-observer";
@@ -24,6 +24,26 @@ const AboutUs: React.FC = () => {
     threshold: 0.2,
   });
 
+  useEffect(() => {
+    console.log("AboutUs component mounted");
+
+    const video = document.getElementById("aboutVideo") as HTMLVideoElement;
+
+    // Auto-play when in view
+    if (video && inView) {
+      video.play();
+      setIsPlaying(true);
+    }
+
+    // Cleanup: pause video on unmount
+    return () => {
+      if (video) {
+        video.pause();
+        setIsPlaying(false);
+      }
+    };
+  }, [inView]); // Dependency on inView to start video when visible
+
   return (
     <section className="py-12 px-4 sm:px-6 md:px-12">
       <div
@@ -31,7 +51,7 @@ const AboutUs: React.FC = () => {
         className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-9 md:gap-20"
       >
         {/* Video */}
-       <motion.div
+        <motion.div
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
@@ -56,7 +76,6 @@ const AboutUs: React.FC = () => {
             </button>
           </div>
         </motion.div>
-
 
         {/* Content */}
         <motion.div

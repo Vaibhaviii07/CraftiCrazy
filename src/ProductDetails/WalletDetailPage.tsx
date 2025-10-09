@@ -1,6 +1,6 @@
 // src/ProductDetails/WalletDetailPage.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { wallets, Wallet, Variant } from "../Data/WalletData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -14,68 +14,45 @@ export default function WalletDetailPage() {
 
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: Wallet | undefined = wallets.find((w) => w.id === id);
+  if (!productFromParams) return <p className="text-center mt-20 text-lg text-gray-400">Wallet not found</p>;
 
-  const [currentProduct] = useState<Wallet | null>(productFromParams ?? null);
+  const [currentProduct] = useState<Wallet>(productFromParams);
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>({
-    image: currentProduct?.variants?.[0]?.image ?? currentProduct?.image ?? "",
-    price: currentProduct?.variants?.[0]?.price ?? currentProduct?.price ?? 0,
-    discount: currentProduct?.variants?.[0]?.discount ?? currentProduct?.discount ?? 0,
-  });
+  // Compute the default variant
+  const selectedVariant = useMemo<Variant>(() => ({
+    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
+    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+  }), [currentProduct]);
 
-  // Simulate loading
+  const [currentVariant, setCurrentVariant] = useState<Variant>(selectedVariant);
+
+  // Update currentVariant and reset quantity whenever selectedVariant changes
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Reset variant and quantity if product changes
-  useEffect(() => {
-    if (!currentProduct) return;
-    setSelectedVariant({
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-    });
+    setCurrentVariant(selectedVariant);
     setQuantity(1);
-  }, [currentProduct]);
+    setImgLoaded(false);
+    setThumbsLoaded({});
+  }, [selectedVariant]);
 
-  if (!currentProduct) {
-    return (
-      <p className="text-center mt-20 text-lg text-gray-400">
-        Wallet not found
-      </p>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-8 lg:gap-12 animate-pulse">
-        <div className="flex-1 bg-gray-200 rounded-3xl h-80 lg:h-[500px]" />
-        <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <div className="h-8 bg-gray-200 w-3/4 rounded"></div>
-          <div className="h-6 bg-gray-200 w-1/2 rounded mt-2"></div>
-          <div className="h-4 bg-gray-200 w-full rounded mt-2"></div>
-          <div className="h-4 bg-gray-200 w-full rounded mt-1"></div>
-          <div className="h-4 bg-gray-200 w-5/6 rounded mt-1"></div>
-          <div className="h-10 bg-gray-200 w-1/3 rounded mt-4"></div>
-        </div>
-      </div>
-    );
-  }
+  // Reset image loading state on variant change and scroll to top
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
   const handleAddToCart = () => {
-    if (!currentProduct.inStock) return;
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: selectedVariant.price.toString(),
+      price: currentVariant.price.toString(),
       quantity,
-      image: selectedVariant.image,
-      discount: selectedVariant.discount,
+      image: currentVariant.image,
+      discount: currentVariant.discount,
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
@@ -86,40 +63,51 @@ export default function WalletDetailPage() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Image */}
+        {/* Left: Main Image + Thumbnails */}
         <div className="flex-1 relative">
+          {!imgLoaded && (
+            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
+          )}
           <motion.img
-            src={selectedVariant.image}
+            src={currentVariant.image}
             alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
+            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setImgLoaded(true)}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5 }}
           />
-          {selectedVariant.discount && (
+          {currentVariant.discount && (
             <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
-              {selectedVariant.discount}% OFF
+              {currentVariant.discount}% OFF
             </span>
           )}
 
-          {/* Variant thumbnails */}
+          {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-              {currentProduct.variants.map((v: Variant, i: number) => (
+              {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
+                  onClick={() => setCurrentVariant(v)}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    selectedVariant.image === v.image
-                      ? "border-[#C45A36] ring-2 ring-[#C45A36]"
-                      : "border-gray-300"
+                    currentVariant.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
+                  {!thumbsLoaded[i] && (
+                    <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>
+                  )}
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
+                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
+                    onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
                   />
+                  {v.discount && (
+                    <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                      {v.discount}% OFF
+                    </span>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -128,136 +116,61 @@ export default function WalletDetailPage() {
 
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">
-            {currentProduct.name}
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
           {/* Rating + Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map(
-                (_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400" />
-                )
-              )}
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+                <Star key={i} className="w-5 h-5 text-yellow-400" />
+              ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">
-              ₹{selectedVariant.price}
-            </span>
-            {selectedVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">
-                ₹{currentProduct.price}
-              </span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">{currentVariant.price}</span>
+            {currentVariant.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">{currentProduct.price}</span>
             )}
           </div>
 
           {/* Description */}
           <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
 
-          {/* Structured Product Info */}
+          {/* Structured Info */}
           <div className="space-y-3 text-gray-700">
-            {currentProduct.material && (
-              <p>
-                <span className="font-semibold text-gray-900">Material:</span>{" "}
-                {currentProduct.material}
-              </p>
-            )}
-            {currentProduct.dimensions && (
-              <p>
-                <span className="font-semibold text-gray-900">Dimensions:</span>{" "}
-                {currentProduct.dimensions}
-              </p>
-            )}
-            {currentProduct.weight && (
-              <p>
-                <span className="font-semibold text-gray-900">Weight:</span>{" "}
-                {currentProduct.weight}
-              </p>
-            )}
-            {currentProduct.careInstructions && (
-              <p>
-                <span className="font-semibold text-gray-900">Care Instructions:</span>{" "}
-                {currentProduct.careInstructions}
-              </p>
-            )}
-            {currentProduct.delivery && (
-              <p>
-                <span className="font-semibold text-gray-900">Delivery:</span>{" "}
-                {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated{" "}
-                {currentProduct.delivery.estimated}
-              </p>
-            )}
+            {currentProduct.material && <p><span className="font-semibold text-gray-900">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold text-gray-900">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold text-gray-900">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold text-gray-900">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct.delivery && <p><span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* Tags / Brand / Stock / Warranty */}
+          {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.brand && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>
-            )}
-            {currentProduct.seller && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>
-            )}
-            <span
-              className={`px-2 py-1 rounded ${
-                currentProduct.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
-            )}
-            {currentProduct.returnPolicy && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>
-            )}
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* Quantity + Add to Cart */}
           <div className="flex flex-wrap gap-3 mt-4 items-center">
             <div className="flex items-center border rounded-full overflow-hidden">
-              <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
-              >
-                -
-              </button>
+              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
               <span className="px-6 py-2">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
-              >
-                +
-              </button>
+              <button onClick={() => setQuantity((q) => q + 1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
             </div>
-
-            <button
-              onClick={handleAddToCart}
-              disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg text-white ${
-                currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#a1472c]" : "bg-gray-300 cursor-not-allowed"
-              }`}
-            >
+            <button onClick={handleAddToCart} className="flex items-center gap-2 px-6 py-3 bg-[#C45A36] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
 
           {/* Structured Sections */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.tags && (
-              <div>
-                <h3 className="font-semibold text-gray-800">Tags</h3>
-                <p className="text-gray-600">{currentProduct.tags.join(", ")}</p>
-              </div>
-            )}
             {currentProduct.contents && (
               <div>
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
+                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
@@ -265,18 +178,6 @@ export default function WalletDetailPage() {
               <div>
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
-              </div>
-            )}
-            {currentProduct.specifications && (
-              <div>
-                <h3 className="font-semibold text-gray-800">Specifications</h3>
-                <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
-                    <li key={idx}>
-                      <span className="font-medium">{key}:</span> {value}
-                    </li>
-                  ))}
-                </ul>
               </div>
             )}
           </div>
@@ -291,8 +192,7 @@ export default function WalletDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
           >
             {toast}
           </motion.div>

@@ -1,4 +1,4 @@
-// src/ProductDetails/HaldiPlatterDetail.tsx
+// src/ProductDetails/HaldiPlatterDetailPage.tsx
 import { useParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { haldiPlatters, HaldiPlatter, Variant } from "../Data/HaldiPlatterData";
@@ -8,19 +8,35 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Params = { id: string };
 
-export default function HaldiPlatterDetail() {
+// Loader component
+function Loader() {
+  return (
+    <div className="flex items-center justify-center w-full h-64">
+      <div className="w-12 h-12 border-4 border-gray-200 border-t-[#C45A36] rounded-full animate-spin"></div>
+    </div>
+  );
+}
+
+export default function HaldiPlatterDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: HaldiPlatter | undefined = haldiPlatters.find(p => String(p.id) === id);
-  const [currentProduct] = useState<HaldiPlatter | null>(productFromParams ?? null);
+  const [currentProduct, setCurrentProduct] = useState<HaldiPlatter | null>(productFromParams ?? null);
 
-  const selectedVariant = useMemo(() => {
+  // Simulate loader
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Selected variant memo
+  const selectedVariant = useMemo<Variant | null>(() => {
     if (!currentProduct) return null;
     return {
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
@@ -31,12 +47,18 @@ export default function HaldiPlatterDetail() {
 
   const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
 
+  // Reset variant and quantity when product changes
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
     setImgLoaded(false);
-    setThumbsLoaded({});
   }, [selectedVariant]);
+
+  // Reset image fade-in on variant change
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
@@ -56,9 +78,8 @@ export default function HaldiPlatterDetail() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  if (!currentProduct) {
-    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
-  }
+  if (loading) return <Loader />;
+  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -74,11 +95,12 @@ export default function HaldiPlatterDetail() {
             <motion.img
               src={currentVariant.image}
               alt={currentProduct.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
-              loading="lazy"
             />
           )}
           {currentVariant?.discount && (
@@ -88,20 +110,23 @@ export default function HaldiPlatterDetail() {
           )}
 
           {/* Variant Thumbnails */}
-           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1">
+          {currentProduct.variants && currentProduct.variants.length > 1 && (
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
                   onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
-                    currentVariant?.image === v.image
-                      ? "border-[#b46029] ring-2 ring-[#b46029]"
-                      : "border-gray-300"
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                    currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" loading="lazy" />
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
+                  {v.discount && (
+                    <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                      {v.discount}% OFF
+                    </span>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -127,7 +152,6 @@ export default function HaldiPlatterDetail() {
             {currentVariant?.discount && (
               <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
             )}
-            {currentProduct.reviews && <span className="text-gray-500 text-sm ml-2">({currentProduct.reviews} reviews)</span>}
           </div>
 
           {/* Description */}

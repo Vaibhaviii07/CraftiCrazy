@@ -25,6 +25,7 @@ export default function KeyChainDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: KeyChain | undefined = keyChains.find((p) => p.id === id);
   const [currentProduct, setCurrentProduct] = useState<KeyChain | null>(productFromParams ?? null);
@@ -49,7 +50,13 @@ export default function KeyChainDetailPage() {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
     setImgLoaded(false);
+    setThumbsLoaded({});
   }, [selectedVariant]);
+
+  useEffect(() => {
+    setImgLoaded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
@@ -108,13 +115,19 @@ export default function KeyChainDetailPage() {
                   key={i}
                   onClick={() => setCurrentVariant(v)}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant?.image === v.image
-                      ? "border-[#C45A36] ring-2 ring-[#C45A36]"
-                      : "border-gray-300"
+                    currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
+                  {!thumbsLoaded[i] && <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>}
+                  <img
+                    src={v.image}
+                    alt={`thumb-${i}`}
+                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${
+                      thumbsLoaded[i] ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
+                  />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
