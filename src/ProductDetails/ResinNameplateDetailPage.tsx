@@ -8,15 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Params = { id: string };
 
-// Loader Component
-function Loader() {
-  return (
-    <div className="flex items-center justify-center w-full h-64">
-      <div className="w-12 h-12 border-4 border-gray-200 border-t-[#C45A36] rounded-full animate-spin"></div>
-    </div>
-  );
-}
-
 export default function ResinNameplateDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
@@ -24,7 +15,6 @@ export default function ResinNameplateDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: ResinNameplate | undefined = resinNameplates.find(p => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<ResinNameplate | null>(productFromParams ?? null);
@@ -44,7 +34,6 @@ export default function ResinNameplateDetailPage() {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
     setImgLoaded(false);
-    setThumbsLoaded({});
   }, [selectedVariant]);
 
   const handleAddToCart = () => {
@@ -72,7 +61,11 @@ export default function ResinNameplateDetailPage() {
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image */}
         <div className="flex-1 relative">
-          {!imgLoaded && <Loader />}
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
+            </div>
+          )}
           {currentVariant && (
             <motion.img
               src={currentVariant.image}
@@ -171,7 +164,7 @@ export default function ResinNameplateDetailPage() {
           {/* Contents / Customization */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
@@ -179,7 +172,7 @@ export default function ResinNameplateDetailPage() {
               </div>
             )}
             {currentProduct.customization?.available && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>

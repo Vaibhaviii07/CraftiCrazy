@@ -11,42 +11,32 @@ type Params = { id: string };
 export default function DiwaliHamperDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
-  const [quantity, setQuantity] = useState<number>(1);
+
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  const productFromParams: DiwaliHamper | undefined = diwaliHampers.find(
-    (p) => String(p.id) === id
-  );
+  const productFromParams: DiwaliHamper | undefined = diwaliHampers.find(p => String(p.id) === id);
+  const [currentProduct] = useState<DiwaliHamper | null>(productFromParams ?? null);
 
-  if (!productFromParams) {
-    return (
-      <p className="text-center mt-20 text-lg text-gray-400">Hamper not found</p>
-    );
-  }
+  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Hamper not found</p>;
 
-  const [currentProduct] = useState<DiwaliHamper>(productFromParams);
-
-  // Default variant
-  const currentVariant = useMemo<Variant>(() => ({
+  const selectedVariantDefault = useMemo(() => ({
     image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
     price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
     discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
   }), [currentProduct]);
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>(currentVariant);
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(selectedVariantDefault);
 
   useEffect(() => {
-    setSelectedVariant(currentVariant);
+    setSelectedVariant(selectedVariantDefault);
     setQuantity(1);
-    setImageLoaded(false);
-    setThumbsLoaded({});
-  }, [currentVariant]);
+    setImgLoaded(false);
+  }, [selectedVariantDefault]);
 
-  // Scroll to top on variant change
   useEffect(() => {
-    setImageLoaded(false);
+    setImgLoaded(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [selectedVariant]);
 
@@ -63,6 +53,7 @@ export default function DiwaliHamperDetailPage() {
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
+
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
@@ -72,19 +63,21 @@ export default function DiwaliHamperDetailPage() {
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image + Thumbnails */}
         <div className="flex-1 relative">
-          {!imageLoaded && (
-            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+            </div>
           )}
-          <motion.img
-            src={selectedVariant.image}
-            alt={currentProduct.name}
-            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-            onLoad={() => setImageLoaded(true)}
-          />
+          {selectedVariant && (
+            <motion.img
+              src={selectedVariant.image}
+              alt={currentProduct.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+              onLoad={() => setImgLoaded(true)}
+            />
+          )}
           {selectedVariant.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {selectedVariant.discount}% OFF
@@ -97,20 +90,12 @@ export default function DiwaliHamperDetailPage() {
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)} // <-- FIX: use selectedVariant
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    selectedVariant.image === v.image
-                      ? "border-[#b46029] ring-2 ring-[#b46029]"
-                      : "border-gray-300"
-                  }`}
+                  onClick={() => setSelectedVariant(v)}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${selectedVariant.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
                   whileHover={{ scale: 1.05 }}
                   aria-label={`Select variant ${i + 1}`}
                 >
-                  <img
-                    src={v.image}
-                    alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
-                  />
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
@@ -122,17 +107,12 @@ export default function DiwaliHamperDetailPage() {
           )}
         </div>
 
-
-
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Highlight */}
           {currentProduct.highlight && (
-            <span className="inline-block bg-[#b46029] text-white px-2 py-1 text-sm rounded-md">
-              {currentProduct.highlight}
-            </span>
+            <span className="inline-block bg-[#b46029] text-white px-2 py-1 text-sm rounded-md">{currentProduct.highlight}</span>
           )}
 
           {/* Rating + Price */}
@@ -142,64 +122,40 @@ export default function DiwaliHamperDetailPage() {
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
-              ₹{selectedVariant.price}
-            </span>
-            {selectedVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">
-                ₹{currentProduct.price}
-              </span>
-            )}
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{selectedVariant.price}</span>
+            {selectedVariant.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
-          {/* Description & Structured Info */}
+          {/* Description & Details */}
           <div className="space-y-3 text-gray-700">
             {currentProduct.description && <p>{currentProduct.description}</p>}
-            {currentProduct.material && (
-              <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>
-            )}
-            {currentProduct.dimensions && (
-              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>
-            )}
-            {currentProduct.weight && (
-              <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>
-            )}
-            {currentProduct.careInstructions && (
-              <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>
-            )}
-            {currentProduct.delivery && (
-              <p>
-                <span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
-              </p>
-            )}
+            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
           {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>
-            ))}
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
             <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
-            )}
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* Quantity & Add to Cart */}
           <div className="flex flex-wrap gap-3 mt-4 items-center">
             <div className="flex items-center border rounded-full overflow-hidden">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
+              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
               <span className="px-6 py-2">{quantity}</span>
-              <button onClick={() => setQuantity((q) => q + 1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
+              <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
             </div>
             <button
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
