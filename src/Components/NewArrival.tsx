@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../AuthContext/CartContext";
 import { newArrivalsData } from "../Data/NewArrivalsData";
+import { Link } from "react-router-dom";
 
 const NewArrivals = () => {
   const [loaded, setLoaded] = useState(false);
@@ -148,34 +149,25 @@ const NewArrivals = () => {
 
       {/* Best Sellers Grid */}
       <section className="py-12 px-6 sm:px-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
-          {[{ id: 1, type: "image", image: "/Diya3.jpg" },
-            { id: 2, type: "text", title: "Elegant Table Essentials", heading: "HANDCRAFTED COASTER", button: "Shop Now", price: 299, link: "/resincoasters" },
-            { id: 3, type: "image", image: "/ResinPoojaThali.jpeg" },
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {[{ id: 2, type: "text", title: "Elegant Table Essentials", heading: "HANDCRAFTED COASTER", button: "Shop Now", price: 299, link: "/resincoasters" },
             { id: 4, type: "text", title: "Beautiful & Elegant", heading: "Candles", button: "Shop Now", price: 399, link: "/diwali" },
-            { id: 5, type: "image", image: "/Coaster.jpeg" },
-            { id: 6, type: "text", title: "Traditional Craft for Your Rituals", heading: "POOJA THALE", button: "Shop Now", price: 599, link: "/resinthale" }].map((item) =>
-            item.type === "image" ? (
-              <div key={item.id} className="overflow-hidden shadow-md w-full aspect-[1/1.1]">
-                <img src={item.image} alt="product" className="w-full h-full object-cover" />
-              </div>
-            ) : (
-              <div
-                key={item.id}
-                className="flex flex-col justify-center items-center bg-white text-center p-6 shadow-md w-full aspect-[1/1.1]"
+            { id: 6, type: "text", title: "Traditional Craft for Your Rituals", heading: "POOJA THALE", button: "Shop Now", price: 599, link: "/resinthale" }].map((item) => (
+            <div
+              key={item.id}
+              className="flex flex-col justify-center items-center bg-white text-center p-6 shadow-md w-full aspect-[1/1.1]"
+            >
+              <p className="text-gray-600 text-base italic">{item.title}</p>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mt-2">{item.heading}</h3>
+              <p className="mt-1 text-gray-700 text-sm">₹{item.price}</p>
+              <Link
+                to={item.link}
+                className="mt-4 px-5 py-2 bg-[#C45A36] hover:bg-[#8c341f] text-white text-sm font-medium rounded-md transition-all duration-300"
               >
-                <p className="text-gray-600 text-base italic">{item.title}</p>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mt-2">{item.heading}</h3>
-                <p className="mt-1 text-gray-700 text-sm">₹{item.price}</p>
-                <a
-                  href={item.link}
-                  className="mt-4 px-5 py-2 bg-[#C45A36] hover:bg-[#8c341f] text-white text-sm font-medium rounded-md transition-all duration-300"
-                >
-                  {item.button}
-                </a>
-              </div>
-            )
-          )}
+                {item.button}
+              </Link>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -223,7 +215,7 @@ const NewArrivals = () => {
         </aside>
 
         {/* Product Grid */}
-        <div className="md:col-span-3 ">
+        <div className="md:col-span-3">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2 ml-4">
             <p className="text-sm text-gray-600">Showing {sortedProducts.length} results</p>
             <div className="flex items-center gap-2">

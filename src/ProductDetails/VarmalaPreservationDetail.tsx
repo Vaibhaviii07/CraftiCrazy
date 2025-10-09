@@ -8,24 +8,17 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Params = { id: string };
 
-function Loader() {
-  return (
-    <div className="flex items-center justify-center w-full h-64">
-      <div className="w-12 h-12 border-4 border-gray-200 border-t-[#C45A36] rounded-full animate-spin"></div>
-    </div>
-  );
-}
-
-export default function VarmalaPreservationDetail() {
+export default function VarmalaDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: VarmalaPreservation | undefined = varmalaPreservations.find(p => String(p.id) === id);
-  const [currentProduct, setCurrentProduct] = useState<VarmalaPreservation | null>(productFromParams ?? null);
+  const [currentProduct] = useState<VarmalaPreservation | null>(productFromParams ?? null);
 
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
@@ -70,7 +63,11 @@ export default function VarmalaPreservationDetail() {
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Image */}
         <div className="flex-1 relative">
-          {!imgLoaded && <Loader />}
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
+            </div>
+          )}
           {currentVariant && (
             <motion.img
               src={currentVariant.image}
@@ -79,6 +76,7 @@ export default function VarmalaPreservationDetail() {
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
+              loading="lazy"
             />
           )}
           {currentVariant?.discount && (
@@ -94,10 +92,8 @@ export default function VarmalaPreservationDetail() {
                 <motion.div
                   key={i}
                   onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant?.image === v.image
-                      ? "border-[#C45A36] ring-2 ring-[#C45A36]"
-                      : "border-gray-300"
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start transition-all ${
+                    currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
@@ -107,6 +103,7 @@ export default function VarmalaPreservationDetail() {
                     alt={`thumb-${i}`}
                     className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
                     onLoad={() => setThumbsLoaded(prev => ({ ...prev, [i]: true }))}
+                    loading="lazy"
                   />
                 </motion.div>
               ))}
@@ -121,14 +118,18 @@ export default function VarmalaPreservationDetail() {
           {/* Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{currentVariant?.price}</span>
-            {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">
+                ₹{Math.round(currentVariant.price / (1 - currentVariant.discount / 100))}
+              </span>
+            )}
           </div>
 
           {/* Description */}
           <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
 
           {/* Structured Info */}
-          <div className="mt-2 space-y-2 text-gray-700">
+          <div className="space-y-2 text-gray-700">
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
@@ -136,7 +137,7 @@ export default function VarmalaPreservationDetail() {
             {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* Tags / Stock / Warranty / Return */}
+          {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
             {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}

@@ -103,12 +103,12 @@ export default function GiftCollections() {
               <h3 className="text-lg sm:text-2xl font-semibold mb-2">
                 {offers[0].subtitle}
               </h3>
-              <a
-                href={offers[0].link}
+              <Link
+                to={offers[0].link}
                 className="bg-white text-gray-900 px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-200 transition"
               >
                 Shop Now
-              </a>
+              </Link>
             </div>
           </motion.div>
 
@@ -136,12 +136,12 @@ export default function GiftCollections() {
                   <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2">
                     {offer.subtitle}
                   </h3>
-                  <a
-                    href={offer.link}
+                  <Link
+                    to={offer.link}
                     className="bg-white text-gray-900 px-2 py-1 sm:px-3 sm:py-1 rounded-lg text-[10px] sm:text-xs font-medium hover:bg-gray-200 transition"
                   >
                     Shop Now
-                  </a>
+                  </Link>
                 </div>
               </motion.div>
             ))}
