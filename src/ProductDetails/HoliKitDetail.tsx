@@ -89,29 +89,28 @@ export default function HoliKitDetail() {
             </span>
           )}
 
-          {/* Variant Thumbnails */}
+           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory scrollbar-hide">
-              {currentProduct.variants.map((v: Variant, i: number) => (
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
+              {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
+                  onClick={() => setSelectedVariant(v)} // <-- update main image correctly
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    selectedVariant.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
+                    selectedVariant.image === v.image
+                      ? "border-[#b46029] ring-2 ring-[#b46029]"
+                      : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
-                  {!thumbsLoaded[i] && (
-                    <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg" />
-                  )}
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
-                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
-                    onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
+                    className="h-20 w-20 object-cover rounded-lg"
                   />
                   {v.discount && (
-                    <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
                     </span>
                   )}
@@ -120,6 +119,8 @@ export default function HoliKitDetail() {
             </div>
           )}
         </div>
+
+
 
         {/* ---------- Right: Product Info ---------- */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">

@@ -88,18 +88,19 @@ export default function RakhiDetailPage() {
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setCurrentVariant(v)}
+                  onClick={() => setCurrentVariant(v)} // <-- update main image
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"
+                    currentVariant.image === v.image
+                      ? "border-[#b46029] ring-2 ring-[#b46029]"
+                      : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
-                  {!thumbsLoaded[i] && <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>}
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
-                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
-                    onLoad={() => setThumbsLoaded(prev => ({ ...prev, [i]: true }))}
+                    className="h-20 w-20 object-cover rounded-lg"
                   />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
@@ -111,6 +112,7 @@ export default function RakhiDetailPage() {
             </div>
           )}
         </div>
+
 
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">

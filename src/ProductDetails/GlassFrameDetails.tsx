@@ -121,6 +121,7 @@ export default function GlassFrameDetailPage() {
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (

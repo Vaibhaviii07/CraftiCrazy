@@ -76,7 +76,9 @@ export default function ResinJewelryDetailPage() {
           <motion.img
             src={selectedVariant.image}
             alt={currentProduct.name}
-            className={`w-full rounded-3xl shadow-xl object-cover ${imageLoading ? "hidden" : "block"}`}
+            className={`w-full rounded-3xl shadow-xl object-cover ${
+              imageLoading ? "hidden" : "block"
+            }`}
             onLoad={() => setImageLoading(false)}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5 }}
@@ -89,26 +91,32 @@ export default function ResinJewelryDetailPage() {
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1">
-              {currentProduct.variants.map((v: Variant, i: number) => (
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
+              {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
                   onClick={() => {
                     setSelectedVariant(v);
-                    setImageLoading(true);
+                    setImageLoading(true); // show loader until image loads
                   }}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
                     selectedVariant.image === v.image
                       ? "border-[#b46029] ring-2 ring-[#b46029]"
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
                     className="h-20 w-20 object-cover rounded-lg"
                   />
+                  {v.discount && (
+                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                      {v.discount}% OFF
+                    </span>
+                  )}
                 </motion.div>
               ))}
             </div>

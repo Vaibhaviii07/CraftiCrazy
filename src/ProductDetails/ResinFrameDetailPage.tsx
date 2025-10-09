@@ -100,7 +100,7 @@ export default function ResinFrameDetailPage() {
             </span>
           )}
 
-          {/* Variant thumbnails */}
+          {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
@@ -113,6 +113,7 @@ export default function ResinFrameDetailPage() {
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
@@ -125,7 +126,6 @@ export default function ResinFrameDetailPage() {
             </div>
           )}
         </div>
-
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>

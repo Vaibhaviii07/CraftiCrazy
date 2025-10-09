@@ -108,7 +108,7 @@ export default function WoodenFrameDetailPage() {
             </span>
           )}
 
-          {/* Variant thumbnails */}
+          {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
@@ -121,6 +121,7 @@ export default function WoodenFrameDetailPage() {
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
