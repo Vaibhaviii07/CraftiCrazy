@@ -11,10 +11,10 @@ const reels = [
 
 const ReelsRow = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rafRef = useRef<number | null>(null);
   const [visibleVideos, setVisibleVideos] = useState<number[]>([]);
 
-  // Lazy load with Intersection Observer
+  // Lazy load videos with Intersection Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -34,37 +34,37 @@ const ReelsRow = () => {
     return () => observer.disconnect();
   }, [visibleVideos]);
 
+  // Smooth infinite auto-scroll using requestAnimationFrame
   const startScrolling = () => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
-    let scrollAmount = scrollContainer.scrollLeft;
 
-    intervalRef.current = setInterval(() => {
+    let scrollAmount = scrollContainer.scrollLeft;
+    const speed = window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 1.5 : 2;
+
+    const scroll = () => {
       if (!scrollContainer) return;
-      scrollAmount += 3;
+      scrollAmount += speed;
       if (scrollAmount >= scrollContainer.scrollWidth / 2) {
         scrollAmount = 0;
-        scrollContainer.scrollTo({ left: 0, behavior: "auto" });
+        scrollContainer.scrollLeft = 0;
       } else {
-        scrollContainer.scrollTo({ left: scrollAmount, behavior: "smooth" });
+        scrollContainer.scrollLeft = scrollAmount;
       }
-    }, 30);
+      rafRef.current = requestAnimationFrame(scroll);
+    };
+
+    rafRef.current = requestAnimationFrame(scroll);
+  };
+
+  const stopScrolling = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
   };
 
   useEffect(() => {
     startScrolling();
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return () => stopScrolling();
   }, []);
-
-  const handleMouseEnter = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-  };
-
-  const handleMouseLeave = () => {
-    startScrolling();
-  };
 
   return (
     <div className="w-full bg-[#FBFAF7] py-10">
@@ -74,9 +74,11 @@ const ReelsRow = () => {
 
       <div
         ref={scrollRef}
-        className="flex gap-6 overflow-x-hidden no-scrollbar px-6 scroll-smooth"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        className="flex gap-6 overflow-x-hidden no-scrollbar px-6"
+        onMouseEnter={stopScrolling}
+        onMouseLeave={startScrolling}
+        onTouchStart={stopScrolling}
+        onTouchEnd={startScrolling}
       >
         {[...reels, ...reels].map((reel, index) => (
           <video

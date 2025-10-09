@@ -99,8 +99,8 @@ const CustomerDemandPremium = () => {
     <section className="min-h-screen bg-[#FFFDF9] overflow-hidden">
       {/* HERO SECTION */}
       <div className="relative w-full h-[260px] sm:h-[380px] md:h-[500px] flex items-center justify-center text-center">
-        <img src="banner.jpg" alt="Crafting" className="w-full h-full object-cover brightness-90" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+        <img src="banner.jpg" alt="Crafting" className="w-full h-full object-cover" />
+        {/* Removed fade overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center px-3">
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-serif text-white drop-shadow-xl font-bold">
             Customize Your Demand
@@ -131,24 +131,21 @@ const CustomerDemandPremium = () => {
               whileHover={{ scale: 1.05 }}
               className="min-w-[180px] sm:min-w-[220px] md:min-w-[280px] rounded-2xl shadow-lg overflow-hidden bg-white border border-gray-100 transition-all duration-300"
             >
-              <div className="relative w-full h-60 sm:h-62 md:h-74 bg-gray-200 animate-pulse rounded-2xl overflow-hidden">
-                <video
-                  src={reel.video}
-                  className="absolute top-0 left-0 w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  aria-label={`Reel ${index + 1}`}
-                />
-              </div>
+             <div className="relative w-full h-60 sm:h-62 md:h-74 rounded-2xl overflow-hidden">
+              <video
+                src={reel.video}
+                className="absolute top-0 left-0 w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                aria-label={`Reel ${index + 1}`}
+              />
+            </div>
+
             </motion.div>
           ))}
         </div>
-
-        {/* edge fade effects */}
-        <div className="absolute top-0 left-0 h-full w-10 bg-gradient-to-r from-[#FFF8F1] via-[#FFF8F1]/70 to-transparent pointer-events-none rounded-l-3xl"></div>
-        <div className="absolute top-0 right-0 h-full w-10 bg-gradient-to-l from-[#FFF8F1] via-[#FFF8F1]/70 to-transparent pointer-events-none rounded-r-3xl"></div>
       </motion.div>
 
       {/* FORM + WHY WE CREATE SECTION */}
