@@ -32,7 +32,7 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/40 z-50 flex justify-end"
+          className="fixed inset-0 bg-black/40 z-50 flex justify-end sm:justify-end"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -45,12 +45,10 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 120 }}
-            className={`${
-              isExpanded ? "w-full sm:w-[150vw]" : "w-[90vw] sm:w-[400px]"
-            } bg-white h-screen shadow-2xl flex flex-col relative`}
+            className={`w-full sm:w-[400px] bg-white h-full shadow-2xl flex flex-col relative`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
               <h2 className="text-xl font-bold text-gray-800">Cart</h2>
               <X
                 onClick={() => setIsOpen(false)}
@@ -79,8 +77,8 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
                 </Link>
               </div>
             ) : (
-              <>
-                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 mb-40">
+              <div className="flex-1 flex flex-col justify-between overflow-y-auto">
+                <div className="p-4 space-y-4">
                   {cart.map((item) => (
                     <div key={item.id} className="flex items-start justify-between border-b pb-3">
                       <div className="flex items-start gap-3 w-full">
@@ -144,7 +142,7 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
                 </div>
 
                 {/* Sticky Summary */}
-                <div className="absolute bottom-0 left-0 w-full bg-white p-4 sm:p-5 border-t border-gray-200 z-20">
+                <div className="w-full bg-white p-4 border-t border-gray-200">
                   <div className="flex justify-between mb-1 text-gray-700 text-sm">
                     <span>Subtotal</span>
                     <span>₹{subtotal.toFixed(2)}</span>
@@ -159,38 +157,27 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
                   </div>
 
                   <div className="mt-3 flex flex-col gap-2">
-                    {!isExpanded ? (
-                      <button
-                        onClick={() => setIsExpanded(true)}
-                        className="w-full py-2 bg-[#4B0E23] text-white font-semibold rounded-full text-sm"
-                      >
-                        View Cart
-                      </button>
-                    ) : (
-                      <>
-                        <Link
-                          to="/checkout"
-                          className="w-full py-2 text-center bg-[#4B0E23] text-white font-semibold rounded-full text-sm hover:bg-[#65102E] transition"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          Checkout
-                        </Link>
-                        <Link
-                          to="/newarrivals"
-                          className="w-full py-2 text-center border border-[#4B0E23] text-[#4B0E23] font-semibold rounded-full text-sm hover:bg-[#4B0E23]/10 transition"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          Continue Shopping
-                        </Link>
-                      </>
-                    )}
+                    <Link
+                      to="/checkout"
+                      className="w-full py-2 text-center bg-[#4B0E23] text-white font-semibold rounded-full text-sm hover:bg-[#65102E] transition"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Checkout
+                    </Link>
+                    <Link
+                      to="/newarrivals"
+                      className="w-full py-2 text-center border border-[#4B0E23] text-[#4B0E23] font-semibold rounded-full text-sm hover:bg-[#4B0E23]/10 transition"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Continue Shopping
+                    </Link>
                   </div>
 
                   <p className="text-xs text-gray-500 text-center mt-2">
                     🔒 Guaranteed secure & safe checkout.
                   </p>
                 </div>
-              </>
+              </div>
             )}
           </motion.div>
         </motion.div>

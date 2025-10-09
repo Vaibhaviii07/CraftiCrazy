@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const reels = [
   { id: 1, src: "/frame.mp4" },
@@ -12,7 +12,27 @@ const reels = [
 const ReelsRow = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [visibleVideos, setVisibleVideos] = useState<number[]>([]);
 
+  // Lazy load with Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = Number(entry.target.getAttribute("data-index"));
+          if (entry.isIntersecting && !visibleVideos.includes(index)) {
+            setVisibleVideos((prev) => [...prev, index]);
+          }
+        });
+      },
+      { root: scrollRef.current, threshold: 0.25 }
+    );
+
+    const videos = scrollRef.current?.querySelectorAll("video");
+    videos?.forEach((v) => observer.observe(v));
+
+    return () => observer.disconnect();
+  }, [visibleVideos]);
 
   const startScrolling = () => {
     const scrollContainer = scrollRef.current;
@@ -21,14 +41,14 @@ const ReelsRow = () => {
 
     intervalRef.current = setInterval(() => {
       if (!scrollContainer) return;
-      scrollAmount += 3; // slightly faster
+      scrollAmount += 3;
       if (scrollAmount >= scrollContainer.scrollWidth / 2) {
         scrollAmount = 0;
         scrollContainer.scrollTo({ left: 0, behavior: "auto" });
       } else {
         scrollContainer.scrollTo({ left: scrollAmount, behavior: "smooth" });
       }
-    }, 30); // smaller interval for smoothness
+    }, 30);
   };
 
   useEffect(() => {
@@ -61,8 +81,9 @@ const ReelsRow = () => {
         {[...reels, ...reels].map((reel, index) => (
           <video
             key={index}
-            src={reel.src}
-            autoPlay
+            data-index={index}
+            src={visibleVideos.includes(index) ? reel.src : ""}
+            autoPlay={visibleVideos.includes(index)}
             muted
             loop
             playsInline

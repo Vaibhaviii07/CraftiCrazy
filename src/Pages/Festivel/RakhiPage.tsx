@@ -18,7 +18,6 @@ export default function RakhiPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted", "Luxury Edition"];
   const categories = [...new Set(rakhiKits.map((i: RakhiKit) => i.category))];
 
-  // Filtering
   const filteredItems = rakhiKits.filter((item: RakhiKit) => {
     const categoryMatch =
       selectedCategories.length === 0 || selectedCategories.includes(item.category);
@@ -40,7 +39,6 @@ export default function RakhiPage() {
     return categoryMatch && highlightMatch;
   });
 
-  // Sorting
   const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
@@ -58,12 +56,12 @@ export default function RakhiPage() {
     <section className="min-h-screen bg-[#fffdfc]">
       {/* Hero Section */}
       <div className="text-center mt-10 mb-8 px-4">
-        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+        <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 relative inline-block">
           Rakhi Collection
-          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#b46029] via-[#F7B77A] to-[#b46029] rounded-full animate-pulse"></span>
         </h2>
         <p className="mt-3 text-gray-600 text-sm sm:text-base italic max-w-sm mx-auto">
-          Handcrafted rakhi for every sibling, made with love and care.
+          Handcrafted rakhis for every sibling, made with love and care.
         </p>
       </div>
 
@@ -84,7 +82,7 @@ export default function RakhiPage() {
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
+                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
                   <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
                     {cat}
@@ -105,7 +103,7 @@ export default function RakhiPage() {
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
+                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -119,13 +117,11 @@ export default function RakhiPage() {
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results
-            </p>
+            <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
             <select
               value={sortOption}
               onChange={e => setSortOption(e.target.value)}
-              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36] focus:border-[#C45A36]"
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
             >
               <option>Default sorting</option>
               <option>Price: Low to High</option>
@@ -150,18 +146,19 @@ export default function RakhiPage() {
                     to={`/RakhiDetail/${item.id}`}
                     className="w-full max-w-[320px] flex flex-col"
                   >
-                    <div className="relative w-full h-[280px] sm:h-[320px] md:h-[350px] lg:h-[380px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
-                      <img
+                    <div className="relative w-full h-[350px] rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
+                      <motion.img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        loading="lazy"
                       />
                       {item.discount && (
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {item.discount}% OFF
                         </motion.span>
@@ -169,7 +166,7 @@ export default function RakhiPage() {
                     </div>
 
                     <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                      <p className="text-sm sm:text-lg text-gray-900 font-serif leading-snug">
                         {item.name}
                       </p>
                       {item.description && (
@@ -178,7 +175,7 @@ export default function RakhiPage() {
                         </p>
                       )}
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
+                        <span className="text-lg sm:text-2xl text-[#b46029] font-semibold">
                           ₹{item.price}
                         </span>
                         {item.discount && (

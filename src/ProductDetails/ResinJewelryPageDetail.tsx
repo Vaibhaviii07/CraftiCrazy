@@ -6,6 +6,15 @@ import { resinJewelry, ResinJewelry, Variant } from "../Data/ResinJewelryData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 
+// Loader Component
+function Loader() {
+  return (
+    <div className="flex items-center justify-center w-full h-64">
+      <div className="w-12 h-12 border-4 border-gray-300 border-t-[#b46029] rounded-full animate-spin"></div>
+    </div>
+  );
+}
+
 type Params = { id: string };
 
 export default function ResinJewelryDetailPage() {
@@ -13,6 +22,7 @@ export default function ResinJewelryDetailPage() {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState<boolean>(true);
 
   const productFromParams: ResinJewelry | undefined = resinJewelry.find(
     (p) => p.id === id
@@ -20,9 +30,7 @@ export default function ResinJewelryDetailPage() {
 
   if (!productFromParams) {
     return (
-      <p className="text-center mt-20 text-lg text-gray-400">
-        Product not found
-      </p>
+      <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>
     );
   }
 
@@ -41,6 +49,7 @@ export default function ResinJewelryDetailPage() {
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     });
     setQuantity(1);
+    setImageLoading(true);
   }, [currentProduct]);
 
   const handleAddToCart = () => {
@@ -63,14 +72,16 @@ export default function ResinJewelryDetailPage() {
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image */}
         <div className="flex-1 relative">
+          {imageLoading && <Loader />}
           <motion.img
             src={selectedVariant.image}
             alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
+            className={`w-full rounded-3xl shadow-xl object-cover ${imageLoading ? "hidden" : "block"}`}
+            onLoad={() => setImageLoading(false)}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5 }}
           />
-          {selectedVariant.discount && (
+          {selectedVariant.discount && !imageLoading && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {selectedVariant.discount}% OFF
             </span>
@@ -82,7 +93,10 @@ export default function ResinJewelryDetailPage() {
               {currentProduct.variants.map((v: Variant, i: number) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
+                  onClick={() => {
+                    setSelectedVariant(v);
+                    setImageLoading(true);
+                  }}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
                     selectedVariant.image === v.image
                       ? "border-[#b46029] ring-2 ring-[#b46029]"
@@ -127,9 +141,11 @@ export default function ResinJewelryDetailPage() {
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
+          {currentProduct.description && (
+            <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
+          )}
 
-          {/* Structured Product Info */}
+          {/* Structured Info */}
           <div className="space-y-3 text-gray-700">
             {currentProduct.material && (
               <p>
@@ -215,7 +231,7 @@ export default function ResinJewelryDetailPage() {
             </button>
           </div>
 
-          {/* Structured Sections */}
+          {/* Additional Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.tags && (
               <div>

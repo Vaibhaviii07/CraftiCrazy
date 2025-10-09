@@ -149,40 +149,14 @@ const NewArrivals = () => {
       {/* Best Sellers Grid */}
       <section className="py-12 px-6 sm:px-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
-          {[
-            { id: 1, type: "image", image: "/Diya3.jpg " },
-            {
-              id: 2,
-              type: "text",
-              title: "Elegant Table Essentials",
-              heading: "HANDCRAFTED COASTER",
-              button: "Shop Now",
-              price: 299,
-              link: "/resincoasters",
-            },
+          {[{ id: 1, type: "image", image: "/Diya3.jpg" },
+            { id: 2, type: "text", title: "Elegant Table Essentials", heading: "HANDCRAFTED COASTER", button: "Shop Now", price: 299, link: "/resincoasters" },
             { id: 3, type: "image", image: "/ResinPoojaThali.jpeg" },
-            {
-              id: 4,
-              type: "text",
-              title: "Beautiful & Elegant",
-              heading: "Candles",
-              button: "Shop Now",
-              price: 399,
-              link: "/candles",
-            },
+            { id: 4, type: "text", title: "Beautiful & Elegant", heading: "Candles", button: "Shop Now", price: 399, link: "/diwali" },
             { id: 5, type: "image", image: "/Coaster.jpeg" },
-            {
-              id: 6,
-              type: "text",
-              title: "Traditional Craft for Your Rituals",
-              heading: "POOJA THALE",
-              button: "Shop Now",
-              price: 599,
-              link: "/resinthale",
-            },
-          ].map((item) =>
+            { id: 6, type: "text", title: "Traditional Craft for Your Rituals", heading: "POOJA THALE", button: "Shop Now", price: 599, link: "/resinthale" }].map((item) =>
             item.type === "image" ? (
-              <div key={item.id} className="overflow-hidden  shadow-md w-full aspect-[1/1.1]">
+              <div key={item.id} className="overflow-hidden shadow-md w-full aspect-[1/1.1]">
                 <img src={item.image} alt="product" className="w-full h-full object-cover" />
               </div>
             ) : (
@@ -321,13 +295,24 @@ const NewArrivals = () => {
                       </div>
                     </motion.div>
                   ))
-                : Array(6)
+                : // Shimmer Loader
+                  Array(6)
                     .fill(0)
                     .map((_, i) => (
                       <div
                         key={i}
-                        className="animate-pulse bg-gray-200 rounded-2xl aspect-[1/1.1] w-full"
-                      ></div>
+                        className="w-full bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col"
+                      >
+                        <div className="relative w-full aspect-[1.3/1] bg-gray-200 overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer"></div>
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col justify-between">
+                          <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                          <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse w-5/6"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                          <div className="h-8 mt-3 bg-gray-200 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
                     ))}
             </AnimatePresence>
           </div>

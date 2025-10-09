@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { corporateHampers, CorporateHamper, Variant } from "../Data/CorporateData"; 
+import { corporateHampers, CorporateHamper, Variant } from "../Data/CorporateData";
 import { useCart } from "../AuthContext/CartContext";
 import { Star, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,10 +10,16 @@ type Params = { id: string };
 export default function CorporateHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
-  const productFromParams: CorporateHamper | undefined = corporateHampers.find((p: CorporateHamper) => p.id === id);
+  const productFromParams: CorporateHamper | undefined = corporateHampers.find(
+    (p: CorporateHamper) => p.id === id
+  );
+
   if (!productFromParams)
     return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
@@ -31,6 +37,8 @@ export default function CorporateHamperDetails() {
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     });
     setQuantity(1);
+    setImageLoaded(false);
+    setThumbsLoaded({});
   }, [currentProduct]);
 
   const handleAddToCart = () => {
@@ -51,14 +59,20 @@ export default function CorporateHamperDetails() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Hero Image */}
+        {/* ===== Left Side: Main Image + Thumbnails ===== */}
         <div className="flex-1 relative">
+          {!imageLoaded && (
+            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
+          )}
           <motion.img
             src={selectedVariant.image}
             alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
+            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5 }}
+            onLoad={() => setImageLoaded(true)}
           />
           {selectedVariant.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
@@ -80,10 +94,16 @@ export default function CorporateHamperDetails() {
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
+                  {!thumbsLoaded[i] && (
+                    <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>
+                  )}
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
+                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${
+                      thumbsLoaded[i] ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
                   />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
@@ -96,18 +116,20 @@ export default function CorporateHamperDetails() {
           )}
         </div>
 
-        {/* Right: Product Info */}
+        {/* ===== Right Side: Product Info ===== */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Rating & Price */}
+          {/* Rating and Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i: number) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{selectedVariant.price}</span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
+              ₹{selectedVariant.price}
+            </span>
             {selectedVariant.discount && (
               <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
             )}
@@ -119,20 +141,30 @@ export default function CorporateHamperDetails() {
           {/* Quantity & Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <div className="flex items-center border rounded-full overflow-hidden">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                -
+              </button>
               <span className="px-6 py-2">{quantity}</span>
-              <button onClick={() => setQuantity((q) => q + 1)}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                +
+              </button>
             </div>
 
-            <button onClick={handleAddToCart}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
+            <button
+              onClick={handleAddToCart}
+              className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg"
+            >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
 
-          {/* Detailed Sections */}
+          {/* Additional Product Info Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.tags && (
               <div className="bg-gray-50 p-3 rounded-md">
@@ -160,7 +192,8 @@ export default function CorporateHamperDetails() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Delivery</h3>
                 <p className="text-gray-600">
-                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
+                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated{" "}
+                  {currentProduct.delivery.estimated}
                 </p>
               </div>
             )}
@@ -168,7 +201,7 @@ export default function CorporateHamperDetails() {
         </div>
       </div>
 
-      {/* Toast */}
+      {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
           <motion.div

@@ -1,4 +1,3 @@
-// src/Pages/CustomizedHamper/WeddingHamper.tsx
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { weddingHampers, WeddingHamper, Variant } from "../../Data/WeddingData";
@@ -16,7 +15,6 @@ export default function WeddingHamperPage() {
 
   const categories = [...new Set(weddingHampers.map((i) => i.category))];
 
-  // Filtered Hampers
   const filteredHampers = useMemo(() => {
     return weddingHampers.filter((item) => {
       return (
@@ -26,7 +24,6 @@ export default function WeddingHamperPage() {
     });
   }, [selectedCategories]);
 
-  // Sorted Hampers
   const sortedHampers = useMemo(() => {
     const sorted = [...filteredHampers];
     switch (sortOption) {
@@ -48,15 +45,16 @@ export default function WeddingHamperPage() {
   return (
     <section className="min-h-screen">
       {/* Hero Section */}
-    <div className="text-center mt-10 mb-3">
-      <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
-        Wedding Hamper
-        <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
-      </h2>
-      <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
-        Exquisite hampers designed to celebrate love and togetherness.  
-      </p>
-    </div>
+      <div className="text-center mt-10 mb-3">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          Wedding Hamper
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+          Exquisite hampers designed to celebrate love and togetherness.  
+        </p>
+      </div>
+
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
@@ -111,6 +109,9 @@ export default function WeddingHamperPage() {
                   price: item.price,
                   discount: item.discount,
                 };
+
+                const [loaded, setLoaded] = useState(false);
+
                 return (
                   <motion.div
                     key={item.id}
@@ -125,9 +126,14 @@ export default function WeddingHamperPage() {
                       className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                     >
                       <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                        <img
+                        <motion.img
                           src={variant.image}
                           alt={item.name}
+                          loading="lazy"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: loaded ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          onLoad={() => setLoaded(true)}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         {variant.discount && (

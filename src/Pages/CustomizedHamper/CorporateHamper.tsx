@@ -1,33 +1,61 @@
-// src/Pages/Hampers/CorporateHamperPage.tsx
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { corporateHampers, Variant, CorporateHamper } from "../../Data/CorporateData";
+import { corporateHampers, Variant } from "../../Data/CorporateData";
 import { Link } from "react-router-dom";
+
+// ✅ LazyImage Component
+const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+  const imgRef = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (imgRef.current) observer.observe(imgRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={imgRef} className={`w-full h-full ${!isVisible ? "bg-gray-200 animate-pulse" : ""}`}>
+      {isVisible && <img src={src} alt={alt} className={className} loading="lazy" />}
+    </div>
+  );
+};
 
 export default function CorporateHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [highlight, setHighlight] = useState("All");
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
 
+  const categories = [...new Set(corporateHampers.map((i) => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(corporateHampers.map(item => item.category))];
 
-  // Filtered Hampers
+  // Filtered & Highlighted Hampers
   const filteredHampers = useMemo(() => {
-    return corporateHampers.filter((item: CorporateHamper) => {
+    return corporateHampers.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
       let highlightMatch = true;
       switch (highlight) {
         case "Best Seller":
-          highlightMatch = item.highlight === "Best Seller";
+          highlightMatch = (item.rating ?? 0) >= 4.5;
           break;
         case "Discounted":
           highlightMatch = (item.discount ?? 0) > 0;
@@ -35,6 +63,7 @@ export default function CorporateHamperPage() {
         default:
           highlightMatch = true;
       }
+
       return categoryMatch && highlightMatch;
     });
   }, [selectedCategories, highlight]);
@@ -67,7 +96,7 @@ export default function CorporateHamperPage() {
           <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
         </h2>
         <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
-          Luxurious corporate hampers designed to impress and express appreciation with elegance.
+          Thoughtful hampers to impress your corporate clients or colleagues.
         </p>
       </div>
 
@@ -79,7 +108,7 @@ export default function CorporateHamperPage() {
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -88,7 +117,9 @@ export default function CorporateHamperPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                    {cat}
+                  </label>
                 </li>
               ))}
             </ul>
@@ -98,11 +129,15 @@ export default function CorporateHamperPage() {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
-              {highlightOptions.map(opt => (
+              {highlightOptions.map((opt) => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"}`}
+                  className={`text-sm cursor-pointer transition-colors duration-300 ${
+                    highlight === opt
+                      ? "text-[#C45A36] font-semibold"
+                      : "text-gray-700 hover:text-[#C45A36]"
+                  }`}
                 >
                   {opt}
                 </li>
@@ -128,10 +163,9 @@ export default function CorporateHamperPage() {
             </select>
           </div>
 
-          {/* Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedHampers.map((item: CorporateHamper) => {
+              {sortedHampers.map((item) => {
                 const variant: Variant = item.variants?.[0] ?? {
                   image: item.image,
                   price: item.price,
@@ -151,7 +185,7 @@ export default function CorporateHamperPage() {
                       className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                     >
                       <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                        <img
+                        <LazyImage
                           src={variant.image}
                           alt={item.name}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

@@ -1,4 +1,3 @@
-// src/Pages/Accessories/WalletPage.tsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { wallets, Wallet } from "../../Data/WalletData";
@@ -18,7 +17,7 @@ export default function WalletPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(wallets.map((item) => item.category))];
 
-  // Filtering
+  // Filtering logic
   const filteredWallets = wallets.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 || selectedCategories.includes(item.category);
@@ -26,7 +25,7 @@ export default function WalletPage() {
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = (item.rating ?? 0) >= 4.5; // change threshold as needed
+        highlightMatch = (item.rating ?? 0) >= 4.5;
         break;
       case "Discounted":
         highlightMatch = (item.discount ?? 0) > 0;
@@ -37,7 +36,7 @@ export default function WalletPage() {
     return categoryMatch && highlightMatch;
   });
 
-  // Sorting
+  // Sorting logic
   const sortedWallets = [...filteredWallets].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
@@ -52,8 +51,9 @@ export default function WalletPage() {
   });
 
   return (
-    <section className="min-h-screen">
-       <div className="text-center mt-10 mb-8">
+    <section className="min-h-screen bg-[#FBFAF7]">
+      {/* Header */}
+      <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Wallets
           <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
@@ -62,6 +62,7 @@ export default function WalletPage() {
           Discover our most-loved creations, handcrafted with care and style.
         </p>
       </div>
+
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
@@ -151,9 +152,11 @@ export default function WalletPage() {
                     className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                      {/* 🔹 Lazy Loading Added Here */}
                       <img
                         src={item.image}
                         alt={item.name}
+                        loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {item.discount && (

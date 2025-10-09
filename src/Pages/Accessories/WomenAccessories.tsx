@@ -4,6 +4,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { womenAccessories } from "../../Data/WomenAccessoriesData";
 import { Link } from "react-router-dom";
 
+// ✅ LazyImage Component
+const LazyImage = ({ src, alt }: { src: string; alt: string }) => (
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+  />
+);
+
 export default function WomenAccessoriesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
@@ -64,6 +74,7 @@ export default function WomenAccessoriesPage() {
           Elegant accessories designed with charm and care.
         </p>
       </div>
+
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         
@@ -151,14 +162,13 @@ export default function WomenAccessoriesPage() {
                 >
                   <Link
                     to={`/accessorydetail/${item.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col group"
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      
+                      {/* ✅ Lazy Image */}
+                      <LazyImage src={item.image} alt={item.name} />
+
                       {item.discount && (
                         <motion.span
                           initial={{ scale: 0 }}
@@ -199,4 +209,4 @@ export default function WomenAccessoriesPage() {
       </div>
     </section>
   );
-} 
+}

@@ -26,7 +26,6 @@ export default function ResinNameplatePage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinNameplates.map(item => item.category))];
 
-  // Filtered items
   const filteredItems = useMemo(() => {
     return resinNameplates.filter(item => {
       const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(item.category);
@@ -42,12 +41,10 @@ export default function ResinNameplatePage() {
         default:
           highlightMatch = true;
       }
-
       return categoryMatch && highlightMatch;
     });
   }, [selectedCategories, highlight]);
 
-  // Sorted items
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
     switch (sortOption) {
@@ -145,9 +142,7 @@ export default function ResinNameplatePage() {
                     <li
                       key={opt}
                       onClick={() => setHighlight(opt)}
-                      className={`text-sm cursor-pointer ${
-                        highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
-                      }`}
+                      className={`text-sm cursor-pointer ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"}`}
                     >
                       {opt}
                     </li>
@@ -194,6 +189,8 @@ export default function ResinNameplatePage() {
                   price: item.price,
                   discount: item.discount,
                 };
+                const [loaded, setLoaded] = useState(false); // lazy load state
+
                 return (
                   <motion.div
                     key={item.id}
@@ -208,10 +205,15 @@ export default function ResinNameplatePage() {
                       className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                     >
                       <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                        <img
+                        <motion.img
                           src={variant.image}
                           alt={item.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: loaded ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          onLoad={() => setLoaded(true)}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                         />
                         {variant.discount && (
                           <motion.span

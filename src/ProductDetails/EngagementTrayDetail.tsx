@@ -1,4 +1,3 @@
-// src/Pages/EngagementTrayDetailPage.tsx
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { engagementTrays, EngagementTray, Variant } from "../Data/EngagementTrayData";
@@ -13,6 +12,8 @@ export default function EngagementTrayDetailPage() {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [thumbsLoaded, setThumbsLoaded] = useState<{ [key: number]: boolean }>({});
 
   const productFromParams: EngagementTray | undefined = engagementTrays.find(
     (p) => String(p.id) === id
@@ -39,6 +40,8 @@ export default function EngagementTrayDetailPage() {
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     });
     setQuantity(1);
+    setImageLoaded(false);
+    setThumbsLoaded({});
   }, [currentProduct]);
 
   const handleAddToCart = () => {
@@ -61,12 +64,18 @@ export default function EngagementTrayDetailPage() {
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image */}
         <div className="flex-1 relative">
+          {!imageLoaded && (
+            <div className="w-full h-[400px] sm:h-[500px] rounded-3xl bg-gray-200 animate-pulse"></div>
+          )}
           <motion.img
             src={selectedVariant.image}
             alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
+            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5 }}
+            onLoad={() => setImageLoaded(true)}
           />
           {selectedVariant.discount && (
             <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
@@ -88,10 +97,16 @@ export default function EngagementTrayDetailPage() {
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
+                  {!thumbsLoaded[i] && (
+                    <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>
+                  )}
                   <img
                     src={v.image}
                     alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
+                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${
+                      thumbsLoaded[i] ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => setThumbsLoaded((prev) => ({ ...prev, [i]: true }))}
                   />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
@@ -141,13 +156,11 @@ export default function EngagementTrayDetailPage() {
             )}
           </div>
 
-          {/* Description */}
-          {currentProduct.description && (
-            <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
-          )}
-
-          {/* Structured Info */}
+          {/* Description & Structured Info */}
           <div className="space-y-3 text-gray-700">
+            {currentProduct.description && (
+              <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
+            )}
             {currentProduct.material && (
               <p>
                 <span className="font-semibold text-gray-900">Material:</span>{" "}
@@ -168,9 +181,7 @@ export default function EngagementTrayDetailPage() {
             )}
             {currentProduct.careInstructions && (
               <p>
-                <span className="font-semibold text-gray-900">
-                  Care Instructions:
-                </span>{" "}
+                <span className="font-semibold text-gray-900">Care Instructions:</span>{" "}
                 {currentProduct.careInstructions}
               </p>
             )}

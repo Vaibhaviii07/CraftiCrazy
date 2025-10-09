@@ -1,9 +1,10 @@
+// src/Pages/CheckoutPage.tsx
 import React, { useState } from "react";
 import { useCart } from "../AuthContext/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CheckoutPage = () => {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, updateCartItem } = useCart();
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -17,6 +18,16 @@ const CheckoutPage = () => {
     customization: "",
     paymentMethod: "cod",
   });
+
+  // Prefill customization with first item's customization if available
+  React.useEffect(() => {
+    if (cart.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        customization: cart.map((item) => item.customization?.userInput || "").join("; "),
+      }));
+    }
+  }, [cart]);
 
   const [toast, setToast] = useState<string | null>(null);
 
@@ -34,6 +45,17 @@ const CheckoutPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Update cart items with latest customization
+    cart.forEach((item) => {
+      updateCartItem(item.id, {
+        ...item,
+        customization: {
+          available: !!formData.customization,
+          userInput: formData.customization,
+        },
+      });
+    });
+
     setToast("Order placed successfully!");
     clearCart();
     setTimeout(() => setToast(null), 3000);
@@ -45,10 +67,10 @@ const CheckoutPage = () => {
         {/* Left Form Section */}
         <form
           onSubmit={handleSubmit}
-          className="lg:flex-2 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 w-full"
+          className="w-full lg:w-2/3 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4"
         >
           {/* Contact */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
             Contact
           </h2>
           <input
@@ -62,7 +84,7 @@ const CheckoutPage = () => {
           />
 
           {/* Delivery Section */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
             Delivery
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -142,11 +164,11 @@ const CheckoutPage = () => {
             onChange={handleChange}
             required
             placeholder="Phone number"
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-6 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
           />
 
-          {/* Customization Section */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-3">
+          {/* Customization */}
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
             Customization
           </h2>
           <textarea
@@ -154,15 +176,15 @@ const CheckoutPage = () => {
             value={formData.customization}
             onChange={handleChange}
             placeholder="Write if you want to customize your hamper or product..."
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-6 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
             rows={3}
           ></textarea>
 
-          {/* Payment Section */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-3">
+          {/* Payment */}
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
             Payment
           </h2>
-          <div className="border border-gray-300 rounded-md p-4 mb-6 space-y-2">
+          <div className="border border-gray-300 rounded-md p-4 mb-4 space-y-2">
             <label className="flex items-center space-x-3">
               <input
                 type="radio"
@@ -196,27 +218,36 @@ const CheckoutPage = () => {
         </form>
 
         {/* Right Order Summary */}
-        <div className="lg:flex-1 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 w-full ">
+        <div className="w-full lg:w-1/3 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 mt-6 lg:mt-0">
           <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-4">
             Order Summary
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-96 overflow-y-auto">
             {cart.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 border-b pb-2">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-14 h-14 object-cover rounded-md border"
-                />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-[#3c1f2c]">{item.name}</p>
-                  <p className="text-xs text-gray-500">
-                    Qty: {item.quantity} × ₹{item.price}
+              <div key={item.id} className="flex flex-col gap-1 border-b pb-2">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-14 h-14 object-cover rounded-md border"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-[#3c1f2c]">{item.name}</p>
+                    <p className="text-xs text-gray-500">
+                      Qty: {item.quantity} × ₹{item.price}
+                    </p>
+                  </div>
+                  <p className="font-semibold text-[#5b2232]">
+                    ₹{Number(item.price) * Number(item.quantity)}
                   </p>
                 </div>
-                <p className="font-semibold text-[#5b2232]">
-                  ₹{Number(item.price) * Number(item.quantity)}
-                </p>
+
+                {/* Customization */}
+                {item.customization?.userInput && (
+                  <p className="text-xs text-gray-600 italic ml-17">
+                    💡 Customization: {item.customization.userInput}
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -237,6 +268,7 @@ const CheckoutPage = () => {
           </div>
         </div>
       </div>
+
       {/* Toast */}
       <AnimatePresence>
         {toast && (

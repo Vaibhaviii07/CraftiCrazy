@@ -156,9 +156,13 @@ export default function EngagementTrayPage() {
                 >
                   <Link to={`/Tray/${item.id}`} className="w-full max-w-[320px] flex flex-col">
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-3">
-                      <img
+                      <motion.img
                         src={item.image}
                         alt={item.name}
+                        loading="lazy"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6 }}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
                       {item.discount && (
@@ -186,6 +190,11 @@ export default function EngagementTrayPage() {
                         <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
                           ₹{item.price}
                         </span>
+                        {item.discount && (
+                          <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
+                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </Link>

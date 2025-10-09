@@ -1,7 +1,6 @@
-// src/Pages/WoodenFrames/WoodenFramePage.tsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { woodenFrames, Variant } from "../../Data/WoodenFramedata";
+import { woodenFrames } from "../../Data/WoodenFramedata";
 import { Link } from "react-router-dom";
 
 export default function WoodenFramePage() {
@@ -144,59 +143,69 @@ export default function WoodenFramePage() {
           {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedFrames.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/woodendetail/${item.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
-                  >
-                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                          }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
+              {sortedFrames.map((item) => {
+                const [loaded, setLoaded] = useState(false); // lazy load state
 
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
-                      {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
-                          ₹{item.price}
-                        </span>
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex justify-center"
+                  >
+                    <Link
+                      to={`/woodendetail/${item.id}`}
+                      className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+                    >
+                      <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                        <motion.img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: loaded ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          onLoad={() => setLoaded(true)}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+
+                        {item.discount && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 20,
+                            }}
+                            className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                          >
+                            {item.discount}% OFF
+                          </motion.span>
+                        )}
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+
+                      <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                        <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                          {item.name}
+                        </p>
+                        {item.description && (
+                          <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+                        <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                          <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
+                            ₹{item.price}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

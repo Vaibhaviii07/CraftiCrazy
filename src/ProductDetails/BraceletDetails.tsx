@@ -1,6 +1,6 @@
 // src/ProductDetails/BraceletDetails.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { bracelets, Bracelet, Variant } from "../Data/BraceletData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -11,88 +11,97 @@ type Params = { id: string };
 export default function BraceletDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
+  // ✅ All hooks initialized unconditionally
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  const productFromParams: Bracelet | undefined = bracelets.find(
-    (b) => String(b.id) === id
-  );
+  const productFromParams: Bracelet | undefined = bracelets.find((b) => String(b.id) === id);
+  const [currentProduct] = useState<Bracelet | null>(productFromParams ?? null);
 
-  if (!productFromParams) {
-    return (
-      <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>
-    );
-  }
-
-  const [currentProduct] = useState<Bracelet>(productFromParams);
-
-  const [selectedVariant, setSelectedVariant] = useState<Variant>({
-    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-  });
-
-  useEffect(() => {
-    setSelectedVariant({
+  const selectedVariant = useMemo(() => {
+    if (!currentProduct) return null;
+    return {
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-    });
-    setQuantity(1);
+    };
   }, [currentProduct]);
 
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
+
+  useEffect(() => {
+    setCurrentVariant(selectedVariant);
+    setQuantity(1);
+  }, [selectedVariant]);
+
   const handleAddToCart = () => {
+    if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
+
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: selectedVariant.price.toString(),
+      price: currentVariant.price.toString(),
       quantity,
-      image: selectedVariant.image,
-      discount: selectedVariant.discount,
+      image: currentVariant.image,
+      discount: currentVariant.discount,
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
+
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
+
+  if (!currentProduct) {
+    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image */}
         <div className="flex-1 relative">
-          <motion.img
-            src={selectedVariant.image}
-            alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-          />
-          {selectedVariant.discount && (
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+            </div>
+          )}
+          {currentVariant && (
+            <motion.img
+              src={currentVariant.image}
+              alt={currentProduct.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImgLoaded(true)}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+              loading="lazy"
+            />
+          )}
+          {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
-              {selectedVariant.discount}% OFF
+              {currentVariant.discount}% OFF
             </span>
           )}
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1">
-              {currentProduct.variants.map((v: Variant, i: number) => (
+              {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
+                  onClick={() => setCurrentVariant(v)}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
-                    selectedVariant.image === v.image
+                    currentVariant?.image === v.image
                       ? "border-[#b46029] ring-2 ring-[#b46029]"
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <img
-                    src={v.image}
-                    alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
-                  />
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" loading="lazy" />
                 </motion.div>
               ))}
             </div>
@@ -101,26 +110,18 @@ export default function BraceletDetails() {
 
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">
-            {currentProduct.name}
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Rating + Price row */}
+          {/* Rating + Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map(
-                (_, i: number) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400" />
-                )
-              )}
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+                <Star key={i} className="w-5 h-5 text-yellow-400" />
+              ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
-              ₹{selectedVariant.price}
-            </span>
-            {selectedVariant.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">
-                ₹{currentProduct.price}
-              </span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">{currentVariant?.price}</span>
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">{currentProduct.price}</span>
             )}
           </div>
 
@@ -129,86 +130,32 @@ export default function BraceletDetails() {
 
           {/* Structured Product Info */}
           <div className="space-y-3 text-gray-700">
-            {currentProduct.material && (
-              <p>
-                <span className="font-semibold text-gray-900">Material:</span>{" "}
-                {currentProduct.material}
-              </p>
-            )}
-            {currentProduct.dimensions && (
-              <p>
-                <span className="font-semibold text-gray-900">Dimensions:</span>{" "}
-                {currentProduct.dimensions}
-              </p>
-            )}
-            {currentProduct.weight && (
-              <p>
-                <span className="font-semibold text-gray-900">Weight:</span>{" "}
-                {currentProduct.weight}
-              </p>
-            )}
-            {currentProduct.careInstructions && (
-              <p>
-                <span className="font-semibold text-gray-900">
-                  Care Instructions:
-                </span>{" "}
-                {currentProduct.careInstructions}
-              </p>
-            )}
+            {currentProduct.material && <p><span className="font-semibold text-gray-900">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold text-gray-900">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold text-gray-900">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold text-gray-900">Care Instructions:</span> {currentProduct.careInstructions}</p>}
             {currentProduct.delivery && (
-              <p>
-                <span className="font-semibold text-gray-900">Delivery:</span>{" "}
-                {currentProduct.delivery.type}, {currentProduct.delivery.availability},{" "}
-                Estimated {currentProduct.delivery.estimated}
-              </p>
+              <p><span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>
             )}
           </div>
 
           {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
-                {tag}
-              </span>
-            ))}
-            <span
-              className={`px-2 py-1 rounded ${
-                currentProduct.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">
-                {currentProduct.warranty}
-              </span>
-            )}
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* Quantity + Add to Cart */}
           <div className="flex flex-wrap gap-3 mt-4 items-center">
             <div className="flex items-center border rounded-full overflow-hidden">
-              <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
-              >
-                -
-              </button>
+              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
               <span className="px-6 py-2">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
-              >
-                +
-              </button>
+              <button onClick={() => setQuantity((q) => q + 1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
             </div>
-
-            <button
-              onClick={handleAddToCart}
-              className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg"
-            >
+            <button onClick={handleAddToCart} className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
@@ -219,19 +166,14 @@ export default function BraceletDetails() {
               <div>
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
+                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
-
             {currentProduct.customization?.available && (
               <div>
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">
-                  {currentProduct.customization.options?.join(", ")}
-                </p>
+                <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
           </div>

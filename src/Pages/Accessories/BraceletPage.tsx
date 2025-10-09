@@ -57,7 +57,7 @@ export default function BraceletPage() {
   }, [filteredItems, sortOption]);
 
   return (
-    <div className=" min-h-screen">
+    <section className="min-h-screen">
       {/* Page Header */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
@@ -69,13 +69,16 @@ export default function BraceletPage() {
         </p>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 flex flex-col md:flex-row gap-10">
+      {/* Main Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
+        
         {/* Sidebar */}
-        <aside className="w-full md:w-1/4 bg-white p-5 rounded-xl shadow-md sticky top-6 h-fit">
+        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Categories
+            </h3>
             <ul className="space-y-2">
               {categories.map(cat => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -84,9 +87,11 @@ export default function BraceletPage() {
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
+                    className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                    {cat}
+                  </label>
                 </li>
               ))}
             </ul>
@@ -94,14 +99,18 @@ export default function BraceletPage() {
 
           {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Highlight
+            </h3>
             <ul className="space-y-2">
               {highlightOptions.map(opt => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer transition-colors duration-300 ${
-                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700 hover:text-[#b46029]"
+                    highlight === opt
+                      ? "text-[#C45A36] font-semibold"
+                      : "text-gray-700 hover:text-[#C45A36]"
                   }`}
                 >
                   {opt}
@@ -112,9 +121,19 @@ export default function BraceletPage() {
         </aside>
 
         {/* Products Grid */}
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
+            <select
+              value={sortOption}
+              onChange={e => setSortOption(e.target.value)}
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36] focus:border-[#C45A36]"
+            >
+              <option>Default sorting</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Rating</option>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -130,13 +149,17 @@ export default function BraceletPage() {
                 >
                   <Link to={`/braceletdetail/${item.id}`} className="w-full max-w-[360px] flex flex-col">
                     <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-3xl overflow-hidden hover:shadow-2xl transition-shadow duration-500 hover:-translate-y-2">
-                      <img
+                      <motion.img
                         src={item.image}
                         alt={item.name}
+                        loading="lazy"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true, amount: 0.2 }}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {item.discount && (
-                        <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-sm">
+                        <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-sm">
                           {item.discount}% OFF
                         </span>
                       )}
@@ -148,7 +171,7 @@ export default function BraceletPage() {
                         <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
                       )}
                       <div className="mt-2 flex justify-center gap-3 items-baseline">
-                        <span className="text-2xl text-[#b46029] font-cinzel">₹{item.price}</span>
+                        <span className="text-2xl text-[#C45A36] font-cinzel">₹{item.price}</span>
                         {item.discount && (
                           <span className="text-sm text-gray-500 line-through">
                             ₹{Math.round(item.price + (item.price * item.discount) / 100)}
@@ -163,6 +186,6 @@ export default function BraceletPage() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

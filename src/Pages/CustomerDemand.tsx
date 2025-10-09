@@ -32,6 +32,7 @@ const CustomerDemandPremium = () => {
     name: "", email: "", phone: "", product: "", customization: "", image: null
   });
   const [submitted, setSubmitted] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const reelContainerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -42,7 +43,7 @@ const CustomerDemandPremium = () => {
     if (!scrollContainer) return;
 
     let scrollAmount = scrollContainer.scrollLeft;
-    const speed = window.innerWidth < 740 ? 1 : 2; 
+    const speed = window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 1.5 : 2;
 
     const scroll = () => {
       if (!scrollContainer) return;
@@ -68,6 +69,17 @@ const CustomerDemandPremium = () => {
     return () => stopScrolling();
   }, []);
 
+  // Handle image preview safely
+  useEffect(() => {
+    if (formData.image) {
+      const objectUrl = URL.createObjectURL(formData.image);
+      setImagePreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setImagePreview(null);
+    }
+  }, [formData.image]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (e.target instanceof HTMLInputElement && e.target.type === "file") {
@@ -80,6 +92,7 @@ const CustomerDemandPremium = () => {
     e.preventDefault();
     setSubmitted(true);
     setFormData({ name: "", email: "", phone: "", product: "", customization: "", image: null });
+    setTimeout(() => setSubmitted(false), 3000); // reset submission message after 3s
   };
 
   return (
@@ -118,14 +131,17 @@ const CustomerDemandPremium = () => {
               whileHover={{ scale: 1.05 }}
               className="min-w-[180px] sm:min-w-[220px] md:min-w-[280px] rounded-2xl shadow-lg overflow-hidden bg-white border border-gray-100 transition-all duration-300"
             >
-              <video
-                src={reel.video}
-                className="w-full h-60 sm:h-62 md:h-74 object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
+              <div className="relative w-full h-60 sm:h-62 md:h-74 bg-gray-200 animate-pulse rounded-2xl overflow-hidden">
+                <video
+                  src={reel.video}
+                  className="absolute top-0 left-0 w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  aria-label={`Reel ${index + 1}`}
+                />
+              </div>
             </motion.div>
           ))}
         </div>
@@ -183,9 +199,9 @@ const CustomerDemandPremium = () => {
               className="w-full py-2 px-3 rounded-xl border border-gray-300 cursor-pointer focus:ring-2 focus:ring-[#c9a26d] text-sm"
             />
 
-            {formData.image && (
+            {imagePreview && (
               <div className="relative mt-2 w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-lg overflow-hidden shadow-md border border-gray-200">
-                <img src={URL.createObjectURL(formData.image)} alt="Preview" className="w-full h-full object-cover" />
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, image: null }))}
@@ -199,7 +215,10 @@ const CustomerDemandPremium = () => {
             <motion.button
               type="submit"
               whileHover={{ scale: 1.05 }}
-              className="mt-4 py-2 w-full bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl shadow-md text-sm sm:text-base"
+              disabled={submitted}
+              className={`mt-4 py-2 w-full bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl shadow-md text-sm sm:text-base ${
+                submitted ? "opacity-60 cursor-not-allowed" : ""
+              }`}
             >
               Submit
             </motion.button>
@@ -208,10 +227,12 @@ const CustomerDemandPremium = () => {
           <AnimatePresence>
             {submitted && (
               <motion.p
+                key="success"
                 className="mt-3 text-green-600 font-medium text-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
               >
                 ✅ Your request has been recorded!
               </motion.p>
@@ -231,13 +252,13 @@ const CustomerDemandPremium = () => {
 
           <div className="flex gap-5 justify-center sm:justify-start mt-3">
             {/* Instagram */}
-            <a href="https://www.instagram.com/crafticrazy_710/" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/crafticrazy_710/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <svg className="w-8 h-8 text-pink-500 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M7.75 2C4.13 2 1.25 4.88 1.25 8.5v7c0 3.62 2.88 6.5 6.5 6.5h7c3.62 0 6.5-2.88 6.5-6.5v-7c0-3.62-2.88-6.5-6.5-6.5h-7zM12 7.25a4.75 4.75 0 1 1 0 9.5 4.75 4.75 0 0 1 0-9.5zm0 1.5a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5zm5.25-.25a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"></path>
               </svg>
             </a>
             {/* WhatsApp */}
-            <a href="https://wa.me/7721028815" target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.me/7721028815" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
               <svg className="w-8 h-8 text-green-500 hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12.04 2C6.55 2 2 6.55 2 12.04c0 2.11.55 4.17 1.59 6L2 22l4.1-1.55a10.04 10.04 0 0 0 5.94 1.9h.01c5.49 0 10.04-4.55 10.04-10.04S17.53 2 12.04 2zm5.92 14.55c-.25.7-1.45 1.34-2 1.43-.51.09-1.17.13-1.89-.12a8.3 8.3 0 0 1-1.86-.89c-3.27-1.95-5.18-5.43-5.34-5.68-.15-.25-1.27-1.7-1.27-3.24 0-1.54.8-2.29 1.09-2.61.29-.32.63-.4.84-.4.21 0 .42.01.6.01.19 0 .45-.07.7.53.25.61.84 2.1.92 2.25.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.45.54-.15.15-.3.31-.13.6.17.29.75 1.23 1.61 2 .99.88 1.83 1.15 2.12 1.3.29.15.46.13.64-.08.18-.21.74-.86.94-1.16.2-.29.4-.25.67-.15.28.09 1.77.84 2.07 1 .3.15.5.25.57.39.07.14.07.79-.18 1.49z"></path>
               </svg>

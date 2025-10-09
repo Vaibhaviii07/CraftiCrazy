@@ -13,7 +13,7 @@ const bestSellers = [
 export default function BestSeller() {
   return (
     <div className="relative min-h-screen py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
-      {/* Floating Gradient Blobs (scaled down on mobile) */}
+      {/* Floating Gradient Blobs */}
       <div className="absolute w-40 sm:w-72 md:w-96 h-40 sm:h-72 md:h-96 bg-[#AB420A] rounded-full blur-3xl opacity-20 top-10 left-5 sm:left-10 animate-pulse-slow"></div>
       <div className="absolute w-32 sm:w-60 md:w-80 h-32 sm:h-60 md:h-80 bg-[#CD500C] rounded-full blur-3xl opacity-25 bottom-10 right-5 sm:right-16 animate-pulse-slow"></div>
       <div className="absolute w-28 sm:w-48 md:w-60 h-28 sm:h-48 md:h-60 bg-[#FF7A00] rounded-full blur-2xl opacity-15 top-1/2 left-1/4 sm:left-1/3 animate-pulse-slower"></div>
@@ -45,6 +45,7 @@ export default function BestSeller() {
               <img
                 src={item.image}
                 alt={item.name}
+                loading="lazy" // <-- Lazy loading added
                 className="w-full h-56 sm:h-72 md:h-80 object-cover rounded-t-2xl sm:rounded-t-3xl transform group-hover:scale-110 transition-transform duration-700"
               />
             </div>

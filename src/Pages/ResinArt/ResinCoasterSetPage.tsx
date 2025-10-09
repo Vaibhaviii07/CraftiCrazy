@@ -1,4 +1,3 @@
-// src/Pages/ResinCoasterSet/ResinCoasterSetPage.tsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinCoasterSets } from "../../Data/ResinCoasterSetData";
@@ -72,6 +71,7 @@ export default function ResinCoasterSetPage() {
           Beautifully handcrafted resin coaster sets bringing art, shine, and elegance to every table.
         </p>
       </div>
+
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
@@ -138,51 +138,59 @@ export default function ResinCoasterSetPage() {
           {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-16">
             <AnimatePresence>
-              {sortedItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/caosterdetail/${item.id}`}
-                    className="w-full max-w-[300px] sm:max-w-[340px] flex flex-col"
+              {sortedItems.map((item) => {
+                const [loaded, setLoaded] = useState(false); // lazy load state
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex justify-center"
                   >
-                    <div className="relative w-full h-[260px] sm:h-[320px] lg:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
-
-                    <div className="mt-2 sm:mt-3 text-center">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
-                      <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                        {item.description}
-                      </p>
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
-                          ₹{item.price}
-                        </span>
+                    <Link
+                      to={`/caosterdetail/${item.id}`}
+                      className="w-full max-w-[300px] sm:max-w-[340px] flex flex-col"
+                    >
+                      <div className="relative w-full h-[260px] sm:h-[320px] lg:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                        <motion.img
+                          src={item.image}
+                          alt={item.name}
+                          loading="lazy"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: loaded ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                          onLoad={() => setLoaded(true)}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                        {item.discount && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                          >
+                            {item.discount}% OFF
+                          </motion.span>
+                        )}
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+
+                      <div className="mt-2 sm:mt-3 text-center">
+                        <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
+                        <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                          <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
+                            ₹{item.price}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

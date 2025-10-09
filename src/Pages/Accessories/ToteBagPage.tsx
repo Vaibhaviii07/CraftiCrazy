@@ -1,5 +1,5 @@
 // src/Pages/Accessories/ToteBagPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toteBags } from "../../Data/ToteBagData";
 import { Link } from "react-router-dom";
@@ -8,6 +8,12 @@ export default function ToteBagPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000); // simulate loading time
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -27,7 +33,7 @@ export default function ToteBagPage() {
     let highlightMatch = true;
     switch (highlight) {
       case "Best Seller":
-        highlightMatch = (item.rating ?? 0) >= 4.5; // adjust rating as per data
+        highlightMatch = (item.rating ?? 0) >= 4.5;
         break;
       case "Discounted":
         highlightMatch = (item.discount ?? 0) > 0;
@@ -53,17 +59,18 @@ export default function ToteBagPage() {
   });
 
   return (
-    <section className=" min-h-screen">
+    <section className="min-h-screen">
       {/* Hero Section */}
-     <div className="text-center mt-10 mb-8">
-      <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
-        Tote Bags
-        <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-24 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
-      </h2>
-      <p className="mt-3 text-gray-600 text-sm sm:text-base italic max-w-sm mx-auto">
-        Stylish totes, crafted for elegance and everyday charm.
-      </p>
-    </div>
+      <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+          Tote Bags
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-24 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-sm sm:text-base italic max-w-sm mx-auto">
+          Stylish totes, crafted for elegance and everyday charm.
+        </p>
+      </div>
+
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-6 sm:mt-12 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8">
         {/* Sidebar */}
@@ -136,58 +143,77 @@ export default function ToteBagPage() {
             </select>
           </div>
 
-          {/* Product Cards */}
+          {/* Product Cards with Lazy Loader */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12">
             <AnimatePresence>
-              {sortedItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/totebagdetail/${item.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
-                  >
-                    <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-1 sm:hover:-translate-y-2 md:hover:-translate-y-3">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      />
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
+              {loading
+                ? // Skeletons while loading
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex justify-center"
+                    >
+                      <div className="w-full max-w-[320px] bg-gray-200 animate-pulse rounded-2xl h-[300px] sm:h-[340px]"></div>
+                    </motion.div>
+                  ))
+                : // Actual Products
+                  sortedItems.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.4 }}
+                      className="flex justify-center"
+                    >
+                      <Link
+                        to={`/totebagdetail/${item.id}`}
+                        className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
+                      >
+                        <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[360px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                          {item.discount && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20,
+                              }}
+                              className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                            >
+                              {item.discount}% OFF
+                            </motion.span>
+                          )}
+                        </div>
 
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
-                      {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
-                          ₹{item.price}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                        <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                          <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                            {item.name}
+                          </p>
+                          {item.description && (
+                            <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                              {item.description}
+                            </p>
+                          )}
+                          <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                            <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
+                              ₹{item.price}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
             </AnimatePresence>
           </div>
         </div>

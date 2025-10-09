@@ -95,6 +95,7 @@ export default function GiftCollections() {
             <img
               src={offers[0].image}
               alt={offers[0].subtitle}
+              loading="lazy"
               className="w-full h-56 sm:h-[500px] object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-end p-3 sm:p-6 text-white">
@@ -125,6 +126,7 @@ export default function GiftCollections() {
                 <img
                   src={offer.image}
                   alt={offer.subtitle}
+                  loading="lazy"
                   className="w-full h-36 sm:h-[250px] object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-start justify-end p-3 sm:p-4 text-white">
@@ -154,82 +156,83 @@ export default function GiftCollections() {
         </h1>
         <p className="mt-3 sm:mt-4 text-sm sm:text-lg font-[Playfair_Display] text-gray-700 max-w-2xl mx-auto leading-relaxed">
           Discover{" "}
-          <span className="font-semibold italic text-[#AB420A]">
-            artisanal creations
-          </span>{" "}
-          blending{" "}
-          <span className="text-[#8C5E3C] italic font-medium">elegance</span> &{" "}
+          <span className="font-semibold italic text-[#AB420A]">artisanal creations</span>{" "}
+          blending <span className="text-[#8C5E3C] italic font-medium">elegance</span> &{" "}
           <span className="italic text-[#AB420A]">luxury</span>. Crafted to make
           every moment unforgettable.
         </p>
       </div>
 
-    <div className="max-w-7xl mx-auto space-y-16 sm:space-y-20">
-  {giftCategories.map((category) => (
-    <div key={category.id} className="space-y-6">
-      {/* Category Title */}
-      <div className="text-center">
-        <h2 className="text-xl sm:text-3xl font-serif text-[#603808] flex items-center justify-center gap-2">
-          <Gift className="w-5 h-5 sm:w-7 sm:h-7 text-[#D9A441]" />{" "}
-          {category.name}
-        </h2>
-        <p className="text-xs sm:text-base italic text-[#8C5E3C] mt-1">
-          {category.tagline}
-        </p>
-      </div>
-
-   {/* Product Scroll Cards */}
-<div className="flex justify-center flex-wrap gap-6 ">
-  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory py-3 ">
-    <AnimatePresence>
-      {category.variants.map((variant) => (
-        <motion.div
-          key={variant.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.4 }}
-          className="group flex-shrink-0 w-[220px] sm:w-[280px] md:w-[300px] snap-center no-scrollbar "
-        >
-          <Link to={variant.link} className=" h-full justify-center">
-            <div className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
-              <img
-                src={variant.image}
-                alt={variant.name}
-                className="w-full h-full object-cover"
-              /> 
-              <span className="absolute top-2 right-2 bg-[#b46029] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-md shadow">
-                {variant.discount} OFF
-              </span>
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <FiArrowRight className="text-white w-5 h-5 sm:w-8 sm:h-8" />
-              </div>
-            </div>
-
-            <div className="mt-2 text-center">
-              <p className="text-base sm:text-lg text-gray-900 font-[Playfair_Display] leading-snug">
-                {variant.name}
+      {/* Gift Categories */}
+      <div className="max-w-7xl mx-auto space-y-16 sm:space-y-20">
+        {giftCategories.map((category) => (
+          <div key={category.id} className="space-y-6">
+            {/* Category Title */}
+            <div className="text-center">
+              <h2 className="text-xl sm:text-3xl font-serif text-[#603808] flex items-center justify-center gap-2">
+                <Gift className="w-5 h-5 sm:w-7 sm:h-7 text-[#D9A441]" />{" "}
+                {category.name}
+              </h2>
+              <p className="text-xs sm:text-base italic text-[#8C5E3C] mt-1">
+                {category.tagline}
               </p>
-              <div className="mt-1 flex justify-center gap-2 items-baseline">
-                <span className="text-gray-400 italic text-xs sm:text-sm line-through">
-                  ₹{variant.oldPrice}
-                </span>
-                <span className="text-lg sm:text-xl text-[#b46029] font-[Cinzel]">
-                  ₹{variant.price}
-                </span>
+            </div>
+
+            {/* Product Scroll Cards */}
+            <div className="flex justify-center flex-wrap gap-6 ">
+              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory py-3 ">
+                <AnimatePresence>
+                  {category.variants.map((variant) => (
+                    <motion.div
+                      key={variant.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.4 }}
+                      className="group flex-shrink-0 w-[220px] sm:w-[280px] md:w-[300px] snap-center no-scrollbar"
+                    >
+                      <Link to={variant.link} className="h-full justify-center">
+                        <div className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
+                          <img
+                            src={variant.image}
+                            alt={variant.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                          {variant.discount && (
+                            <span className="absolute top-2 right-2 bg-[#b46029] text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-md shadow">
+                              {variant.discount} OFF
+                            </span>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <FiArrowRight className="text-white w-5 h-5 sm:w-8 sm:h-8" />
+                          </div>
+                        </div>
+
+                        <div className="mt-2 text-center">
+                          <p className="text-base sm:text-lg text-gray-900 font-[Playfair_Display] leading-snug">
+                            {variant.name}
+                          </p>
+                          <div className="mt-1 flex justify-center gap-2 items-baseline">
+                            {variant.oldPrice && (
+                              <span className="text-gray-400 italic text-xs sm:text-sm line-through">
+                                ₹{variant.oldPrice}
+                              </span>
+                            )}
+                            <span className="text-lg sm:text-xl text-[#b46029] font-[Cinzel]">
+                              ₹{variant.price}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
-          </Link>
-        </motion.div>
-      ))}
-    </AnimatePresence>
-  </div>
-</div>
-
-    </div>
-  ))}
-</div>
-
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

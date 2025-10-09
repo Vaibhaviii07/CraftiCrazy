@@ -1,9 +1,9 @@
 // src/Pages/CustomizedHamper/WeddingHamperDetails.tsx
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { weddingHampers, WeddingHamper, Variant } from "../Data/WeddingData"; 
+import { weddingHampers, WeddingHamper, Variant } from "../Data/WeddingData";
 import { useCart } from "../AuthContext/CartContext";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Params = { id: string };
@@ -13,19 +13,26 @@ export default function WeddingHamperDetails() {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const productFromParams: WeddingHamper | undefined = weddingHampers.find((p) => p.id === id);
-  if (!productFromParams)
-    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  const [currentProduct] = useState<WeddingHamper | null>(productFromParams ?? null);
 
-  const [currentProduct, setCurrentProduct] = useState<WeddingHamper>(productFromParams);
   const [selectedVariant, setSelectedVariant] = useState<Variant>({
-    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+    image: currentProduct?.variants?.[0]?.image ?? currentProduct?.image ?? "",
+    price: currentProduct?.variants?.[0]?.price ?? currentProduct?.price ?? 0,
+    discount: currentProduct?.variants?.[0]?.discount ?? currentProduct?.discount ?? 0,
   });
 
+  // Simulate loading
   useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Reset variant and quantity if product changes
+  useEffect(() => {
+    if (!currentProduct) return;
     setSelectedVariant({
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
@@ -34,7 +41,30 @@ export default function WeddingHamperDetails() {
     setQuantity(1);
   }, [currentProduct]);
 
+  if (!currentProduct) {
+    return (
+      <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 flex flex-col lg:flex-row gap-8 lg:gap-12 animate-pulse">
+        <div className="flex-1 bg-gray-200 rounded-3xl h-80 lg:h-[500px]" />
+        <div className="flex-1 flex flex-col gap-4 sm:gap-5">
+          <div className="h-8 bg-gray-200 w-3/4 rounded"></div>
+          <div className="h-6 bg-gray-200 w-1/2 rounded mt-2"></div>
+          <div className="h-4 bg-gray-200 w-full rounded mt-2"></div>
+          <div className="h-4 bg-gray-200 w-full rounded mt-1"></div>
+          <div className="h-4 bg-gray-200 w-5/6 rounded mt-1"></div>
+          <div className="h-10 bg-gray-200 w-1/3 rounded mt-4"></div>
+        </div>
+      </div>
+    );
+  }
+
   const handleAddToCart = () => {
+    if (!currentProduct.inStock) return;
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -69,12 +99,12 @@ export default function WeddingHamperDetails() {
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1">
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v: Variant, i: number) => (
                 <motion.div
                   key={i}
                   onClick={() => setSelectedVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
                     selectedVariant.image === v.image
                       ? "border-[#b46029] ring-2 ring-[#b46029]"
                       : "border-gray-300"
@@ -104,7 +134,7 @@ export default function WeddingHamperDetails() {
           {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i: number) => (
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
@@ -138,7 +168,11 @@ export default function WeddingHamperDetails() {
             </div>
 
             <button onClick={handleAddToCart}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
+                    disabled={!currentProduct.inStock}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg text-white ${
+                      currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20]" : "bg-gray-300 cursor-not-allowed"
+                    }`}
+            >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>

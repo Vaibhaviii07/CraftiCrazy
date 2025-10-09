@@ -150,9 +150,14 @@ export default function VarmalaPreservationPage() {
                     className="w-full max-w-[330px] flex flex-col"
                   >
                     <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      <img
+                      {/* Lazy-loaded image with fade-in */}
+                      <motion.img
                         src={item.image}
                         alt={item.name}
+                        loading="lazy"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6 }}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
                       {item.discount && (

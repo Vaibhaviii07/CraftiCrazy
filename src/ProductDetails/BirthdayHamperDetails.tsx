@@ -1,6 +1,7 @@
+// src/Pages/BirthdayHamperDetails.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { birthdayHampers, BirthdayHamper, Variant } from "../Data/BirthdayHampersdata"; 
+import { useState, useEffect, useMemo } from "react";
+import { birthdayHampers, BirthdayHamper, Variant } from "../Data/BirthdayHampersdata";
 import { useCart } from "../AuthContext/CartContext";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,81 +11,120 @@ type Params = { id: string };
 export default function BirthdayHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
+  // ✅ Hooks always come first
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  const productFromParams: BirthdayHamper | undefined = birthdayHampers.find((p: BirthdayHamper) => p.id === id);
-  if (!productFromParams)
-    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  // Find the product (can be undefined)
+  const productFromParams: BirthdayHamper | undefined = birthdayHampers.find((p) => p.id === id);
 
-  const [currentProduct, setCurrentProduct] = useState<BirthdayHamper>(productFromParams);
-  const [selectedVariant, setSelectedVariant] = useState<Variant>({
-    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
-    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-  });
+  // currentProduct state
+  const [currentProduct, setCurrentProduct] = useState<BirthdayHamper | null>(productFromParams ?? null);
 
+  // Handle loading simulation
   useEffect(() => {
-    setSelectedVariant({
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // selectedVariant memo
+  const selectedVariant = useMemo(() => {
+    if (!currentProduct) return null;
+    return {
       image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-    });
-    setQuantity(1);
+    };
   }, [currentProduct]);
 
+  // currentVariant state
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
+
+  useEffect(() => {
+    setCurrentVariant(selectedVariant);
+    setQuantity(1);
+  }, [selectedVariant]);
+
+  // Add to cart handler
   const handleAddToCart = () => {
+    if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
+
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: selectedVariant.price.toString(),
+      price: currentVariant.price.toString(),
       quantity,
-      image: selectedVariant.image,
-      discount: selectedVariant.discount,
+      image: currentVariant.image,
+      discount: currentVariant.discount,
       category: currentProduct.category,
       highlight: currentProduct.highlight,
     });
+
     setToast(`${currentProduct.name} added to cart`);
     setTimeout(() => setToast(null), 2000);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Product not found
+  if (!currentProduct) {
+    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Left: Hero Image */}
         <div className="flex-1 relative">
-          <motion.img
-            src={selectedVariant.image}
-            alt={currentProduct.name}
-            className="w-full rounded-3xl shadow-xl object-cover"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
-          />
-          {selectedVariant.discount && (
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+            </div>
+          )}
+          {currentVariant && (
+            <motion.img
+              src={currentVariant.image}
+              alt={currentProduct.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImgLoaded(true)}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+            />
+          )}
+          {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
-              {selectedVariant.discount}% OFF
+              {currentVariant.discount}% OFF
             </span>
           )}
 
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1">
-              {currentProduct.variants.map((v: Variant, i: number) => (
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory ">
+              {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setSelectedVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
-                    selectedVariant.image === v.image
+                  onClick={() => setCurrentVariant(v)}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                    currentVariant?.image === v.image
                       ? "border-[#b46029] ring-2 ring-[#b46029]"
                       : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
                 >
-                  <img
-                    src={v.image}
-                    alt={`thumb-${i}`}
-                    className="h-20 w-20 object-cover rounded-lg"
-                  />
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
@@ -103,12 +143,14 @@ export default function BirthdayHamperDetails() {
           {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i: number) => (
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
             </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{selectedVariant.price}</span>
-            {selectedVariant.discount && (
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
+              ₹{currentVariant?.price}
+            </span>
+            {currentVariant?.discount && (
               <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
             )}
           </div>
@@ -120,29 +162,72 @@ export default function BirthdayHamperDetails() {
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
             {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
             {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+            <span
+              className={`px-2 py-1 rounded ${
+                currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+            {currentProduct.returnPolicy && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>
+            )}
+          </div>
+
+          {/* Additional details */}
+          <div className="mt-4 space-y-2 text-gray-700">
+            {currentProduct.material && (
+              <p>
+                <span className="font-semibold">Material:</span> {currentProduct.material}
+              </p>
+            )}
+            {currentProduct.dimensions && (
+              <p>
+                <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
+              </p>
+            )}
+            {currentProduct.weight && (
+              <p>
+                <span className="font-semibold">Weight:</span> {currentProduct.weight}
+              </p>
+            )}
+            {currentProduct.careInstructions && (
+              <p>
+                <span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}
+              </p>
+            )}
           </div>
 
           {/* Quantity & Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <div className="flex items-center border rounded-full overflow-hidden">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                -
+              </button>
               <span className="px-6 py-2">{quantity}</span>
-              <button onClick={() => setQuantity((q) => q + 1)}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition"
+              >
+                +
+              </button>
             </div>
-
-            <button onClick={handleAddToCart}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#b46029] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
+            <button
+              onClick={handleAddToCart}
+              disabled={!currentProduct.inStock}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
+                currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
+            >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
 
-          {/* Detailed Sections */}
+          {/* Structured Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.tags && (
               <div className="bg-gray-50 p-3 rounded-md">
@@ -154,7 +239,7 @@ export default function BirthdayHamperDetails() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item: string, idx: number) => (
+                  {currentProduct.contents.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
@@ -170,7 +255,8 @@ export default function BirthdayHamperDetails() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Delivery</h3>
                 <p className="text-gray-600">
-                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}
+                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated{" "}
+                  {currentProduct.delivery.estimated}
                 </p>
               </div>
             )}
@@ -186,8 +272,7 @@ export default function BirthdayHamperDetails() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
           >
             {toast}
           </motion.div>

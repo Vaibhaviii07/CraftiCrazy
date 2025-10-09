@@ -152,9 +152,14 @@ export default function HaldiPlatterPage() {
                     className="w-full max-w-[320px] flex flex-col"
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
-                      <img
+                      {/* Lazy-loaded image with fade-in */}
+                      <motion.img
                         src={item.image}
                         alt={item.name}
+                        loading="lazy"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6 }}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                       />
                       {item.discount && (

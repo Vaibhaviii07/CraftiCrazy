@@ -1,13 +1,19 @@
 // src/Pages/Accessories/KeyChainPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { keyChains } from "../../Data/KeyChainData"; 
+import { keyChains } from "../../Data/KeyChainData";
 import { Link } from "react-router-dom";
 
 export default function KeyChainPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000); // simulate loading
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -57,7 +63,7 @@ export default function KeyChainPage() {
       {/* Hero Section */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
-          KeyChainPage
+          KeyChains
           <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
         </h2>
         <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
@@ -137,62 +143,77 @@ export default function KeyChainPage() {
             </select>
           </div>
 
-          {/* Product Cards */}
+          {/* Product Cards with Lazy Loader */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedKeyChains.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/keydetail/${item.id}`}
-                    className="w-full max-w-[330px] flex flex-col"
-                  >
-                    <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                          }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
+              {loading
+                ? // Skeleton loaders while loading
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex justify-center"
+                    >
+                      <div className="w-full max-w-[330px] bg-gray-200 animate-pulse rounded-2xl h-[320px] sm:h-[360px]"></div>
+                    </motion.div>
+                  ))
+                : // Loaded products
+                  sortedKeyChains.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.4 }}
+                      className="flex justify-center"
+                    >
+                      <Link
+                        to={`/keydetail/${item.id}`}
+                        className="w-full max-w-[330px] flex flex-col"
+                      >
+                        <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          {item.discount && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20,
+                              }}
+                              className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                            >
+                              {item.discount}% OFF
+                            </motion.span>
+                          )}
+                        </div>
 
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
-                      {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
-                          ₹{item.price}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                        <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                          <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                            {item.name}
+                          </p>
+                          {item.description && (
+                            <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                              {item.description}
+                            </p>
+                          )}
+                          <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                            <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
+                              ₹{item.price}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
             </AnimatePresence>
           </div>
         </div>
