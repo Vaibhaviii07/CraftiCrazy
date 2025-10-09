@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
@@ -43,18 +44,18 @@ const HomePage = () => {
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 justify-center">
-              <a
-                href="/newarrivals"
+              <Link
+                to="/newarrivals"
                 className="px-4 sm:px-8 py-2 sm:py-3 bg-[#FFF0CE] hover:bg-[#fff1eb] rounded-full text-[#cb997e] font-semibold text-[0.8rem] sm:text-lg transition-all transform hover:scale-105 shadow-md"
               >
                 Shop Now
-              </a>
-              <a
-                href="/AboutUs"
+              </Link>
+              <Link
+                to="/aboutus"
                 className="px-4 sm:px-8 py-2 sm:py-3 bg-[#FFE8CD] border border-[#cb997e] hover:bg-[#6c584c] rounded-full text-[#cb997e] font-semibold text-[0.8rem] sm:text-lg transition-all transform hover:scale-105 shadow-sm"
               >
                 Learn More
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>
