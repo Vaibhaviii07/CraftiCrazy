@@ -88,35 +88,25 @@ export default function EngagementTrayDetailPage() {
           )}
 
           {/* Variant Thumbnails */}
-          {currentProduct.variants && currentProduct.variants.length > 1 && (
+            {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
                   onClick={() => setCurrentVariant(v)}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 ${
-                    currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
+                    currentVariant?.image === v.image
+                      ? "border-[#b46029] ring-2 ring-[#b46029]"
+                      : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  {!thumbsLoaded[i] && <div className="h-20 w-20 bg-gray-200 animate-pulse rounded-lg"></div>}
-                  <img
-                    src={v.image}
-                    alt={`thumb-${i}`}
-                    className={`h-20 w-20 object-cover rounded-lg transition-opacity duration-500 ${thumbsLoaded[i] ? "opacity-100" : "opacity-0"}`}
-                    onLoad={() => setThumbsLoaded(prev => ({ ...prev, [i]: true }))}
-                  />
-                  {v.discount && (
-                    <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
-                      {v.discount}% OFF
-                    </span>
-                  )}
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" loading="lazy" />
                 </motion.div>
               ))}
             </div>
           )}
         </div>
-
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
