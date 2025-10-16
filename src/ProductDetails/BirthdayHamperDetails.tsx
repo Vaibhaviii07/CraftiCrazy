@@ -5,16 +5,25 @@ import { birthdayHampers, BirthdayHamper, Variant } from "../Data/BirthdayHamper
 import { useCart } from "../AuthContext/CartContext";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+<<<<<<< HEAD
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
+=======
+import { useAuth } from "../AuthContext/AuthContext";
+>>>>>>> origin/master
 
 type Params = { id: string };
 
 export default function BirthdayHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
 
+<<<<<<< HEAD
   // Hooks
+=======
+  // Hooks always come first
+>>>>>>> origin/master
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,12 +70,9 @@ export default function BirthdayHamperDetails() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: currentVariant.price.toString(),
+      price: currentVariant.price,
       quantity,
       image: currentVariant.image,
-      discount: currentVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
     });
 
     setToast(`${currentProduct.name} added to cart`);

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
@@ -9,10 +9,15 @@ import {
   Gift,
   Sparkles,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import { useCart } from "../AuthContext/CartContext";
+import { useAuth } from "../AuthContext/AuthContext";
 import { allProducts } from "../Data/AllProduct";
 
+// ----------------------
+// Interface Definitions
+// ----------------------
 interface SubLink {
   name: string;
   href: string;
@@ -33,24 +38,41 @@ interface NavbarProps {
   setCartOpen: (open: boolean) => void;
 }
 
+// ----------------------
+// Navbar Component
+// ----------------------
 const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
-  const [open, setOpen] = useState(false);
-  const [dropdown, setDropdown] = useState<number | null>(null);
-  const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // ---------- State ----------
+  const [open, setOpen] = useState(false); // mobile menu toggle
+  const [dropdown, setDropdown] = useState<number | null>(null); // desktop submenu
+  const [mobileDropdown, setMobileDropdown] = useState<number | null>(null); // mobile submenu
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // hover delay for submenu
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<Product[]>([]);
+  const [userDropdown, setUserDropdown] = useState(false);
+  const [userData, setUserData] = useState<{ name: string; email: string } | null>(null);
 
+  // ---------- Hooks ----------
   const { cart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleMouseEnter = (idx: number) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setDropdown(idx);
-  };
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setDropdown(null), 250);
+  // ---------- Fetch Logged-In User ----------
+  useEffect(() => {
+    // Decode or get user info from context
+    if (user) {
+      setUserData({ name: user.name, email: user.email });
+    }
+  }, [user]);
+
+  // ---------- Logout Handler ----------
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // remove auth token
+    setUserData(null); // clear state
+    navigate("/login"); // redirect
   };
 
+  // ---------- Search Handler ----------
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
     setQuery(value);
@@ -66,6 +88,16 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
     setResult(filtered);
   };
 
+  // ---------- Dropdown Hover Logic ----------
+  const handleMouseEnter = (idx: number) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setDropdown(idx);
+  };
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setDropdown(null), 250);
+  };
+
+  // ---------- Nav Links ----------
   const links: NavLink[] = [
     { name: "New & Best Sellers", href: "/newarrivals" },
     {
@@ -128,10 +160,13 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
     { name: "Contact", href: "/contactus" },
   ];
 
+  // ----------------------
+  // JSX Return
+  // ----------------------
   return (
     <header className="sticky top-0 z-50 bg-[#faf7f0] shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-10 py-4">
-        {/* Logo */}
+        {/* ------------------ Logo ------------------ */}
         <Link to="/" className="flex items-center gap-2 cursor-pointer relative">
           <div className="relative flex items-center justify-center">
             <Gift className="w-8 h-8 text-[#432818]" />
@@ -142,7 +177,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
           </span>
         </Link>
 
-        {/* Search */}
+        {/* ------------------ Search ------------------ */}
         <div className="hidden md:flex flex-1 justify-center px-6">
           <div className="relative w-full max-w-lg">
             <input
@@ -178,11 +213,37 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
           </div>
         </div>
 
-        {/* Desktop Icons */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/login" aria-label="Login">
-            <User size={22} className="text-[#432818] hover:text-yellow-600 transition" />
-          </Link>
+        {/* ------------------ Desktop Icons ------------------ */}
+        <div className="hidden md:flex items-center gap-6 relative">
+          {/* ----- User Dropdown ----- */}
+          {userData ? (
+            <div className="relative">
+              <button onClick={() => setUserDropdown(!userDropdown)}>
+                <User size={22} className="text-[#432818] cursor-pointer" />
+              </button>
+
+              {userDropdown && (
+                <div className="absolute right-0 mt-3 bg-white shadow-lg rounded-lg w-52 border">
+                  <div className="px-4 py-3 border-b">
+                    <p className="font-semibold text-gray-800">{userData.name}</p>
+                    <p className="text-sm text-gray-500">{userData.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login"  className="flex items-center gap-2 text-[#432818] hover:text-yellow-600 transition" aria-label="Login">
+              <User size={16} /> <span>Login</span>
+            </Link>
+          )}
+
+          {/* ----- Cart Icon ----- */}
           <button
             onClick={() => setCartOpen(true)}
             className="relative"
@@ -197,16 +258,12 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
           </button>
         </div>
 
-        {/* Mobile Hamburger + Login + Cart */}
+        {/* ------------------ Mobile Section ------------------ */}
         <div className="flex md:hidden items-center gap-4">
           <Link to="/login" aria-label="Login">
             <User size={26} className="text-[#432818]" />
           </Link>
-          <button
-            onClick={() => setCartOpen(true)}
-            className="relative"
-            aria-label="Cart"
-          >
+          <button onClick={() => setCartOpen(true)} className="relative" aria-label="Cart">
             <ShoppingCart size={26} className="text-[#432818]" />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
@@ -220,7 +277,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
         </div>
       </div>
 
-      {/* Desktop Nav */}
+      {/* ------------------ Desktop Nav Links ------------------ */}
       <nav className="hidden md:flex justify-center gap-8 text-[#432818] font-medium text-base py-3 bg-[#fbfaf8]">
         {links.map((link, idx) => (
           <div
@@ -253,7 +310,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
         ))}
       </nav>
 
-      {/* Mobile Nav */}
+      {/* ------------------ Mobile Nav Links ------------------ */}
       {open && (
         <nav className="md:hidden bg-[#fbfaf8] px-6 py-4 shadow-md space-y-2">
           {links.map((link, idx) => (

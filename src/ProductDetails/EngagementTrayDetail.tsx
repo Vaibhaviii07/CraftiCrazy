@@ -5,8 +5,12 @@ import { engagementTrays, EngagementTray, Variant } from "../Data/EngagementTray
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+<<<<<<< HEAD
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
+=======
+import { useAuth } from "../AuthContext/AuthContext";
+>>>>>>> origin/master
 
 type Params = { id: string };
 
@@ -22,6 +26,7 @@ function Loader() {
 export default function EngagementTrayDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
 
 
 
@@ -69,16 +74,17 @@ export default function EngagementTrayDetailPage() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: currentVariant.price.toString(),
+      price: currentVariant.price,
       quantity,
       image: currentVariant.image,
-      discount: currentVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
     });
 
-    setToast(`${currentProduct.name} added to cart`);
-    setTimeout(() => setToast(null), 2000);
+    
+    if (isAuthenticated) {
+      setToast(`${currentProduct.name} added to cart`);
+    } else {
+      return;
+    }
   };
 
   if (loading) return <Loader />;

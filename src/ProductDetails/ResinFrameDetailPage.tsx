@@ -5,8 +5,12 @@ import { resinFrames, ResinFrame, Variant } from "../Data/ResinFramedata";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+<<<<<<< HEAD
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
+=======
+import { useAuth } from "../AuthContext/AuthContext";
+>>>>>>> origin/master
 
 type Params = { id: string };
 
@@ -22,6 +26,7 @@ function Loader() {
 export default function ResinFrameDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
 
 
 
@@ -61,12 +66,9 @@ export default function ResinFrameDetailPage() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: currentVariant.price.toString(),
+      price: currentVariant.price,
       quantity,
       image: currentVariant.image,
-      discount: currentVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
     });
 
     setToast(`${currentProduct.name} added to cart`);

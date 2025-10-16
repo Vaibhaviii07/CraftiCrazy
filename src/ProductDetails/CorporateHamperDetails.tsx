@@ -5,15 +5,20 @@ import { corporateHampers, CorporateHamper, Variant } from "../Data/CorporateDat
 import { useCart } from "../AuthContext/CartContext";
 import { Star, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+<<<<<<< HEAD
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 
+=======
+import { useAuth } from "../AuthContext/AuthContext";
+>>>>>>> origin/master
 
 type Params = { id: string };
 
 export default function CorporateHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
 
   
 
@@ -74,18 +79,17 @@ export default function CorporateHamperDetails() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: currentVariant.price.toString(),
+      price: currentVariant.price,
       quantity,
       image: currentVariant.image,
-      discount: currentVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
     });
 
-    setToast(`${currentProduct.name} added to cart`);
-
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    toastTimeoutRef.current = setTimeout(() => setToast(null), 2000);
+    
+    if (isAuthenticated) {
+      setToast(`${currentProduct.name} added to cart`);
+    } else {
+      return;
+    }
   };
 
   useEffect(() => {

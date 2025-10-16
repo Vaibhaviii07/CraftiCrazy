@@ -11,7 +11,7 @@ interface CartSidebarProps {
 }
 
 const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
-  const { cart, removeFromCart, increaseQty, decreaseQty, updateCartItem } = useCart();
+  const { cart, removeFromCart, increaseQty, decreaseQty,updateCartItem} = useCart();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const subtotal = cart.reduce(

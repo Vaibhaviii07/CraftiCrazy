@@ -2,25 +2,51 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinClocks, ResinClock } from "../../Data/ResinWallClockdata";
 import { Link } from "react-router-dom";
+import { useCart } from "../../AuthContext/CartContext";
+import { useAuth } from "../../AuthContext/AuthContext";
+import { ToastContainer, toast } from "react-toastify";
+
 
 export default function ResinClockPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
 
+  const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
+
+  // Convert ResinClock → CartItem before adding
+  const handleAddToCart = (item: ResinClock) => {
+    const token = localStorage.getItem("token");
+    if (!token && !isAuthenticated) {
+      return;
+    }
+
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      quantity: 1,
+    };
+
+    addToCart(cartItem);
+  };
+
   const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinClocks.map(item => item.category))];
+  const categories = [...new Set(resinClocks.map((item) => item.category))];
 
   // Filter items
   const filteredItems = resinClocks.filter((item: ResinClock) => {
     const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(item.category);
 
     let highlightMatch = true;
     switch (highlight) {
@@ -57,8 +83,9 @@ export default function ResinClockPage() {
   }, [filteredItems, sortOption]);
 
   return (
-    <section className="min-h-screen">
+    <section className="min-h-screen bg-gray-50 pb-12">
       {/* Hero Section */}
+       <ToastContainer />
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Resin Clocks
@@ -79,7 +106,7 @@ export default function ResinClockPage() {
               Categories
             </h3>
             <ul className="space-y-2">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -88,7 +115,10 @@ export default function ResinClockPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -102,12 +132,14 @@ export default function ResinClockPage() {
               Highlight
             </h3>
             <ul className="space-y-2">
-              {highlightOptions.map(opt => (
+              {highlightOptions.map((opt) => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
+                    highlight === opt
+                      ? "text-[#b46029] font-semibold"
+                      : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -126,7 +158,7 @@ export default function ResinClockPage() {
             </p>
             <select
               value={sortOption}
-              onChange={e => setSortOption(e.target.value)}
+              onChange={(e) => setSortOption(e.target.value)}
               className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
             >
               <option>Default sorting</option>
@@ -148,11 +180,8 @@ export default function ResinClockPage() {
                   transition={{ duration: 0.4 }}
                   className="flex justify-center"
                 >
-                  <Link
-                    to={`/clockdetail/${item.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
-                  >
-                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                  <div className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3 overflow-hidden">
+                    <Link to={`/clockdetail/${item.id}`} className="relative">
                       <motion.img
                         src={item.image}
                         alt={item.name}
@@ -161,7 +190,7 @@ export default function ResinClockPage() {
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        className="w-full h-[240px] sm:h-[320px] lg:h-[380px] object-cover transition-transform duration-500 hover:scale-105"
                       />
 
                       {item.discount && (
@@ -169,16 +198,20 @@ export default function ResinClockPage() {
                           initial={{ scale: 0 }}
                           whileInView={{ scale: 1 }}
                           viewport={{ once: true }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                          }}
                           className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {item.discount}% OFF
                         </motion.span>
                       )}
-                    </div>
+                    </Link>
 
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                    <div className="p-4 text-center flex flex-col flex-grow">
+                      <p className="text-base sm:text-lg text-gray-900 font-playfair leading-snug">
                         {item.name}
                       </p>
                       {item.description && (
@@ -186,18 +219,29 @@ export default function ResinClockPage() {
                           {item.description}
                         </p>
                       )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+
+                      <div className="mt-2 flex justify-center gap-2 items-baseline">
                         <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
                           ₹{item.price}
                         </span>
                         {item.discount && (
                           <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
-                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                            ₹
+                            {Math.round(
+                              item.price / (1 - (item.discount || 0) / 100)
+                            )}
                           </span>
                         )}
                       </div>
+
+                      <button
+                        onClick={() => handleAddToCart(item)}
+                        className="mt-auto bg-[#b46029] text-white text-sm sm:text-base px-4 py-2 rounded-md hover:bg-[#944d21] transition-all duration-300 mt-4"
+                      >
+                        Add to Cart
+                      </button>
                     </div>
-                  </Link>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>

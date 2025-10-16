@@ -1,32 +1,89 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, LogIn } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../AuthContext/AuthContext";
+
+interface LoginResponse {
+  token: string;
+  user: {
+    name: string;
+    email: string;
+  };
+}
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const emailRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  const {login } = useAuth();
+
 
   useEffect(() => {
-    // Auto-focus the email input when component mounts
     emailRef.current?.focus();
-    console.log("Login component mounted");
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 🔗 Replace with real authentication logic
-    console.log("Login submitted:", { email, password });
-    alert(`Logged in with email: ${email}`);
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data: LoginResponse & { message?: string } = await res.json();
+      
+      if(res.ok && data.token){
+        //we have to check the data is coming properly or not when we are working with backend
+        login(data.token);
+        toast.success(`Welcome back, ${data.user?.name}!`, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      }else {
+        toast.error(data.message || "Invalid credentials", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+        setError(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      setTimeout(() => navigate("/home"), 2000);
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6">
+      <ToastContainer />
       <div className="w-full max-w-sm bg-white shadow-lg rounded-2xl p-6 sm:p-8">
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-5">
           <img
-            src="/Logo.jpeg"
+            src={"/Logo.jpeg"}
             alt="CraftiCrazy Logo"
             className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-amber-400"
           />
@@ -41,7 +98,8 @@ const Login = () => {
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="mt-5 space-y-4">
-          {/* Email */}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
           <div>
             <label className="block text-gray-700 font-medium text-sm sm:text-base">
               Email
@@ -53,14 +111,13 @@ const Login = () => {
                 required
                 placeholder="you@example.com"
                 value={email}
-                ref={emailRef} // 👈 useEffect focuses this input
+                ref={emailRef}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
             </div>
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-700 font-medium text-sm sm:text-base">
               Password
@@ -78,7 +135,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Forgot Password */}
           <div className="text-right">
             <Link
               to="/forgot-password"
@@ -88,24 +144,24 @@ const Login = () => {
             </Link>
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg shadow-md transition text-sm sm:text-base"
+            disabled={loading}
+            className={`w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg shadow-md transition text-sm sm:text-base ${
+              loading ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
             <LogIn size={18} />
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Divider */}
         <div className="flex items-center gap-2 my-5">
           <div className="flex-1 h-px bg-gray-200"></div>
           <span className="text-xs sm:text-sm text-gray-400">OR</span>
           <div className="flex-1 h-px bg-gray-200"></div>
         </div>
 
-        {/* Register Link */}
         <p className="text-center text-gray-600 mt-4 text-xs sm:text-sm">
           Don’t have an account?{" "}
           <Link

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -10,9 +11,13 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
-  const [passwordMatch, setPasswordMatch] = useState(true);
-  const nameRef = useRef<HTMLInputElement>(null);
 
+  const [passwordMatch, setPasswordMatch] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  // Autofocus on name field
   useEffect(() => {
     nameRef.current?.focus();
   }, []);
@@ -28,15 +33,41 @@ const SignUp = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle signup
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!passwordMatch) {
       alert("Passwords do not match!");
       return;
     }
-    console.log("SignUp Data:", formData);
-    alert("Account created successfully!");
-    setFormData({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
+
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Account created successfully!");
+        navigate("/login");
+      } else {
+        alert(data.message || "Signup failed");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server error! Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,6 +106,7 @@ const SignUp = () => {
             value={formData.name}
             onChange={handleChange}
             ref={nameRef}
+            required
             className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:outline-none"
           />
 
@@ -84,6 +116,7 @@ const SignUp = () => {
             placeholder="Email Address"
             value={formData.email}
             onChange={handleChange}
+            required
             className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:outline-none"
           />
 
@@ -93,6 +126,7 @@ const SignUp = () => {
             placeholder="Phone Number"
             value={formData.phone}
             onChange={handleChange}
+            required
             className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:outline-none"
           />
 
@@ -102,6 +136,7 @@ const SignUp = () => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
+            required
             className="w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:outline-none"
           />
 
@@ -111,22 +146,26 @@ const SignUp = () => {
             placeholder="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange}
+            required
             className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-xl text-sm sm:text-base focus:ring-2 ${
               passwordMatch ? "focus:ring-amber-500" : "focus:ring-red-500"
             } focus:outline-none`}
           />
-          {!passwordMatch && (
+          {!passwordMatch && formData.confirmPassword && (
             <p className="text-red-500 text-xs sm:text-sm">Passwords do not match!</p>
+          )}
+          {passwordMatch && formData.confirmPassword && (
+            <p className="text-green-500 text-xs sm:text-sm">Password match!</p>
           )}
 
           <button
             type="submit"
-            disabled={!passwordMatch}
+            disabled={!passwordMatch || loading}
             className={`w-full py-2 sm:py-3 bg-amber-600 text-white rounded-xl font-semibold shadow-md hover:bg-amber-700 transition text-sm sm:text-base ${
-              !passwordMatch ? "opacity-60 cursor-not-allowed" : ""
+              !passwordMatch || loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
