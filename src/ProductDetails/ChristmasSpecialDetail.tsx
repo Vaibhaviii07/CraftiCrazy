@@ -5,13 +5,9 @@ import { christmasSpecials, ChristmasSpecial, Variant } from "../Data/ChristmasS
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-<<<<<<< HEAD
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
-
-=======
 import { useAuth } from "../AuthContext/AuthContext";
->>>>>>> origin/master
 
 type Params = { id: string };
 

@@ -4,14 +4,9 @@ import { resinJewelry, ResinJewelry, Variant } from "../Data/ResinJewelryData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-<<<<<<< HEAD
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
-
-
-=======
 import { useAuth } from "../AuthContext/AuthContext";
->>>>>>> origin/master
 
 type Params = { id: string };
 
