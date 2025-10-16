@@ -3,15 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
-  useEffect(() => {
-    console.log("HomePage mounted");
-
-    // Example: could trigger an animation, analytics, or fetch data here
-
-    return () => {
-      console.log("HomePage unmounted");
-    };
-  }, []);
+ 
 
   return (
     <div className="bg-[#FBFAF7]">

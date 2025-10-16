@@ -5,12 +5,14 @@ import { rakhiKits, RakhiKit, Variant } from "../Data/RakhiData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../AuthContext/AuthContext";
 
 type Params = { id: string };
 
 export default function RakhiDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
 
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -46,16 +48,18 @@ export default function RakhiDetailPage() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: selectedVariant.price.toString(),
+      price: selectedVariant.price,
       quantity,
       image: selectedVariant.image,
-      discount: selectedVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
+     
     });
 
-    setToast(`${currentProduct.name} added to cart`);
-    setTimeout(() => setToast(null), 2000);
+    
+    if (isAuthenticated) {
+      setToast(`${currentProduct.name} added to cart`);
+    } else {
+      return;
+    }
   };
 
   return (

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../AuthContext/CartContext";
 import { newArrivalsData } from "../Data/NewArrivalsData";
 import { Link } from "react-router-dom";
+import { useAuth } from "../AuthContext/AuthContext";
 
 const NewArrivals = () => {
   const [loaded, setLoaded] = useState(false);
@@ -14,6 +15,7 @@ const NewArrivals = () => {
   const [sortOption, setSortOption] = useState("Default sorting");
   const [cartQuantities, setCartQuantities] = useState<{ [key: number]: number }>({});
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 800);
@@ -38,8 +40,11 @@ const NewArrivals = () => {
       quantity: 1,
     });
 
-    setToast(`${item.name || item.heading} added to cart`);
-    setTimeout(() => setToast(null), 2500);
+    if(isAuthenticated){
+      setToast(`${item.name || item.heading} added to cart`);
+    }else{
+      return;
+    }
   };
 
   const toggleCategory = (cat: string) => {
@@ -123,9 +128,8 @@ const NewArrivals = () => {
             <li
               key={opt}
               onClick={() => setHighlight(opt)}
-              className={`text-sm cursor-pointer ${
-                highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
-              }`}
+              className={`text-sm cursor-pointer ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"
+                }`}
             >
               {opt}
             </li>
@@ -203,8 +207,8 @@ const NewArrivals = () => {
                   {item.heading}
                 </h3>
                 <p className="mt-1 text-gray-700 text-sm">₹{item.price}</p>
-               <Link
-                  to={item.link || "/"} 
+                <Link
+                  to={item.link || "/"}
                   className="mt-4 px-5 py-2 bg-[#C45A36] hover:bg-[#8c341f] text-white text-sm font-medium rounded-md transition-all duration-300"
                 >
                   {item.button}
@@ -292,69 +296,76 @@ const NewArrivals = () => {
             <AnimatePresence>
               {loaded
                 ? sortedProducts.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.4 }}
-                      className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg overflow-hidden flex flex-col transition-all duration-300"
-                    >
-                      <div className="w-full aspect-[1.3/1] bg-gray-100 relative overflow-hidden">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className={`w-full h-full object-cover transition-opacity duration-500 ${
-                            imagesLoaded[index] ? "opacity-100" : "opacity-0"
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg overflow-hidden flex flex-col transition-all duration-300"
+                  >
+                    <div className="w-full aspect-[1.3/1] bg-gray-100 relative overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className={`w-full h-full object-cover transition-opacity duration-500 ${imagesLoaded[index] ? "opacity-100" : "opacity-0"
                           }`}
-                          onLoad={() => handleImageLoad(index)}
-                        />
-                      </div>
+                        onLoad={() => handleImageLoad(index)}
+                      />
+                    </div>
 
-                      <div className="p-3 sm:p-4 text-center flex flex-col flex-1 justify-between">
-                        <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-1 truncate">
-                          {item.name}
-                        </h3>
-                        <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-2">
-                          {item.description || "Beautiful handmade creation"}
-                        </p>
-                        <span className="text-[#C45A36] font-semibold text-sm sm:text-base mb-2">
-                          ₹{item.price}
-                        </span>
+                    <div className="p-3 sm:p-4 text-center flex flex-col flex-1 justify-between">
+                      <h3 className="text-gray-800 font-semibold text-sm sm:text-base mb-1 truncate">
+                        {item.name}
+                      </h3>
+                      <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-2">
+                        {item.description || "Beautiful handmade creation"}
+                      </p>
+                      <span className="text-[#C45A36] font-semibold text-sm sm:text-base mb-2">
+                        ₹{item.price}
+                      </span>
 
+                   
                         <button
-                          onClick={() => handleAddToCart(item)}
-                          className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition ${
-                            cartQuantities[item.id]
+                          onClick={() => {
+                            if(isAuthenticated){
+                               handleAddToCart(item)
+                              }else {
+                                setToast("please login first!");
+                                setTimeout(() => setToast(null), 2000);
+                              }
+                            }}
+                          className={`px-4 py-2 rounded-full text-xs sm:text-sm cursor-pointer font-medium transition ${cartQuantities[item.id]
                               ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                               : "bg-[#C45A36] text-white hover:bg-[#8c341f]"
-                          }`}
+                            }`}
+                            
                           disabled={!!cartQuantities[item.id]}
                         >
                           {cartQuantities[item.id] ? "Added" : "Add"}
                         </button>
-                      </div>
-                    </motion.div>
-                  ))
+                    </div>
+                  </motion.div>
+                ))
                 : Array(6)
-                    .fill(0)
-                    .map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-full bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col"
-                      >
-                        <div className="relative w-full aspect-[1.3/1] bg-gray-200 overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer"></div>
-                        </div>
-                        <div className="p-4 flex-1 flex flex-col justify-between">
-                          <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                          <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse w-5/6"></div>
-                          <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-                          <div className="h-8 mt-3 bg-gray-200 rounded-full animate-pulse"></div>
-                        </div>
+                  .fill(0)
+                  .map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-full bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col"
+                    >
+                      <div className="relative w-full aspect-[1.3/1] bg-gray-200 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer"></div>
                       </div>
-                    ))}
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse w-5/6"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                        <div className="h-8 mt-3 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
             </AnimatePresence>
           </div>
         </div>

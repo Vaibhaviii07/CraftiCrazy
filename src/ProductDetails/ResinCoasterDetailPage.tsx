@@ -5,12 +5,14 @@ import { resinCoasterSets, ResinCoaster, Variant } from "../Data/ResinCoasterSet
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../AuthContext/AuthContext";
 
 type Params = { id: string };
 
 export default function ResinCoasterDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -53,16 +55,18 @@ export default function ResinCoasterDetailPage() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: currentVariant.price.toString(),
+      price: currentVariant.price,
       quantity,
       image: currentVariant.image,
-      discount: currentVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
     });
 
-    setToast(`${currentProduct.name} added to cart`);
-    setTimeout(() => setToast(null), 2000);
+    if (isAuthenticated) {
+      setToast(`${currentProduct.name} added to cart`);
+    } else {
+      return;
+    }
+
+
   };
 
   if (loading) {
@@ -110,9 +114,8 @@ export default function ResinCoasterDetailPage() {
                 <motion.div
                   key={i}
                   onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant?.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"
-                  }`}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant?.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"
+                    }`}
                   whileHover={{ scale: 1.05 }}
                   aria-label={`Select variant ${i + 1}`}
                 >

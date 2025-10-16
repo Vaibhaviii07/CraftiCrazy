@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {useAuth} from "../src/AuthContext/AuthContext.tsx"
+
 
 import Navbar from "./Components/Navbar";
 import HeroPage from "./Pages/HeroPage";
@@ -76,13 +80,14 @@ function App() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [cartOpen, setCartOpen] = useState(false); // For Sidebar
+  const {isAuthenticated} = useAuth();
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated){
       const timer = setTimeout(() => setShowPrompt(true), 5000);
       return () => clearTimeout(timer);
     }
-  }, [isLoggedIn]);
+  }, [isAuthenticated]);
 
   return (
     <Router>
@@ -170,9 +175,17 @@ function App() {
       <Footer />
 
       {/* Login Prompt Modal */}
-      {showPrompt && !isLoggedIn && (
+      {showPrompt && !isAuthenticated && (
         <LoginPromptModal onClose={() => setShowPrompt(false)} />
       )}
+       <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
     </Router>
   );
 }

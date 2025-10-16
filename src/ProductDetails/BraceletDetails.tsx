@@ -5,6 +5,7 @@ import { bracelets, Bracelet, Variant } from "../Data/BraceletData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../AuthContext/AuthContext";
 
 type Params = { id: string };
 
@@ -20,6 +21,7 @@ function Loader() {
 export default function BraceletDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
 
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -65,16 +67,17 @@ export default function BraceletDetails() {
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
-      price: currentVariant.price.toString(),
+      price: currentVariant.price,
       quantity,
       image: currentVariant.image,
-      discount: currentVariant.discount,
-      category: currentProduct.category,
-      highlight: currentProduct.highlight,
     });
 
-    setToast(`${currentProduct.name} added to cart`);
-    setTimeout(() => setToast(null), 2000);
+    
+    if (isAuthenticated) {
+      setToast(`${currentProduct.name} added to cart`);
+    } else {
+      return;
+    }
   };
 
   if (loading) return <Loader />;

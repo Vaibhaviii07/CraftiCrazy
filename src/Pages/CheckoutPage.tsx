@@ -3,8 +3,9 @@ import React, { useState, useEffect } from "react";
 import { useCart } from "../AuthContext/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-const CheckoutPage = () => {
+const CheckoutPage: React.FC = () => {
   const { cart, clearCart, updateCartItem } = useCart();
+
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -21,7 +22,7 @@ const CheckoutPage = () => {
 
   const [toast, setToast] = useState<string | null>(null);
 
-  // Prefill customization with cart items' customization if available
+  // 🧾 Prefill customization from cart items
   useEffect(() => {
     if (cart.length > 0) {
       setFormData((prev) => ({
@@ -31,21 +32,6 @@ const CheckoutPage = () => {
     }
   }, [cart]);
 
-  // Lock scroll while on checkout page
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-    // Auto-focus email input
-    const firstInput = document.querySelector<HTMLInputElement>(
-      'input[name="email"]'
-    );
-    firstInput?.focus();
-
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
 
   const totalPrice = cart.reduce(
     (total, item) => total + Number(item.price) * Number(item.quantity),
@@ -56,13 +42,13 @@ const CheckoutPage = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Update cart items with latest customization
+    //Update each cart item's customization
     cart.forEach((item) => {
       updateCartItem(item.id, {
         ...item,
@@ -73,18 +59,20 @@ const CheckoutPage = () => {
       });
     });
 
-    setToast("Order placed successfully!");
+    //Simulate order success
+    setToast("Order placed successfully! Thank you for shopping with us.");
     clearCart();
+
     setTimeout(() => setToast(null), 3000);
   };
 
   return (
-    <div className="min-h-screen bg-[#fffdf7] py-6 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
-        {/* Left Form Section */}
+    <div className="min-h-screen bg-[#fffdf7] py-6 px-4 sm:px-6 lg:px-12">
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+        {/* 🧾 Left Form Section */}
         <form
           onSubmit={handleSubmit}
-          className="w-full lg:w-2/3 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-4"
+          className="w-full lg:w-2/3 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 flex flex-col gap-4"
         >
           {/* Contact */}
           <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Contact</h2>
@@ -95,12 +83,12 @@ const CheckoutPage = () => {
             onChange={handleChange}
             required
             placeholder="Email or mobile number"
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
           />
 
           {/* Delivery Section */}
           <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Delivery</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               type="text"
               name="firstName"
@@ -128,7 +116,7 @@ const CheckoutPage = () => {
             onChange={handleChange}
             required
             placeholder="Address"
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
           />
 
           <input
@@ -137,10 +125,10 @@ const CheckoutPage = () => {
             value={formData.apartment}
             onChange={handleChange}
             placeholder="Apartment, suite, etc."
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
               name="city"
@@ -177,24 +165,26 @@ const CheckoutPage = () => {
             onChange={handleChange}
             required
             placeholder="Phone number"
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
           />
 
           {/* Customization */}
-          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Customization</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">
+            Customization
+          </h2>
           <textarea
             name="customization"
             value={formData.customization}
             onChange={handleChange}
             placeholder="Write if you want to customize your hamper or product..."
-            className="w-full border border-gray-300 rounded-md p-3 text-sm mb-4 focus:ring-2 focus:ring-[#5b2232] outline-none"
+            className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
             rows={3}
           ></textarea>
 
           {/* Payment */}
           <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Payment</h2>
-          <div className="border border-gray-300 rounded-md p-4 mb-4 space-y-2">
-            <label className="flex items-center space-x-3">
+          <div className="border border-gray-300 rounded-md p-4 mb-4 space-y-3">
+            <label className="flex items-center space-x-3 cursor-pointer">
               <input
                 type="radio"
                 name="paymentMethod"
@@ -205,7 +195,7 @@ const CheckoutPage = () => {
               />
               <span className="text-sm text-gray-700">Cash on Delivery (COD)</span>
             </label>
-            <label className="flex items-center space-x-3">
+            <label className="flex items-center space-x-3 cursor-pointer">
               <input
                 type="radio"
                 name="paymentMethod"
@@ -220,23 +210,24 @@ const CheckoutPage = () => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-[#5b2232] text-white font-semibold rounded-md hover:bg-[#451a27] transition"
+            className="w-full py-3 bg-[#5b2232] text-white font-semibold rounded-md hover:bg-[#451a27] transition duration-200"
           >
             Pay Now
           </button>
         </form>
 
-        {/* Right Order Summary */}
-        <div className="w-full lg:w-1/3 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 mt-6 lg:mt-0">
+        {/* 🛍️ Right Summary */}
+        <div className="w-full lg:w-1/3 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 mt-6 lg:mt-0">
           <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-4">Order Summary</h2>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-[26rem] overflow-y-auto">
             {cart.map((item) => (
               <div key={item.id} className="flex flex-col gap-1 border-b pb-2">
                 <div className="flex items-center gap-3">
                   <img
-                    src={item.image}
+                    src={item.image || "https://via.placeholder.com/80"}
                     alt={item.name}
                     className="w-14 h-14 object-cover rounded-md border"
+                    loading="lazy"
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#3c1f2c]">{item.name}</p>
@@ -249,10 +240,9 @@ const CheckoutPage = () => {
                   </p>
                 </div>
 
-                {/* Customization */}
                 {item.customization?.userInput && (
-                  <p className="text-xs text-gray-600 italic ml-17">
-                    💡 Customization: {item.customization.userInput}
+                  <p className="text-xs text-gray-600 italic ml-4">
+                    💡 {item.customization.userInput}
                   </p>
                 )}
               </div>
@@ -276,7 +266,7 @@ const CheckoutPage = () => {
         </div>
       </div>
 
-      {/* Toast */}
+      {/* ✅ Toast Message */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -284,8 +274,8 @@ const CheckoutPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 
-                       bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 
+                       bg-[#E8D4B7] text-[#3c1f2c] px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
           >
             {toast}
           </motion.div>
