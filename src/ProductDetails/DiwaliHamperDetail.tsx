@@ -5,12 +5,15 @@ import { diwaliHampers, DiwaliHamper, Variant } from "../Data/DiwaliHamperdata";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
 export default function DiwaliHamperDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
 
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -195,6 +198,10 @@ export default function DiwaliHamperDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
+
     </div>
   );
 }

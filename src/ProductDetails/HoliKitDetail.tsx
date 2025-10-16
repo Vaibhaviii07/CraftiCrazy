@@ -5,6 +5,9 @@ import { holiKits, HoliKit, Variant } from "../Data/HoliKitData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -20,6 +23,7 @@ export default function HoliKitDetail() {
   const [currentProduct] = useState<HoliKit | null>(productFromParams ?? null);
 
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+
 
   const selectedVariantDefault = useMemo(() => ({
     image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
@@ -190,6 +194,9 @@ export default function HoliKitDetail() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

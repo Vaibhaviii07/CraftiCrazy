@@ -71,6 +71,8 @@ import ChristmasSpecialPage from "./Pages/Festivel/ChristmasSpecialPage.tsx";
 import HoliKitDetail from "./ProductDetails/HoliKitDetail.tsx";
 import RakhiPage from "./Pages/Festivel/RakhiPage.tsx";
 import RakhiDetailPage from "./ProductDetails/RakhiDetail.tsx";
+import ReviewSection from "./Components/ReviewSlider.tsx";
+import FloatingCustomerReview from "./Components/FloatingCustomerReview.tsx";
 
 function App() {
   const [showPrompt, setShowPrompt] = useState(false);

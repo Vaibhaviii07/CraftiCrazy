@@ -5,12 +5,17 @@ import { corporateHampers, CorporateHamper, Variant } from "../Data/CorporateDat
 import { useCart } from "../AuthContext/CartContext";
 import { Star, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingCustomerReview from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
 export default function CorporateHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
+  
 
   // States
   const [quantity, setQuantity] = useState(1);
@@ -277,6 +282,12 @@ export default function CorporateHamperDetails() {
           </motion.div>
         )}
       </AnimatePresence>
+     {currentProduct && (
+  <>
+    <CustomerReview productId={currentProduct.id} />
+    <FloatingCustomerReview productId={currentProduct.id} />
+  </>
+)}
     </div>
   );
 }

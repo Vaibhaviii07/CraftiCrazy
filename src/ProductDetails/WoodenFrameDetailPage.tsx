@@ -5,6 +5,8 @@ import { woodenFrames, WoodenFrame, Variant } from "../Data/WoodenFramedata";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
@@ -25,6 +27,7 @@ export default function WoodenFrameDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+
 
   const productFromParams: WoodenFrame | undefined = woodenFrames.find((p) => p.id === id);
   const [currentProduct, setCurrentProduct] = useState<WoodenFrame | null>(productFromParams ?? null);
@@ -242,6 +245,9 @@ export default function WoodenFrameDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+       {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

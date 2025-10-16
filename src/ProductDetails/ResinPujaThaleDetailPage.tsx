@@ -5,6 +5,8 @@ import { resinPujaThales, ResinPujaThale, Variant } from "../Data/ResinPujaThale
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
@@ -18,6 +20,8 @@ export default function ResinPujaThaleDetailPage() {
 
   const productFromParams: ResinPujaThale | undefined = resinPujaThales.find(p => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<ResinPujaThale | null>(productFromParams ?? null);
+
+
 
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
@@ -195,6 +199,9 @@ export default function ResinPujaThaleDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+     {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

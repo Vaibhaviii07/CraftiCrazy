@@ -5,6 +5,8 @@ import { bracelets, Bracelet, Variant } from "../Data/BraceletData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
@@ -28,6 +30,8 @@ export default function BraceletDetails() {
 
   const productFromParams: Bracelet | undefined = bracelets.find((p) => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<Bracelet | null>(productFromParams ?? null);
+
+ 
 
   // Simulate loader
   useEffect(() => {
@@ -229,6 +233,9 @@ export default function BraceletDetails() {
           </motion.div>
         )}
       </AnimatePresence>
+    {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

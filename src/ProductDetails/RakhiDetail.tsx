@@ -5,6 +5,9 @@ import { rakhiKits, RakhiKit, Variant } from "../Data/RakhiData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -18,6 +21,7 @@ export default function RakhiDetailPage() {
 
   const productFromParams: RakhiKit | undefined = rakhiKits.find(p => String(p.id) === id);
   const [currentProduct] = useState<RakhiKit | null>(productFromParams ?? null);
+
 
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
@@ -196,6 +200,9 @@ export default function RakhiDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

@@ -5,6 +5,9 @@ import { resinClocks, ResinClock, Variant } from "../Data/ResinWallClockdata";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingCustomerReview from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -18,6 +21,8 @@ export default function ResinClockDetailPage() {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const productFromParams: ResinClock | undefined = resinClocks.find((c) => String(c.id) === id);
+
+ 
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -224,6 +229,13 @@ export default function ResinClockDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+       {currentProduct && (
+  <>
+    <CustomerReview productId={currentProduct.id} />
+    <FloatingCustomerReview productId={currentProduct.id} />
+  </>
+)}
+
     </div>
   );
 }

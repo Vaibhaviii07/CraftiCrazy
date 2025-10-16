@@ -5,6 +5,8 @@ import { resinNameplates, ResinNameplate, Variant } from "../Data/ResinNameplate
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
@@ -18,6 +20,8 @@ export default function ResinNameplateDetailPage() {
 
   const productFromParams: ResinNameplate | undefined = resinNameplates.find(p => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<ResinNameplate | null>(productFromParams ?? null);
+
+
 
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
@@ -195,6 +199,9 @@ export default function ResinNameplateDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+     {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

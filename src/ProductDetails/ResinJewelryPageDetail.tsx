@@ -4,6 +4,10 @@ import { resinJewelry, ResinJewelry, Variant } from "../Data/ResinJewelryData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingCustomerReview from "../Components/FloatingCustomerReview";
+
+
 
 type Params = { id: string };
 
@@ -15,6 +19,7 @@ export default function ResinJewelryDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+
 
   const productFromParams: ResinJewelry | undefined = resinJewelry.find(
     (j) => j.id === id
@@ -304,6 +309,15 @@ export default function ResinJewelryDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+     {currentProduct && (
+  <>
+    <CustomerReview productId={currentProduct.id} />
+    <FloatingCustomerReview productId={currentProduct.id} />
+  </>
+)}
+
+
+
     </div>
   );
 }

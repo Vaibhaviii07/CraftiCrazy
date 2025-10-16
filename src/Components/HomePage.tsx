@@ -56,7 +56,7 @@ const HomePage = () => {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 justify-center">
               <Link
                 to="/newarrivals"
-                className="px-4 sm:px-8 py-2 sm:py-3 bg-[#FFF0CE] hover:bg-[#fff1eb] rounded-full text-[#cb997e] font-semibold text-[0.8rem] sm:text-lg transition-all transform hover:scale-105 shadow-md"
+                className="px-4 sm:px-8 py-2 sm:py-3 bg-[#FFF0CE] hover:bg-[#6c584c] rounded-full text-[#cb997e] font-semibold text-[0.8rem] sm:text-lg transition-all transform hover:scale-105 shadow-md"
               >
                 Shop Now
               </Link>

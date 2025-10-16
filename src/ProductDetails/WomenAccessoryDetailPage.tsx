@@ -5,6 +5,9 @@ import { womenAccessories, WomenAccessory, Variant } from "../Data/WomenAccessor
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -18,6 +21,8 @@ export default function WomenAccessoryDetailPage() {
 
   const productFromParams: WomenAccessory | undefined = womenAccessories.find(p => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<WomenAccessory | null>(productFromParams ?? null);
+
+  
 
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
@@ -195,6 +200,9 @@ export default function WomenAccessoryDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+       {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

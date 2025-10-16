@@ -5,6 +5,9 @@ import { weddingHampers, WeddingHamper, Variant } from "../Data/WeddingData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -16,6 +19,8 @@ export default function WeddingHamperDetails() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [imgLoaded, setImgLoaded] = useState<boolean>(false);
+
+ 
 
   const productFromParams: WeddingHamper | undefined = weddingHampers.find((p) => p.id === id);
   const [currentProduct, setCurrentProduct] = useState<WeddingHamper | null>(productFromParams ?? null);
@@ -265,6 +270,9 @@ export default function WeddingHamperDetails() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

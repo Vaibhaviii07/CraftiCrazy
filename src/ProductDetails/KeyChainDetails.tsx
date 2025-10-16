@@ -5,6 +5,9 @@ import { keyChains, KeyChain, Variant } from "../Data/KeyChainData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -20,6 +23,8 @@ function Loader() {
 export default function KeyChainDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
+
+
 
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -243,6 +248,9 @@ export default function KeyChainDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+       {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

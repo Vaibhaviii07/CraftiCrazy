@@ -5,6 +5,8 @@ import { birthdayHampers, BirthdayHamper, Variant } from "../Data/BirthdayHamper
 import { useCart } from "../AuthContext/CartContext";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
@@ -12,25 +14,25 @@ export default function BirthdayHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
 
-  // ✅ Hooks always come first
+  // Hooks
   const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Find the product (can be undefined)
+  // Find the product
   const productFromParams: BirthdayHamper | undefined = birthdayHampers.find((p) => p.id === id);
+  const [currentProduct, setCurrentProduct] = useState<BirthdayHamper | null>(
+    productFromParams ?? null
+  );
 
-  // currentProduct state
-  const [currentProduct, setCurrentProduct] = useState<BirthdayHamper | null>(productFromParams ?? null);
-
-  // Handle loading simulation
+  // Loading simulation
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // selectedVariant memo
+  // Selected variant
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
     return {
@@ -40,22 +42,19 @@ export default function BirthdayHamperDetails() {
     };
   }, [currentProduct]);
 
-  // currentVariant state
   const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
 
-  // Update currentVariant when selectedVariant changes
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
   }, [selectedVariant]);
 
-  // Reset image fade-in and scroll to top on variant change
   useEffect(() => {
     setImgLoaded(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentVariant]);
 
-  // Add to cart handler
+  // Add to cart
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
 
@@ -74,19 +73,17 @@ export default function BirthdayHamperDetails() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  // Loading state
-  if (loading) {
+  if (loading)
     return (
       <div className="flex justify-center items-center h-96">
         <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
       </div>
     );
-  }
 
-  // Product not found
-  if (!currentProduct) {
-    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
-  }
+  if (!currentProduct)
+    return (
+      <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>
+    );
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -131,7 +128,11 @@ export default function BirthdayHamperDetails() {
                   whileHover={{ scale: 1.05 }}
                   aria-label={`Select variant ${i + 1}`}
                 >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
+                  <img
+                    src={v.image}
+                    alt={`thumb-${i}`}
+                    className="h-20 w-20 object-cover rounded-lg"
+                  />
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
@@ -150,15 +151,19 @@ export default function BirthdayHamperDetails() {
           {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400" />
-              ))}
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map(
+                (_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400" />
+                )
+              )}
             </div>
             <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
               ₹{currentVariant?.price}
             </span>
             {currentVariant?.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
+              <span className="line-through text-gray-400 text-lg ml-2">
+                ₹{currentProduct.price}
+              </span>
             )}
           </div>
 
@@ -167,8 +172,12 @@ export default function BirthdayHamperDetails() {
 
           {/* Info Tags */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
-            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
+            {currentProduct.brand && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>
+            )}
+            {currentProduct.seller && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>
+            )}
             <span
               className={`px-2 py-1 rounded ${
                 currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
@@ -176,33 +185,11 @@ export default function BirthdayHamperDetails() {
             >
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+            {currentProduct.warranty && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
+            )}
             {currentProduct.returnPolicy && (
               <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>
-            )}
-          </div>
-
-          {/* Additional details */}
-          <div className="mt-4 space-y-2 text-gray-700">
-            {currentProduct.material && (
-              <p>
-                <span className="font-semibold">Material:</span> {currentProduct.material}
-              </p>
-            )}
-            {currentProduct.dimensions && (
-              <p>
-                <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
-              </p>
-            )}
-            {currentProduct.weight && (
-              <p>
-                <span className="font-semibold">Weight:</span> {currentProduct.weight}
-              </p>
-            )}
-            {currentProduct.careInstructions && (
-              <p>
-                <span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}
-              </p>
             )}
           </div>
 
@@ -227,28 +214,21 @@ export default function BirthdayHamperDetails() {
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
               className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                currentProduct.inStock
+                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
               }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
-
-          {/* Structured Sections */}
+          {/* Extra Sections */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.tags && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Tags</h3>
-                <p className="text-gray-600">{currentProduct.tags.join(", ")}</p>
-              </div>
-            )}
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
+                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
@@ -258,13 +238,14 @@ export default function BirthdayHamperDetails() {
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
-            {currentProduct.delivery && (
+            {currentProduct.specifications && (
               <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Delivery</h3>
-                <p className="text-gray-600">
-                  {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated{" "}
-                  {currentProduct.delivery.estimated}
-                </p>
+                <h3 className="font-semibold text-gray-800">Specifications</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
+                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
@@ -285,6 +266,10 @@ export default function BirthdayHamperDetails() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

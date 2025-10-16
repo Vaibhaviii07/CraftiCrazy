@@ -5,6 +5,9 @@ import { resinCoasterSets, ResinCoaster, Variant } from "../Data/ResinCoasterSet
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -19,6 +22,7 @@ export default function ResinCoasterDetailPage() {
 
   const productFromParams: ResinCoaster | undefined = resinCoasterSets.find(p => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<ResinCoaster | null>(productFromParams ?? null);
+
 
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
@@ -227,6 +231,9 @@ export default function ResinCoasterDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+       {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
     </div>
   );
 }

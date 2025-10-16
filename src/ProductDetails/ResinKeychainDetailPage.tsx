@@ -5,6 +5,9 @@ import { resinKeychains, ResinKeychain, Variant } from "../Data/ResinKeychainDat
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingCustomerReview from "../Components/FloatingCustomerReview";
+
 
 type Params = { id: string };
 
@@ -16,6 +19,8 @@ export default function ResinKeychainDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  
 
   const productFromParams: ResinKeychain | undefined = resinKeychains.find((p) => String(p.id) === id);
 
@@ -268,6 +273,13 @@ export default function ResinKeychainDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+     {currentProduct && (
+  <>
+    <CustomerReview productId={currentProduct.id} />
+    <FloatingCustomerReview productId={currentProduct.id} />
+  </>
+)}
+
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { wallets, Wallet, Variant } from "../Data/WalletData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 
 type Params = { id: string };
 
@@ -16,6 +18,8 @@ export default function WalletDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+
+
 
   const productFromParams: Wallet | undefined = wallets.find((w) => w.id === id);
 
@@ -224,6 +228,12 @@ export default function WalletDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+        {currentProduct && (
+  <>
+    <CustomerReview productId={currentProduct.id} />
+    <FloatingCustomerReview productId={currentProduct.id} />
+  </>
+)}
     </div>
   );
 }

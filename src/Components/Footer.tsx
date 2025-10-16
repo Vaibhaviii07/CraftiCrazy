@@ -1,4 +1,6 @@
-import { Instagram, Facebook, Twitter, Mail } from "lucide-react";
+// src/Components/Footer.tsx
+import { Instagram, Facebook, Mail } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -20,10 +22,10 @@ const Footer = () => {
               <a href="/" className="hover:text-yellow-400 transition-colors duration-300">Home</a>
             </li>
             <li>
-              <a href="/AboutUs" className="hover:text-yellow-400 transition-colors duration-300">About Us</a>
+              <a href="/aboutus" className="hover:text-yellow-400 transition-colors duration-300">About Us</a>
             </li>
             <li>
-              <a href="/collections" className="hover:text-yellow-400 transition-colors duration-300">Gift Collections</a>
+              <a href="/newarrivals" className="hover:text-yellow-400 transition-colors duration-300">Gift Collections</a>
             </li>
             <li>
               <a href="/contactus" className="hover:text-yellow-400 transition-colors duration-300">Contact</a>
@@ -35,14 +37,29 @@ const Footer = () => {
         <div className="flex-1 space-y-4 text-center sm:text-left">
           <h3 className="text-xl font-semibold text-[#432818]">Connect With Us</h3>
           <div className="flex justify-center sm:justify-start gap-6">
-            <a href="https://www.instagram.com/crafticrazy_710" className="hover:text-pink-400 hover:scale-110 transition-transform duration-300">
+            <a
+              href="https://www.instagram.com/crafticrazy_710"
+              className="hover:text-pink-400 hover:scale-110 transition-transform duration-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Instagram size={24} />
             </a>
-            <a href="#" className="hover:text-blue-400 hover:scale-110 transition-transform duration-300">
+            <a
+              href="https://www.facebook.com/crafticrazy"
+              className="hover:text-blue-500 hover:scale-110 transition-transform duration-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Facebook size={24} />
             </a>
-            <a href="#" className="hover:text-sky-400 hover:scale-110 transition-transform duration-300">
-              <Twitter size={24} />
+            <a
+              href="https://wa.me/919876543210"
+              className="hover:text-green-500 hover:scale-110 transition-transform duration-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaWhatsapp size={24} />
             </a>
           </div>
           <p className="flex justify-center sm:justify-start items-center gap-2 text-sm">
