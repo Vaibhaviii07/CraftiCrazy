@@ -208,7 +208,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
               aria-label="Search"
               className="absolute right-2 top-1/2 -translate-y-1/2 text-[#432818] rounded-full p-2 shadow-md transition"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-5 h-5 cursor-pointer" />
             </button>
           </div>
         </div>
@@ -249,7 +249,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
             className="relative"
             aria-label="Cart"
           >
-            <ShoppingCart size={22} className="text-[#432818] hover:text-yellow-600 transition" />
+            <ShoppingCart size={22} className="text-[#432818] hover:text-yellow-600 transition cursor-pointer" />
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
                 {cart.length}

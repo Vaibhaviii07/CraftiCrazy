@@ -28,7 +28,7 @@ export default function ResinPujaThaleDetailPage() {
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     };
@@ -154,17 +154,12 @@ export default function ResinPujaThaleDetailPage() {
 
           {/* Quantity & Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
-            <div className="flex items-center border rounded-full overflow-hidden">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">-</button>
-              <span className="px-6 py-2">{quantity}</span>
-              <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 transition">+</button>
-            </div>
             <button
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
               className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
             >
-              <ShoppingCart className="w-5 h-5" /> Add to Cart
+              <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
             </button>
           </div>
 

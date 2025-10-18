@@ -31,7 +31,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();  
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -53,11 +53,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addToCart = async (item: CartItem) => {
   const token = localStorage.getItem("token");
 
-  if (!token && !isAuthenticated) {
-  toast.error("Please login to add items to your cart!");
-  localStorage.removeItem("token");
-  return;
-}
+//once backend is ready and payment gateway once done we will uncomment this.
+//   if (!token && !isAuthenticated) {
+//   toast.error("Please login to add items to your cart!");
+//   localStorage.removeItem("token");
+//   return;
+// }
 
 
     // User logged in — Add or update item
@@ -120,7 +121,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateCartItem = (id:string, updatedItem: CartItem) => {
       setCart((prev) => (
         prev.map((item) => (
-          item.id === id ? updatedItem : item
+          item.id === id ? updatedItem : item 
         ))
       ))
   }
@@ -135,7 +136,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         increaseQty,
         decreaseQty,
         cartTotal,
-        updateCartItem
+        updateCartItem  
 
       }}
     >

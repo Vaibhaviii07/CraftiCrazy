@@ -1,8 +1,28 @@
-import React, { useEffect } from "react";
-import { motion } from "framer-motion";
+import  { useState,useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 const HomePage = () => {
+  const [toast, setToast] = useState<string | null>(null);
+  const location = useLocation();
+  
+   useEffect(() => {
+    if (location.state?.message) {
+      setToast(location.state?.message);
+      setTimeout(()=> {
+        setToast(null);
+      },4000)
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+  // restore scroll
+  const savedScroll = sessionStorage.getItem("scrollPosition");
+  if (savedScroll) {
+    window.scrollTo(0, parseInt(savedScroll, 10));
+  }})
  
 
   return (
@@ -62,6 +82,19 @@ const HomePage = () => {
           </motion.div>
         </div>
       </section>
+        <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-[#3c1f2c] px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

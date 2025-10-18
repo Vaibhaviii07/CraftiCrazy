@@ -126,14 +126,14 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
                           <div className="flex items-center mt-2 gap-2">
                             <button
                               onClick={() => decreaseQty(item.id)}
-                              className="px-2 py-1 rounded border border-gray-300"
+                              className="px-2 py-1 rounded border border-gray-300 cursor-pointer"
                             >
                               <Minus className="w-4 h-4 text-gray-600" />
                             </button>
                             <span className="px-2 text-gray-800">{item.quantity}</span>
                             <button
                               onClick={() => increaseQty(item.id)}
-                              className="px-2 py-1 rounded border border-gray-300"
+                              className="px-2 py-1 rounded border border-gray-300 cursor-pointer"
                             >
                               <Plus className="w-4 h-4 text-gray-600" />
                             </button>
@@ -165,7 +165,7 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
                         onClick={() => removeFromCart(item.id)}
                         className="text-gray-400 hover:text-red-500 transition ml-2"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5 cursor-pointer" />
                       </button>
                     </div>
                   ))}

@@ -15,6 +15,7 @@ import BirthdayHamperPage from "./Pages/CustomizedHamper/BirthdayHamper";
 import ContactUs from "./Pages/ContactUs";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
+import SuccessPage from "./Pages/SuccessPage.tsx";
 
 // Product Pages
 import CartSidebar from "./Pages/Cart.tsx";
@@ -75,8 +76,7 @@ import ChristmasSpecialPage from "./Pages/Festivel/ChristmasSpecialPage.tsx";
 import HoliKitDetail from "./ProductDetails/HoliKitDetail.tsx";
 import RakhiPage from "./Pages/Festivel/RakhiPage.tsx";
 import RakhiDetailPage from "./ProductDetails/RakhiDetail.tsx";
-import ReviewSection from "./Components/ReviewSlider.tsx";
-import FloatingCustomerReview from "./Components/FloatingCustomerReview.tsx";
+
 
 function App() {
   const [showPrompt, setShowPrompt] = useState(false);
@@ -107,6 +107,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/checkout" element={<CheckoutPage/>} />
+        <Route path="/success" element={<SuccessPage/>} />
 
         
 
