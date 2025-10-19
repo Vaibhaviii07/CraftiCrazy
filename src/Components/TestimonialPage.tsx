@@ -72,14 +72,14 @@ export default function TestimonialsSlider() {
   };
 
   return (
-    <section className="py-20 relative bg-[#fff8f2]">
+    <section className="py-20 relative bg-[#FBF7F0]">
       {/* Header */}
-      <div className="text-center mb-14 px-4">
-        <h2 className="text-4xl md:text-5xl font-serif text-[#603808]">
-          Our Happy Clients
+      <div className="text-center mb-16 px-4">
+        <h2 className="text-4xl md:text-5xl font-serif text-[#603808] font-semibold">
+          What Our Clients Say
         </h2>
-        <p className="mt-4 text-lg text-[#6B3F28] max-w-xl mx-auto italic">
-          Hear from those who chose handmade craftsmanship for their big moments.
+        <p className="mt-4 text-lg text-[#6B3F28] max-w-xl mx-auto italic leading-relaxed">
+          Hear from customers who chose our handcrafted gifts to celebrate their special moments.
         </p>
       </div>
 
@@ -88,39 +88,39 @@ export default function TestimonialsSlider() {
         {/* Arrows */}
         <button
           onClick={prevSlide}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow hover:bg-[#f2e6db]"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 rounded-full shadow hover:bg-[#f2e6db] transition"
         >
-          <ChevronLeft className="w-6 h-6 text-[#C45A36]" />
+          <ChevronLeft className="w-6 h-6 text-[#8C5E3C]" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow hover:bg-[#f2e6db]"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/90 rounded-full shadow hover:bg-[#f2e6db] transition"
         >
-          <ChevronRight className="w-6 h-6 text-[#C45A36]" />
+          <ChevronRight className="w-6 h-6 text-[#8C5E3C]" />
         </button>
 
         <div
           ref={scrollRef}
           className="flex overflow-x-hidden scroll-smooth snap-x snap-mandatory gap-6 px-4"
         >
-          {testimonials.map((t, idx) => (
+          {testimonials.map((t) => (
             <div
               key={t.id}
-              className="flex-shrink-0 w-full sm:w-[300px] md:w-[350px] snap-center bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center hover:shadow-2xl hover:scale-105 transition-transform duration-300"
+              className="flex-shrink-0 w-full sm:w-[320px] md:w-[360px] snap-center bg-white rounded-3xl shadow-md p-8 flex flex-col items-center text-center hover:shadow-xl hover:-translate-y-1 transition-transform duration-300"
             >
               <img
                 src={t.image}
                 alt={t.product}
-                className="w-28 h-28 object-cover rounded-full mb-5 border-4 border-[#b46029]"
+                className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-full mb-5 border-4 border-[#D9A441]"
               />
-              <h3 className="text-xl font-semibold text-gray-800">{t.name}</h3>
+              <h3 className="text-xl sm:text-2xl font-serif text-gray-800 font-semibold">{t.name}</h3>
               {t.location && (
-                <p className="text-sm text-gray-500 mb-2">{t.location}</p>
+                <p className="text-sm sm:text-base text-gray-500 mb-3">{t.location}</p>
               )}
-              <p className="text-gray-700 italic mb-4">"{t.feedback}"</p>
-              <div className="flex text-yellow-500">
+              <p className="text-gray-700 italic mb-4 leading-relaxed">"{t.feedback}"</p>
+              <div className="flex text-[#D9A441]">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5" fill="currentColor" stroke="none" />
+                  <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" stroke="none" />
                 ))}
               </div>
             </div>
@@ -128,13 +128,13 @@ export default function TestimonialsSlider() {
         </div>
 
         {/* Dots */}
-        <div className="flex justify-center mt-6 gap-2">
+        <div className="flex justify-center mt-8 gap-3">
           {testimonials.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`w-3 h-3 rounded-full transition ${
-                currentIndex === idx ? "bg-[#C45A36]" : "bg-gray-300"
+              className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-colors ${
+                currentIndex === idx ? "bg-[#8C5E3C]" : "bg-gray-300"
               }`}
             />
           ))}

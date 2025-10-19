@@ -30,7 +30,7 @@ export default function GlassFrameDetailPage() {
   const selectedVariant = useMemo<Variant | null>(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     };
@@ -50,13 +50,7 @@ export default function GlassFrameDetailPage() {
     setQuantity(1);
   }, [selectedVariant]);
 
-  // Reset image fade-in and scroll to top on variant change
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentVariant]);
-
-  if (loading) {
+   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
         <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>

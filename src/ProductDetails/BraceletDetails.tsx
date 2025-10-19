@@ -45,7 +45,7 @@ export default function BraceletDetails() {
   const selectedVariant = useMemo<Variant | null>(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     };
@@ -58,12 +58,6 @@ export default function BraceletDetails() {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
   }, [selectedVariant]);
-
-  // Reset image fade-in on variant change
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;

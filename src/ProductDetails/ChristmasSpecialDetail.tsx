@@ -42,11 +42,6 @@ export default function ChristmasSpecialDetailPage() {
     setImgLoaded(false);
   }, [selectedVariantDefault]);
 
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [selectedVariant]);
-
   const handleAddToCart = () => {
     if (!currentProduct || !selectedVariant || !currentProduct.inStock) return;
 

@@ -27,7 +27,7 @@ export default function DiwaliHamperDetailPage() {
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Hamper not found</p>;
 
   const selectedVariantDefault = useMemo(() => ({
-    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+    image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
     price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
     discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
   }), [currentProduct]);
@@ -39,11 +39,6 @@ export default function DiwaliHamperDetailPage() {
     setQuantity(1);
     setImgLoaded(false);
   }, [selectedVariantDefault]);
-
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [selectedVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !selectedVariant || !currentProduct.inStock) return;

@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Heart, Gift, Star, Play } from "lucide-react";
+import { Heart, Gift, Star, Play, Volume2, VolumeX } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 
 const AboutUs: React.FC = () => {
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.2,
+  });
 
+  // Handles Play/Pause toggle
   const toggleVideo = () => {
     const video = document.getElementById("aboutVideo") as HTMLVideoElement;
     if (video) {
       if (video.paused) {
-        video.play();
+        video.play().catch(() => {});
         setIsPlaying(true);
       } else {
         video.pause();
@@ -19,38 +25,39 @@ const AboutUs: React.FC = () => {
     }
   };
 
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.2,
-  });
-
-  useEffect(() => {
-    console.log("AboutUs component mounted");
-
+  // Handles Mute/Unmute toggle
+  const toggleMute = () => {
     const video = document.getElementById("aboutVideo") as HTMLVideoElement;
+    if (video) {
+      video.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
 
-    // Auto-play when in view
+  // Autoplay muted when in view
+  useEffect(() => {
+    const video = document.getElementById("aboutVideo") as HTMLVideoElement;
     if (video && inView) {
-      video.play();
+      video.play().catch(() => {});
       setIsPlaying(true);
     }
 
-    // Cleanup: pause video on unmount
+    // Cleanup on unmount
     return () => {
       if (video) {
         video.pause();
         setIsPlaying(false);
       }
     };
-  }, [inView]); // Dependency on inView to start video when visible
+  }, [inView]);
 
   return (
-    <section className="py-12 px-4 sm:px-6 md:px-12">
+    <section className="py-12 px-4 sm:px-6 md:px-12 bg-white">
       <div
         ref={ref}
-        className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-9 md:gap-20"
+        className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-20"
       >
-        {/* Video */}
+        {/* ----------- VIDEO SECTION ----------- */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -58,26 +65,41 @@ const AboutUs: React.FC = () => {
           viewport={{ once: true }}
           className="w-full md:w-1/3 flex justify-center md:justify-start relative"
         >
-          <div className="relative w-60 sm:w-64 md:w-80 lg:w-96">
+          <div className="relative w-64 sm:w-72 md:w-80 lg:w-96 rounded-2xl overflow-hidden shadow-xl">
             <video
               id="aboutVideo"
-              src="/aboutus.mp4"
-              autoPlay
+              src="/about.mp4"
               loop
-              muted
+              muted={isMuted}
               playsInline
-              className="w-full h-auto rounded-2xl shadow-xl object-cover transition-transform duration-500 hover:scale-105"
+              className="w-full h-auto object-cover"
             />
+
+            {/* Play/Pause Overlay Button */}
             <button
               onClick={toggleVideo}
-              className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl hover:bg-black/30 transition-colors"
+              aria-label={isPlaying ? "Pause video" : "Play video"}
+              className="absolute cursor-pointer inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
             >
-              {!isPlaying && <Play className="w-10 h-5 sm:w-12 sm:h-10 text-white" />}
+              {!isPlaying && <Play className="w-12 h-12 text-white" />}
+            </button>
+
+            {/* Sound Toggle Button */}
+            <button
+              onClick={toggleMute}
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
+              className="absolute cursor-pointer bottom-3 right-3 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            >
+              {isMuted ? (
+                <VolumeX className="w-5 h-5" />
+              ) : (
+                <Volume2 className="w-5 h-5" />
+              )}
             </button>
           </div>
         </motion.div>
 
-        {/* Content */}
+        {/* ----------- TEXT SECTION ----------- */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -88,27 +110,32 @@ const AboutUs: React.FC = () => {
             About <span className="text-[#C45A36]">CraftiCrazy</span>
           </h2>
 
-          <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-3 font-serif leading-relaxed">
-            At <span className="font-semibold text-gray-900">CraftiCrazy</span>, we craft gifts that speak the language of emotions. From handmade hampers to keepsakes, rakhis, photo frames, and more every creation celebrates moments and memories.
+          <p className="text-base sm:text-lg text-gray-700 mb-3 font-serif leading-relaxed">
+            At{" "}
+            <span className="font-semibold text-gray-900">CraftiCrazy</span>, we
+            craft gifts that speak the language of emotions. From handmade
+            hampers to keepsakes, rakhis, photo frames, and more — every
+            creation celebrates moments and memories.
           </p>
 
-          <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-5 font-serif leading-relaxed">
-            Perfect for birthdays, anniversaries, festivals, or any special occasion where love, thoughtfulness, and quality matter.
+          <p className="text-base sm:text-lg text-gray-700 mb-5 font-serif leading-relaxed">
+            Perfect for birthdays, anniversaries, festivals, or any special
+            occasion where love, thoughtfulness, and quality matter.
           </p>
 
           {/* Values */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 font-serif">
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <Heart className="text-[#C45A36] w-6 h-6" />
-              <span className="text-gray-800 font-medium text-base sm:text-sm md:text-base">Made with Love</span>
+              <span className="text-gray-800 font-medium">Made with Love</span>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <Gift className="text-[#C45A36] w-6 h-6" />
-              <span className="text-gray-800 font-medium text-base sm:text-sm md:text-base">Unique Gifts</span>
+              <span className="text-gray-800 font-medium">Unique Gifts</span>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <Star className="text-[#C45A36] w-6 h-6" />
-              <span className="text-gray-800 font-medium text-base sm:text-sm md:text-base">Premium Quality</span>
+              <span className="text-gray-800 font-medium">Premium Quality</span>
             </div>
           </div>
         </motion.div>

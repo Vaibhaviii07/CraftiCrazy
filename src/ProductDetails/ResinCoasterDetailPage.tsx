@@ -27,7 +27,7 @@ export default function ResinCoasterDetailPage() {
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     };
@@ -40,11 +40,6 @@ export default function ResinCoasterDetailPage() {
     setQuantity(1);
     setImgLoaded(false);
   }, [selectedVariant]);
-
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentVariant]);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);

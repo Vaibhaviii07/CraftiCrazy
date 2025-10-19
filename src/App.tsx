@@ -16,6 +16,7 @@ import ContactUs from "./Pages/ContactUs";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
 import SuccessPage from "./Pages/SuccessPage.tsx";
+import ScrollToTop from "./Components/ScroolToTop.tsx";
 
 // Product Pages
 import CartSidebar from "./Pages/Cart.tsx";
@@ -93,12 +94,14 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
+
       {/* Navbar with cart toggle */}
       <Navbar setCartOpen={setCartOpen} />
 
       {/* Cart Sidebar */}
       <CartSidebar isOpen={cartOpen} setIsOpen={setCartOpen} />
-
+      
       <Routes>
         {/* Home & Static Pages */}
         <Route path="/" element={<HeroPage />} />

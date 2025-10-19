@@ -54,11 +54,6 @@ export default function BirthdayHamperDetails() {
     setQuantity(1);
   }, [selectedVariant]);
 
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentVariant]);
-
   // Add to cart
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;

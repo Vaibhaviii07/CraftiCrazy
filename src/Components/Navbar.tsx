@@ -4,20 +4,17 @@ import {
   Menu,
   X,
   Search,
-  User,
   ShoppingCart,
-  Gift,
-  Sparkles,
+  User,
   ChevronDown,
   LogOut,
+  Gift,
+  Sparkles,
 } from "lucide-react";
 import { useCart } from "../AuthContext/CartContext";
 import { useAuth } from "../AuthContext/AuthContext";
 import { allProducts } from "../Data/AllProduct";
 
-// ----------------------
-// Interface Definitions
-// ----------------------
 interface SubLink {
   name: string;
   href: string;
@@ -29,66 +26,41 @@ interface NavLink {
   submenu?: SubLink[];
 }
 
-interface Product {
-  name: string;
-  href: string;
-}
-
 interface NavbarProps {
   setCartOpen: (open: boolean) => void;
 }
 
-// ----------------------
-// Navbar Component
-// ----------------------
 const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
-  // ---------- State ----------
-  const [open, setOpen] = useState(false); // mobile menu toggle
-  const [dropdown, setDropdown] = useState<number | null>(null); // desktop submenu
-  const [mobileDropdown, setMobileDropdown] = useState<number | null>(null); // mobile submenu
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // hover delay for submenu
+  const [open, setOpen] = useState(false);
+  const [dropdown, setDropdown] = useState<number | null>(null);
+  const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<Product[]>([]);
+  const [result, setResult] = useState<{ name: string; href: string }[]>([]);
   const [userDropdown, setUserDropdown] = useState(false);
-  const [userData, setUserData] = useState<{ name: string; email: string } | null>(null);
-
-  // ---------- Hooks ----------
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { cart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // ---------- Fetch Logged-In User ----------
+  const [userData, setUserData] = useState<{ name: string; email: string } | null>(null);
   useEffect(() => {
-    // Decode or get user info from context
-    if (user) {
-      setUserData({ name: user.name, email: user.email });
-    }
+    if (user) setUserData({ name: user.name, email: user.email });
   }, [user]);
 
-  // ---------- Logout Handler ----------
   const handleLogout = () => {
-    localStorage.removeItem("token"); // remove auth token
-    setUserData(null); // clear state
-    navigate("/login"); // redirect
+    localStorage.removeItem("token");
+    setUserData(null);
+    navigate("/login");
   };
 
-  // ---------- Search Handler ----------
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
     setQuery(value);
-
-    if (value.trim() === "") {
-      setResult([]);
-      return;
-    }
-
-    const filtered = allProducts.filter((p) =>
-      p.name.toLowerCase().includes(value)
-    );
+    if (value.trim() === "") return setResult([]);
+    const filtered = allProducts.filter((p) => p.name.toLowerCase().includes(value));
     setResult(filtered);
   };
 
-  // ---------- Dropdown Hover Logic ----------
   const handleMouseEnter = (idx: number) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDropdown(idx);
@@ -97,7 +69,6 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
     timeoutRef.current = setTimeout(() => setDropdown(null), 250);
   };
 
-  // ---------- Nav Links ----------
   const links: NavLink[] = [
     { name: "New & Best Sellers", href: "/newarrivals" },
     {
@@ -122,8 +93,8 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
         { name: "Women Accessories", href: "/womenAss" },
         { name: "Keychains", href: "/keychain" },
         { name: "Leather Wallet", href: "/wallet" },
-        { name: "Handmade Bracelet", href: "/bracelet" },
-        { name: "Stylish Tote Bag", href: "/tote" },
+        { name: "Bracelets", href: "/bracelet" },
+        { name: "Tote Bags", href: "/tote" },
       ],
     },
     {
@@ -139,7 +110,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
       ],
     },
     {
-      name: "Wedding special",
+      name: "Wedding Special",
       submenu: [
         { name: "Engagement Tray", href: "/Tray" },
         { name: "Haldi Platter", href: "/HaldiPlatter" },
@@ -160,77 +131,67 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
     { name: "Contact", href: "/contactus" },
   ];
 
-  // ----------------------
-  // JSX Return
-  // ----------------------
   return (
-    <header className="sticky top-0 z-50 bg-[#faf7f0] shadow-lg">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-10 py-4">
-        {/* ------------------ Logo ------------------ */}
-        <Link to="/" className="flex items-center gap-2 cursor-pointer relative">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#d9c6a5]/40 shadow-[0_4px_20px_-6px_rgba(0,0,0,0.1)]">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-5 py-3 sm:px-10">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
           <div className="relative flex items-center justify-center">
-            <Gift className="w-8 h-8 text-[#432818]" />
-            <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-500 animate-ping" />
+            <Gift className="w-7 h-7 text-[#7f5539]" />
+            <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-amber-400 animate-ping" />
           </div>
-          <span className="font-bold text-3xl text-[#432818] tracking-wide hover:text-[#7f5539] transition-colors">
-            CraftiCrazy
+          <span className="text-2xl sm:text-3xl font-extrabold tracking-wide text-[#7f5539]">
+            Crafti<span className="text-amber-500">Crazy</span>
           </span>
         </Link>
 
-        {/* ------------------ Search ------------------ */}
-        <div className="hidden md:flex flex-1 justify-center px-6">
-          <div className="relative w-full max-w-lg">
+        {/* Search */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <div className="relative w-full max-w-md">
             <input
               type="text"
               value={query}
               onChange={handleSearch}
-              placeholder="Search for gifts..."
-              className="w-full rounded-full py-2.5 pl-5 pr-14 border border-gray-700 text-[#432818] placeholder-gray-400 shadow-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+              placeholder="Find the perfect handcrafted gift..."
+              className="w-full rounded-full py-2.5 pl-5 pr-12 border text-[#432818] shadow-sm placeholder-gray-400 transition-all"
             />
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7f5539] cursor-pointer" />
             {result.length > 0 && (
-              <div className="absolute mt-2 w-full bg-white shadow-lg rounded-xl max-h-60 overflow-y-auto z-50">
+              <div className="absolute w-full mt-2 bg-white rounded-lg shadow-lg overflow-y-auto max-h-56 z-50">
                 {result.map((item, idx) => (
                   <Link
                     key={idx}
                     to={item.href}
-                    className="block px-4 py-2 hover:bg-gray-100 text-gray-700"
                     onClick={() => {
                       setQuery("");
                       setResult([]);
                     }}
+                    className="block px-4 py-2 hover:bg-amber-50 text-gray-700"
                   >
                     {item.name}
                   </Link>
                 ))}
               </div>
             )}
-            <button
-              aria-label="Search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#432818] rounded-full p-2 shadow-md transition"
-            >
-              <Search className="w-5 h-5 cursor-pointer" />
-            </button>
           </div>
         </div>
 
-        {/* ------------------ Desktop Icons ------------------ */}
-        <div className="hidden md:flex items-center gap-6 relative">
-          {/* ----- User Dropdown ----- */}
+        {/* Desktop Icons */}
+        <div className="hidden md:flex items-center gap-6">
           {userData ? (
             <div className="relative">
-              <button onClick={() => setUserDropdown(!userDropdown)}>
-                <User size={22} className="text-[#432818] cursor-pointer" />
+              <button onClick={() => setUserDropdown(!userDropdown)} className="hover:scale-110 transition-transform">
+                <User size={22} className="text-[#7f5539]" />
               </button>
-
               {userDropdown && (
-                <div className="absolute right-0 mt-3 bg-white shadow-lg rounded-lg w-52 border">
+                <div className="absolute right-0 mt-3 bg-white shadow-lg rounded-lg w-56 border border-[#e6ccb2] z-50">
                   <div className="px-4 py-3 border-b">
-                    <p className="font-semibold text-gray-800">{userData.name}</p>
+                    <p className="font-semibold text-[#432818]">{userData.name}</p>
                     <p className="text-sm text-gray-500">{userData.email}</p>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-red-600 hover:bg-amber-50 transition"
                   >
                     <LogOut size={16} /> Logout
                   </button>
@@ -238,68 +199,66 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
               )}
             </div>
           ) : (
-            <Link to="/login"  className="flex items-center gap-2 text-[#432818] hover:text-yellow-600 transition" aria-label="Login">
-              <User size={16} /> <span>Login</span>
+            <Link
+              to="/login"
+              className="flex items-center gap-1 font-medium text-[#7f5539] hover:text-amber-600 transition"
+            >
+              <User size={18} /> Login
             </Link>
           )}
 
-          {/* ----- Cart Icon ----- */}
           <button
             onClick={() => setCartOpen(true)}
-            className="relative"
-            aria-label="Cart"
+            className="relative hover:scale-110 transition-transform cursor-pointer"
           >
-            <ShoppingCart size={22} className="text-[#432818] hover:text-yellow-600 transition cursor-pointer" />
+            <ShoppingCart size={22} className="text-[#7f5539] cusrsor-pointer" />
             {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
+              <span className="absolute -top-2 -right-2 bg-amber-400 text-black text-xs font-bold rounded-full px-1">
                 {cart.length}
               </span>
             )}
           </button>
         </div>
 
-        {/* ------------------ Mobile Section ------------------ */}
-        <div className="flex md:hidden items-center gap-4">
-          <Link to="/login" aria-label="Login">
-            <User size={26} className="text-[#432818]" />
-          </Link>
-          <button onClick={() => setCartOpen(true)} className="relative" aria-label="Cart">
-            <ShoppingCart size={26} className="text-[#432818]" />
+        {/* Mobile Menu Button */}
+        <div className="flex md:hidden items-center gap-3">
+          <button onClick={() => setCartOpen(true)} className="relative">
+            <ShoppingCart size={24} className="text-[#7f5539]" />
             {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black font-bold rounded-full px-1">
+              <span className="absolute -top-2 -right-2 bg-amber-400 text-black text-xs font-bold rounded-full px-1">
                 {cart.length}
               </span>
             )}
           </button>
-          <button className="text-[#432818]" onClick={() => setOpen(!open)}>
-            {open ? <X size={28} /> : <Menu size={28} />}
+          <button onClick={() => setOpen(!open)} className="text-[#7f5539]">
+            {open ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
       </div>
 
-      {/* ------------------ Desktop Nav Links ------------------ */}
-      <nav className="hidden md:flex justify-center gap-8 text-[#432818] font-medium text-base py-3 bg-[#fbfaf8]">
+      {/* Desktop Nav */}
+      <nav className="hidden md:flex justify-center gap-8 font-medium text-[#432818] bg-gradient-to-r from-[#f7ede2] via-[#f8f5f2] to-[#f7ede2] py-2">
         {links.map((link, idx) => (
           <div
             key={idx}
-            className="relative group"
             onMouseEnter={() => handleMouseEnter(idx)}
             onMouseLeave={handleMouseLeave}
+            className="relative"
           >
             <Link
               to={link.href ?? "#"}
-              className="flex items-center gap-1 relative after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-yellow-300 after:transition-all after:duration-300 hover:after:w-full"
+              className="flex items-center gap-1 hover:text-amber-600 transition"
             >
               {link.name}
-              {link.submenu && <ChevronDown size={16} />}
+              {link.submenu && <ChevronDown size={14} />}
             </Link>
             {link.submenu && dropdown === idx && (
-              <div className="absolute top-full left-0 bg-white/95 shadow-lg rounded-xl mt-2 py-3 w-56 z-50 border border-gray-100">
-                {link.submenu.map((sublink, subIdx) => (
+              <div className="absolute bg-white/95 rounded-lg shadow-md mt-2 py-2 border border-[#e6ccb2] w-56 z-50">
+                {link.submenu.map((sublink, sIdx) => (
                   <Link
-                    key={subIdx}
+                    key={sIdx}
                     to={sublink.href}
-                    className="block px-4 py-2 text-gray-700 hover:bg-[#b7b7a4]/20 hover:text-[#6b705c] transition rounded-md"
+                    className="block px-4 py-2 hover:bg-amber-50 text-gray-700 transition"
                   >
                     {sublink.name}
                   </Link>
@@ -310,29 +269,34 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
         ))}
       </nav>
 
-      {/* ------------------ Mobile Nav Links ------------------ */}
+      {/* Mobile Nav */}
       {open && (
-        <nav className="md:hidden bg-[#fbfaf8] px-6 py-4 shadow-md space-y-2">
+        <nav className="md:hidden bg-[#fffaf5] shadow-md px-6 py-4 space-y-2 animate-slide-down">
           {links.map((link, idx) => (
-            <div key={idx} className="flex flex-col">
+            <div key={idx}>
               {link.submenu ? (
                 <>
                   <button
                     onClick={() =>
                       setMobileDropdown(mobileDropdown === idx ? null : idx)
                     }
-                    className="flex justify-between items-center w-full py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
+                    className="flex justify-between items-center w-full py-2 text-[#432818] font-medium"
                   >
                     <span>{link.name}</span>
-                    <ChevronDown size={16} />
+                    <ChevronDown
+                      className={`transform transition-transform ${
+                        mobileDropdown === idx ? "rotate-180" : ""
+                      }`}
+                      size={16}
+                    />
                   </button>
                   {mobileDropdown === idx && (
-                    <div className="flex flex-col pl-4 mt-2 space-y-1">
-                      {link.submenu.map((sublink, subIdx) => (
+                    <div className="pl-4 mt-1 space-y-1">
+                      {link.submenu.map((sublink, sIdx) => (
                         <Link
-                          key={subIdx}
+                          key={sIdx}
                           to={sublink.href}
-                          className="py-1 text-gray-700 hover:text-[#6b705c] transition"
+                          className="block py-1 text-gray-700 hover:text-[#7f5539] transition"
                           onClick={() => setOpen(false)}
                         >
                           {sublink.name}
@@ -344,7 +308,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
               ) : (
                 <Link
                   to={link.href ?? "#"}
-                  className="py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-gray-50 transition"
+                  className="block py-2 text-[#432818] font-medium border-b border-gray-200 hover:bg-amber-50 transition"
                   onClick={() => setOpen(false)}
                 >
                   {link.name}

@@ -43,7 +43,7 @@ export default function ToteBagDetailPage() {
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     };
@@ -57,11 +57,6 @@ export default function ToteBagDetailPage() {
     setImgLoaded(false);
     setThumbsLoaded({});
   }, [selectedVariant]);
-
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;

@@ -27,7 +27,7 @@ export default function ResinNameplateDetailPage() {
   const selectedVariant = useMemo(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
       price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
       discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
     };

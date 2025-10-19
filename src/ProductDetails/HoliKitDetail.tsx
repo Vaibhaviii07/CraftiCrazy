@@ -26,7 +26,7 @@ export default function HoliKitDetail() {
 
 
   const selectedVariantDefault = useMemo(() => ({
-    image: currentProduct.variants?.[0]?.image ?? currentProduct.image,
+    image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
     price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
     discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
   }), [currentProduct]);
@@ -38,11 +38,6 @@ export default function HoliKitDetail() {
     setQuantity(1);
     setImgLoaded(false);
   }, [selectedVariantDefault]);
-
-  useEffect(() => {
-    setImgLoaded(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [selectedVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !selectedVariant || !currentProduct.inStock) return;
