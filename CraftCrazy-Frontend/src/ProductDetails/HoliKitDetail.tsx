@@ -1,0 +1,193 @@
+// src/ProductDetails/HoliKitDetail.tsx
+import { useParams } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { holiKits, HoliKit, Variant } from "../Data/HoliKitData";
+import { useCart } from "../AuthContext/CartContext";
+import { ShoppingCart, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import CustomerReview from "../Components/CustomerReview";
+import FloatingReviewChat from "../Components/FloatingCustomerReview";
+import { useAuth } from "../AuthContext/AuthContext";
+type Params = { id: string };
+
+export default function HoliKitDetail() {
+  const { id } = useParams<Params>();
+  const { addToCart } = useCart();
+  const {isAuthenticated} = useAuth();
+
+  const [quantity, setQuantity] = useState(1);
+  const [toast, setToast] = useState<string | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  const productFromParams: HoliKit | undefined = holiKits.find(p => String(p.id) === id);
+  const [currentProduct] = useState<HoliKit | null>(productFromParams ?? null);
+
+  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+
+
+  const selectedVariantDefault = useMemo(() => ({
+    image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
+    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
+    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+  }), [currentProduct]);
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(selectedVariantDefault);
+
+  useEffect(() => {
+    setSelectedVariant(selectedVariantDefault);
+    setQuantity(1);
+    setImgLoaded(false);
+  }, [selectedVariantDefault]);
+
+  const handleAddToCart = () => {
+    if (!currentProduct || !selectedVariant || !currentProduct.inStock) return;
+
+    addToCart({
+      id: currentProduct.id,
+      name: currentProduct.name,
+      price: selectedVariant.price,
+      quantity,
+      image: selectedVariant.image,
+    });
+
+   
+    if (isAuthenticated) {
+      setToast(`${currentProduct.name} added to cart`);
+    } else {
+      return;
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* Left: Hero Image + Thumbnails */}
+        <div className="flex-1 relative">
+          {!imgLoaded && (
+            <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
+              <div className="w-10 h-10 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
+            </div>
+          )}
+          {selectedVariant && (
+            <motion.img
+              src={selectedVariant.image}
+              alt={currentProduct.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+              onLoad={() => setImgLoaded(true)}
+            />
+          )}
+          {selectedVariant.discount && (
+            <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
+              {selectedVariant.discount}% OFF
+            </span>
+          )}
+
+          {/* Thumbnails */}
+          {currentProduct.variants && currentProduct.variants.length > 1 && (
+            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
+              {currentProduct.variants.map((v, i) => (
+                <motion.div
+                  key={i}
+                  onClick={() => setSelectedVariant(v)}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${selectedVariant.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
+                  whileHover={{ scale: 1.05 }}
+                  aria-label={`Select variant ${i + 1}`}
+                >
+                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
+                  {v.discount && (
+                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                      {v.discount}% OFF
+                    </span>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Product Info */}
+        <div className="flex-1 flex flex-col gap-4 sm:gap-5">
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
+
+          {currentProduct.highlight && (
+            <span className="inline-block bg-[#C45A36] text-white px-2 py-1 text-sm rounded-md">{currentProduct.highlight}</span>
+          )}
+
+          {/* Rating + Price */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+                <Star key={i} className="w-5 h-5 text-yellow-400" />
+              ))}
+            </div>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{selectedVariant.price}</span>
+            {selectedVariant.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
+          </div>
+
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
+
+          {/* Structured Info */}
+          <div className="space-y-2 text-gray-700">
+            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
+          </div>
+
+          {/* Tags / Stock / Warranty */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{currentProduct.inStock ? "In Stock" : "Out of Stock"}</span>
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+          </div>
+
+          {/* Quantity + Add to Cart */}
+          <div className="flex flex-wrap gap-3 mt-4 items-center">
+            <button onClick={handleAddToCart} className="flex items-center gap-2 px-6 py-3 bg-[#C45A36] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
+              <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
+            </button>
+          </div>
+
+          {/* Contents + Customization */}
+          <div className="mt-6 flex flex-col gap-4">
+            {currentProduct.contents && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Contents</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
+                </ul>
+              </div>
+            )}
+            {currentProduct.customization?.available && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Customization Options</h3>
+                <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base z-50"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Reviews Section */}
+      <CustomerReview productId={currentProduct.id} />
+      <FloatingReviewChat productId={currentProduct.id} />
+    </div>
+  );
+}
