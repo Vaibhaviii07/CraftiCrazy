@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -44,7 +47,7 @@ const SignUp = () => {
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch("http://localhost:8000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -57,10 +60,24 @@ const SignUp = () => {
 
       const data = await res.json();
       if (res.ok) {
-        alert("Account created successfully!");
+        toast.success(`Account Created Successfully Please login ${data.user?.name}}!`, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
         navigate("/login");
       } else {
-        alert(data.message || "Signup failed");
+        toast.error("Invalid credentials ", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       }
     } catch (error) {
       console.error(error);
@@ -72,6 +89,7 @@ const SignUp = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6">
+      <ToastContainer />
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -161,7 +179,7 @@ const SignUp = () => {
           <button
             type="submit"
             disabled={!passwordMatch || loading}
-            className={`w-full py-2 sm:py-3 bg-amber-600 text-white rounded-xl font-semibold shadow-md hover:bg-amber-700 transition text-sm sm:text-base ${
+            className={`w-full py-2 sm:py-3 cursor-pointer bg-amber-600 text-white rounded-xl font-semibold shadow-md hover:bg-amber-700 transition text-sm sm:text-base ${
               !passwordMatch || loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >
