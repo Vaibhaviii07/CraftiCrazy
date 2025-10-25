@@ -1,0 +1,8 @@
+import express from "express";
+import { addContact,getContact } from "../controllers/contact.controller";
+const router = express.Router();
+
+router.post("/add", addContact);     
+router.get("/all", getContact);  
+
+export default router;
