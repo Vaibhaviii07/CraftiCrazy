@@ -53,13 +53,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addToCart = async (item: CartItem) => {
   const token = localStorage.getItem("token");
 
-//once backend is ready and payment gateway once done we will uncomment this.
-//   if (!token && !isAuthenticated) {
-//   toast.error("Please login to add items to your cart!");
-//   localStorage.removeItem("token");
-//   return;
-// }
-
+  if (!token && !isAuthenticated) {
+  toast.error("Please login to add items to your cart!");
+  localStorage.removeItem("token");
+  return;
+}
 
     // User logged in — Add or update item
     setCart((prevCart) => {

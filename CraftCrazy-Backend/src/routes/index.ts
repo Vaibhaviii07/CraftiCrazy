@@ -2,6 +2,7 @@ import { Router } from "express";
 import orderRoutes from "./order.route";
 import authRoutes from "./auth.route";
 import contactRoutes from "./contact.route";
+import demandRoutes from "./demand.route";
 
 const router = Router();
 
@@ -9,5 +10,6 @@ const router = Router();
 router.use("/order",orderRoutes);
 router.use("/auth",authRoutes);
 router.use("/contact",contactRoutes);
+router.use("/demand",demandRoutes);
 
 export default router;

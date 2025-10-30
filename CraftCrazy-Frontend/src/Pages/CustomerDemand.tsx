@@ -1,6 +1,9 @@
-// src/Pages/CustomerDemandPremium.tsx
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { useAuth } from "../AuthContext/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type FormData = {
   name: string;
@@ -29,10 +32,17 @@ const reels = [
 
 const CustomerDemandPremium = () => {
   const [formData, setFormData] = useState<FormData>({
-    name: "", email: "", phone: "", product: "", customization: "", image: null
+    name: "",
+    email: "",
+    phone: "",
+    product: "",
+    customization: "",
+    image: null,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const {isAuthenticated} = useAuth();
 
   const reelContainerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -85,6 +95,7 @@ const CustomerDemandPremium = () => {
     }
   }, [submitted]);
 
+  // ✅ handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (e.target instanceof HTMLInputElement && e.target.type === "file") {
@@ -93,10 +104,52 @@ const CustomerDemandPremium = () => {
     } else setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ handle form submit (connected to backend API)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", product: "", customization: "", image: null });
+
+    const token = localStorage.getItem("token");
+      if (!token && !isAuthenticated) {
+      toast.error("Please login to add items to your cart!");
+      localStorage.removeItem("token");
+      return;
+    }
+
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("product", formData.product);
+      formDataToSend.append("customization", formData.customization);
+      if (formData.image) formDataToSend.append("image", formData.image);
+
+      const res = await axios.post(
+        "http://localhost:8000/api/demand/create",
+        formDataToSend,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (res.status === 200 || res.status === 201) {
+        setSubmitted(true);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          product: "",
+          customization: "",
+          image: null,
+        });
+        setImagePreview(null);
+      }
+    } catch (error) {
+      console.error("Error submitting demand:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -210,13 +263,13 @@ const CustomerDemandPremium = () => {
 
             <motion.button
               type="submit"
-              whileHover={{ scale: 1.05 }}
-              disabled={submitted}
-              className={`mt-4 py-2 w-full bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl shadow-md text-sm sm:text-base ${
-                submitted ? "opacity-60 cursor-not-allowed" : ""
+              whileHover={{ scale: submitting ? 1 : 1.05 }}
+              disabled={submitting}
+              className={`mt-4 py-2 w-full cursor-pointer bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl shadow-md text-sm sm:text-base ${
+                submitting ? "opacity-60 cursor-not-allowed" : ""
               }`}
             >
-              Submit
+              {submitting ? "Submitting..." : "Submit"}
             </motion.button>
           </form>
 

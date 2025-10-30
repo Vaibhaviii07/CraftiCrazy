@@ -27,7 +27,6 @@ export const createOrderService = async (orderData:IOrderDocument) => {
         order.razorPayOrderId = razorpayOrder.id;
         await order.save();
 
-        
         return {orderDBId: order._id, orderId: razorpayOrder.id};
     }
 
