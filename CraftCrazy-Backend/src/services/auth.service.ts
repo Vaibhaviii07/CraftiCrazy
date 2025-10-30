@@ -8,7 +8,7 @@ export const signUpService = async(name:string,email:string,phone:Number,passwor
 
     if(userExist) throw new Error("User Alredy exists");
 
-    const user = new User({name,email,phone,password});
+    const user = new User({name,email,phone,password, role: "user"});
     await user.save();
 
     const token = generateToken(user._id.toString(),user.name, user.email);

@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { createDemandService } from "../services/demand.service";
+import { NextFunction, Request, Response } from "express";
+import * as demandService from "../services/demand.service";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import multer from "multer";
 
@@ -17,7 +17,7 @@ export const createDemandController = async (req: Request, res: Response) => {
 
     const cloudinaryResult: any = await uploadToCloudinary(req.file.buffer, "demands");
 
-    const newDemand = await createDemandService({
+    const newDemand = await demandService.createDemandService({
       name,
       email,
       phone,
@@ -30,9 +30,18 @@ export const createDemandController = async (req: Request, res: Response) => {
       message: "Demand created successfully",
       demand: newDemand,
     });
-    
+
   } catch (error: any) {
     console.error("Cloudinary Upload Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const demandOrders = (req:Request,res:Response,next:NextFunction) => {
+      try {
+         const allDemandOrders = demandService.getAllDemandService();
+         res.status(200).json({message:"All customized Orders", customizedOrder: allDemandOrders});
+      } catch (error) {
+          next(error);
+      }
+}

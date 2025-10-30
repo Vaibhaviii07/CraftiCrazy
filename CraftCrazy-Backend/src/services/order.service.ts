@@ -39,6 +39,28 @@ export const completeOrderService = async(orderDBId:string, paymentId:string) =>
     if(!order) throw new Error("Order Not Found");
 
     order.razorpayPaymentId = paymentId;
+    order.transactionStatus = "Payment Succeed";
+    order.orderStatus = "Processing";
     await order.save();
+    return order;
+}
+
+export const getAllOrders = async () => {
+    return await Order.find().sort({createdAt:-1});
+}
+
+export const orderUpdate = async(orderId:string, Status:string) => {
+    const allowedStatuses = ["Processing", "Shipped", "Delivered", "Cancelled"];
+
+    if(!allowedStatuses.includes(Status)){
+        throw new Error("invalid order status");
+    }
+
+    const order = await Order.findById(orderId);
+    if(!order) throw new Error("Order not found");
+
+    order.orderStatus = Status;
+    await order.save();
+
     return order;
 }

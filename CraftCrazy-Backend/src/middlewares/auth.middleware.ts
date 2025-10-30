@@ -17,10 +17,10 @@ export const authMiddleware = (req:AuthRequest,res:Response,next:NextFunction) =
 
         if(!authHeader || !authHeader.startsWith("Bearer")){
             return res.status(401).json({message : "no token provided"});
-        }
+        };
 
-        const token = authHeader?.split(" ")[1];
-        const decoded = jwt.verify(token,JWT_SECRET) as {userId:string};
+        const token = authHeader?.split("")[1];
+        const decoded = jwt.verify(token,JWT_SECRET) as {userId:string; role: string};
 
         req.user = {userId:decoded.userId};
         next();

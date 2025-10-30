@@ -35,7 +35,18 @@ const OrderSchema = new Schema<IOrderDocument>({
     paymentMethod: { type: String, required: true, enum: ["UPI", "CASH", "CARD"] },
     razorPayOrderId:{type:String},
     razorpayPaymentId:{type:String},
-    createdAt: {type:Date,default:Date.now}
+    createdAt: {type:Date,default:Date.now},
+
+    orderStatus: {
+    type: String,
+    enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+    default: "Pending",
+  },
+  transactionStatus: {
+    type: String,
+    enum: ["Payment Pending", "Payment Succeed", "Payment Failed"],
+    default: "Payment Pending",
+  },
 
 });
 

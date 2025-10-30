@@ -4,4 +4,5 @@ export interface IUser {
     phone:Number;
     password:string;
     comparePassword:(candidatePassword:string) => Promise<Boolean>
+    role?: "user" | "admin";
 }
