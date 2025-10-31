@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
   const staticProducts: Product[] = [
     {
       name: "Blue Ocean Resin Clock",
-      price: "$250",
+      price: "₹250",
       quantity: 12,
       category: "Resin Clocks",
       image: "http://localhost:5173/clock2-1.jpg",
@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
     },
     {
       name: "Marble Swirl Resin Coaster Set",
-      price: "$45",
+      price: "₹45",
       quantity: 25,
       category: "Resin Coasters",
       image: "http://localhost:5173/coaster1.jpg",
@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
     },
     {
       name: "Golden Leaf Resin Tray",
-      price: "$85",
+      price: "₹85",
       quantity: 8,
       category: "Resin Trays",
       image: "http://localhost:5173/tray1.jpg",
@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
     },
     {
       name: "Galaxy Bookmark Set",
-      price: "$30",
+      price: "₹30",
       quantity: 30,
       category: "Bookmarks",
       image: "http://localhost:5173/jewell11-1.jpg",
@@ -96,7 +96,7 @@ const Dashboard: React.FC = () => {
     },
     {
       name: "Custom Resin Name Keychain",
-      price: "$20",
+      price: "₹20",
       quantity: 50,
       category: "Keychains",
       image: "http://localhost:5173/keychain1.jpg",
@@ -145,11 +145,11 @@ const Dashboard: React.FC = () => {
   ];
 
   const staticOrders: Order[] = [
-    { name: "Blue Ocean Resin Clock", price: "$250", deliveryDate: "2025-10-29" },
-    { name: "Golden Leaf Resin Tray", price: "$85", deliveryDate: "2025-10-30" },
-    { name: "Marble Swirl Coaster Set", price: "$45", deliveryDate: "2025-10-31" },
-    { name: "Custom Resin Name Keychain", price: "$20", deliveryDate: "2025-11-01" },
-    { name: "Floral Resin Wall Frame", price: "$180", deliveryDate: "2025-11-03" },
+    { name: "Blue Ocean Resin Clock", price: "₹250", deliveryDate: "2025-10-29" },
+    { name: "Golden Leaf Resin Tray", price: "₹85", deliveryDate: "2025-10-30" },
+    { name: "Marble Swirl Coaster Set", price: "₹45", deliveryDate: "2025-10-31" },
+    { name: "Custom Resin Name Keychain", price: "₹20", deliveryDate: "2025-11-01" },
+    { name: "Floral Resin Wall Frame", price: "₹180", deliveryDate: "2025-11-03" },
   ];
 
   const staticLine: LineData[] = [
@@ -194,7 +194,6 @@ const Dashboard: React.FC = () => {
   // -------------------- UI --------------------
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 transition-all duration-300">
-
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
@@ -220,7 +219,7 @@ const Dashboard: React.FC = () => {
           <div className="text-right">
             <p className="text-sm text-gray-500">Revenue (this month)</p>
             <p className="text-xl font-semibold text-gray-800">
-              ${kpis.revenue.toLocaleString()}
+              ₹{kpis.revenue.toLocaleString("en-IN")}
             </p>
           </div>
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center text-white shadow">
@@ -233,7 +232,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: "Total Customers", value: kpis.customers, icon: <Users />, link: "/customers" },
-          { label: "Total Revenue", value: `$${kpis.revenue}`, icon: <DollarSign />, link: "/revenue" },
+          { label: "Total Revenue", value: `₹${kpis.revenue.toLocaleString("en-IN")}`, icon: <DollarSign />, link: "/revenue" },
           { label: "Total Sales", value: kpis.sales, icon: <ShoppingBag />, link: "/sales" },
           { label: "Performance Rate", value: "97%", icon: <Activity />, link: "/performance" },
         ].map((kpi, idx) => (
@@ -438,11 +437,11 @@ const Dashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {activeOrders.map((order, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 transition">
-                    <td className="py-2 px-4 font-medium text-gray-800">{order.name}</td>
+                {activeOrders.map((order, i) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="py-2 px-4">{order.name}</td>
                     <td className="py-2 px-4">{order.price}</td>
-                    <td className="py-2 px-4 text-gray-500">{order.deliveryDate}</td>
+                    <td className="py-2 px-4">{order.deliveryDate}</td>
                   </tr>
                 ))}
               </tbody>

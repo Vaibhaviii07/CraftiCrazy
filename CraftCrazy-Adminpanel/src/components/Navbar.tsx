@@ -5,6 +5,8 @@ import {
   ChevronDown,
   Settings,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 
 interface AdminData {
@@ -18,39 +20,16 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
-  // Default Static Data
   const [admin, setAdmin] = useState<AdminData>({
-    name: "Vaibhavi Tingane",
+    name: "Sanika",
     role: "Craft Manager",
-    avatar: "https://i.pravatar.cc/40?img=8",
+    avatar: "http://localhost:5173/logo.png",
   });
 
   const [notifications, setNotifications] = useState<number>(2);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [showSearch, setShowSearch] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // 🟣 API Fetch (Commented for now — backend route not yet made)
-  /*
-  useEffect(() => {
-    const fetchNavbarData = async () => {
-      try {
-        const res = await fetch("/api/navbar");
-        if (!res.ok) throw new Error("Failed to fetch navbar data");
-
-        const data = await res.json();
-        setAdmin({
-          name: data.admin?.name || "Vaibhavi Tingane",
-          role: data.admin?.role || "Craft Manager",
-          avatar: data.admin?.avatar || "https://i.pravatar.cc/40?img=8",
-        });
-        setNotifications(data.notifications || 2);
-      } catch (err) {
-        console.warn("⚠️ Using default navbar data (no API found)");
-      }
-    };
-    fetchNavbarData();
-  }, []);
-  */
 
   // 🟢 Close dropdown when clicking outside
   useEffect(() => {
@@ -68,19 +47,29 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
 
   const handleLogout = () => {
     console.log("Logging out...");
-    // Later: localStorage.clear(); navigate("/login");
+    // TODO: localStorage.clear(); navigate("/login");
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 border-b border-[#2a0a4b] shadow-md">
-      <div className="flex justify-between items-center px-5 py-3 text-black">
-        
-        {/* 🔹 Left Section (Sidebar Toggle Placeholder) */}
+    <header className="sticky top-0 z-50 bg-white/90 border-b border-[#2a0a4b] shadow-md backdrop-blur-lg">
+      <div className="flex justify-between items-center px-4 sm:px-6 py-3">
+        {/* 🔹 LEFT: Sidebar Toggle + Logo */}
         <div className="flex items-center gap-3">
-          {/* You can add a toggle button here later */}
+          {/* Sidebar toggle (mobile) */}
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-md text-[#2a0a4b] hover:bg-gray-100 transition-colors md:hidden"
+          >
+            <Menu size={22} />
+          </button>
+
+          {/* Logo */}
+          <h1 className="hidden sm:block text-lg font-semibold bg-gradient-to-r from-[#845EF7] to-[#B197FC] bg-clip-text text-transparent">
+            Crafti<span className="text-[#2a0a4b]">Crazy</span>
+          </h1>
         </div>
 
-        {/* 🔹 Center Search */}
+        {/* 🔸 CENTER: Search (Desktop) */}
         <div className="hidden md:flex relative w-80">
           <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
           <input
@@ -90,9 +79,16 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           />
         </div>
 
-        {/* 🔹 Right Section */}
-        <div className="flex items-center gap-5 relative" ref={dropdownRef}>
-          
+        {/* 🔸 RIGHT: Icons + Profile */}
+        <div className="flex items-center gap-4 sm:gap-5 relative" ref={dropdownRef}>
+          {/* Mobile Search Icon */}
+          <button
+            className="md:hidden text-gray-600 hover:text-[#C45A36] transition-colors"
+            onClick={() => setShowSearch(!showSearch)}
+          >
+            {showSearch ? <X size={20} /> : <Search size={20} />}
+          </button>
+
           {/* Notifications */}
           <div className="relative cursor-pointer group">
             <Bell className="w-6 h-6 text-gray-500 group-hover:text-[#C45A36] transition-colors" />
@@ -104,14 +100,14 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           </div>
 
           {/* Settings */}
-          <div className="cursor-pointer group">
+          <div className="hidden sm:block cursor-pointer group">
             <Settings className="w-6 h-6 text-gray-500 group-hover:text-[#C45A36] transition-colors" />
           </div>
 
           {/* Profile Dropdown */}
           <div
             onClick={() => setShowDropdown((prev) => !prev)}
-            className="flex items-center gap-3 bg-white hover:bg-gray-200 border border-[#3d116b] rounded-full px-3 py-1.5 cursor-pointer transition-all"
+            className="flex items-center gap-2 sm:gap-3 bg-white hover:bg-gray-200 border border-[#3d116b] rounded-full px-2 sm:px-3 py-1.5 cursor-pointer transition-all"
           >
             <img
               src={admin.avatar}
@@ -133,7 +129,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
 
           {/* Dropdown Menu */}
           {showDropdown && (
-            <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded-lg shadow-xl w-48 py-2 text-sm animate-fade-in">
+            <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded-lg shadow-xl w-44 py-2 text-sm animate-fade-in">
               <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
                 <Settings className="w-4 h-4 mr-2" /> Settings
               </button>
@@ -147,6 +143,20 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           )}
         </div>
       </div>
+
+      {/* 🔻 Mobile Search Dropdown */}
+      {showSearch && (
+        <div className="md:hidden px-4 pb-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 text-sm rounded-full bg-gray-100 text-black border border-[#2f1154] focus:ring-2 focus:ring-[#C45A36] focus:border-[#C45A36] outline-none transition-all"
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 };

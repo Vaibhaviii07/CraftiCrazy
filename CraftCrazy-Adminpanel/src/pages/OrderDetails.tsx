@@ -177,7 +177,7 @@ const OrderDetails: React.FC = () => {
       billingAddress:
         "Plot 23, Shivaji Nagar, Nagpur, Maharashtra, India - 440010",
       paymentCard: "UPI - vaibhavitingane07@oksbi",
-      profileImage: "https://randomuser.me/api/portraits/women/47.jpg",
+      profileImage: "http://localhost:5173/logo.png",
     },
     timeline: [
       {

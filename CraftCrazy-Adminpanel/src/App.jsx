@@ -8,6 +8,8 @@ import Orders from "./pages/Order";
 import OrderDetails from "./pages/OrderDetails";
 import AddProduct from "./pages/Addproducts";
 import AllProducts from "./pages/Allproducts";
+import ProductDetail from "./pages/ProductDetails";
+import CategoryList from "./pages/CategoryList";
 
 function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -45,9 +47,8 @@ function App() {
               <Route path="/orders/details" element={<OrderDetails />} />
               <Route path="/addproducts" element={<AddProduct />} />
               <Route path="/allproducts" element={<AllProducts />} />
-
-
-
+              <Route path="/product/details" element={<ProductDetail/>} />
+              <Route path="/catogaries" element={<CategoryList/>} />
             </Routes>
           </main>
         </div>
