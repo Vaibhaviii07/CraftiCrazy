@@ -10,6 +10,13 @@ import AddProduct from "./pages/Addproducts";
 import AllProducts from "./pages/Allproducts";
 import ProductDetail from "./pages/ProductDetails";
 import CategoryList from "./pages/CategoryList";
+import Customers from "./pages/Customers";
+import CustomerReviewsPage from "./pages/Review";
+import Notifications from "./pages/Notifications";
+import SettingsPage from "./pages/SettingsPage";
+import CreateInvoice from "./pages/CreateInvoice";
+import InvoiceList from "./pages/InvoiceList";
+import InvoiceDetails from "./pages/InvoiceDetails";
 
 function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -49,6 +56,15 @@ function App() {
               <Route path="/allproducts" element={<AllProducts />} />
               <Route path="/product/details" element={<ProductDetail/>} />
               <Route path="/catogaries" element={<CategoryList/>} />
+              <Route path="/AllCustomer" element={<Customers />}/>
+              <Route path="/review" element={<CustomerReviewsPage />}/>
+              <Route path="/notification" element={<Notifications />}/>
+              <Route path="/setting" element={<SettingsPage />}/>
+              <Route path="/CreateInvoice" element={<CreateInvoice />}/>
+              <Route path="/ListInvoice" element={<InvoiceList />}/>
+              <Route path="/InvoiceDetail" element={<InvoiceDetails />}/>
+
+
             </Routes>
           </main>
         </div>

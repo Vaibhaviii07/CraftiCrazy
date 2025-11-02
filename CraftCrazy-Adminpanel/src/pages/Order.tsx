@@ -200,7 +200,7 @@ const OrdersPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-1">Orders List</h1>
+       <h1 className="text-3xl font-bold text-black">📦 Orders List</h1>
       </div>
 
       {/* ===== Earnings & Chart Section ===== */}

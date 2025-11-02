@@ -8,6 +8,8 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface AdminData {
   name: string;
@@ -20,24 +22,57 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
-  const [admin, setAdmin] = useState<AdminData>({
-    name: "Sanika",
-    role: "Craft Manager",
-    avatar: "http://localhost:5173/logo.png",
-  });
-
-  const [notifications, setNotifications] = useState<number>(2);
+  const navigate = useNavigate();
+  const [admin, setAdmin] = useState<AdminData | null>(null);
+  const [notifications, setNotifications] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 🟢 Close dropdown when clicking outside
+  // 🟢 Fetch admin profile dynamically (from Settings backend)
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/admin/profile");
+        setAdmin(res.data); // expecting { name, role, avatar }
+      } catch (err) {
+        console.error("❌ Error fetching admin profile:", err);
+        // fallback default if API fails
+        setAdmin({
+          name: "Admin User",
+          role: "Dashboard Manager",
+          avatar: "http://localhost:5173/logo.png",
+        });
+      }
+    };
+    fetchAdmin();
+  }, []);
+
+  // 🔔 Fetch notifications dynamically
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/notifications");
+        if (Array.isArray(res.data)) setNotifications(res.data.length);
+        else if (res.data.count) setNotifications(res.data.count);
+        else setNotifications(0);
+      } catch (err) {
+        console.error("❌ Error fetching notifications:", err);
+        setNotifications(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000); // auto-refresh every 1 min
+    return () => clearInterval(interval);
+  }, []);
+
+  // 🟣 Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
       }
     };
@@ -46,30 +81,24 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   }, []);
 
   const handleLogout = () => {
-    console.log("Logging out...");
-    // TODO: localStorage.clear(); navigate("/login");
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 border-b border-[#2a0a4b] shadow-md backdrop-blur-lg">
       <div className="flex justify-between items-center px-4 sm:px-6 py-3">
-        {/* 🔹 LEFT: Sidebar Toggle + Logo */}
+        {/* LEFT: Sidebar Toggle + Logo */}
         <div className="flex items-center gap-3">
-          {/* Sidebar toggle (mobile) */}
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-md text-[#2a0a4b] hover:bg-gray-100 transition-colors md:hidden"
           >
             <Menu size={22} />
           </button>
-
-          {/* Logo */}
-          <h1 className="hidden sm:block text-lg font-semibold bg-gradient-to-r from-[#845EF7] to-[#B197FC] bg-clip-text text-transparent">
-            Crafti<span className="text-[#2a0a4b]">Crazy</span>
-          </h1>
         </div>
 
-        {/* 🔸 CENTER: Search (Desktop) */}
+        {/* CENTER: Search */}
         <div className="hidden md:flex relative w-80">
           <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
           <input
@@ -79,9 +108,9 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           />
         </div>
 
-        {/* 🔸 RIGHT: Icons + Profile */}
+        {/* RIGHT: Icons + Profile */}
         <div className="flex items-center gap-4 sm:gap-5 relative" ref={dropdownRef}>
-          {/* Mobile Search Icon */}
+          {/* Mobile Search */}
           <button
             className="md:hidden text-gray-600 hover:text-[#C45A36] transition-colors"
             onClick={() => setShowSearch(!showSearch)}
@@ -89,36 +118,36 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
             {showSearch ? <X size={20} /> : <Search size={20} />}
           </button>
 
-          {/* Notifications */}
-          <div className="relative cursor-pointer group">
-            <Bell className="w-6 h-6 text-gray-500 group-hover:text-[#C45A36] transition-colors" />
-            {notifications > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#C45A36] text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">
+          {/* Notifications Icon */}
+          <Link to="/notification" className="relative cursor-pointer group">
+            <Bell
+              className={`w-6 h-6 ${
+                loading ? "text-gray-300" : "text-gray-500"
+              } group-hover:text-[#C45A36] transition-colors`}
+            />
+            {!loading && notifications > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[#C45A36] text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm animate-pulse">
                 {notifications}
               </span>
             )}
-          </div>
-
-          {/* Settings */}
-          <div className="hidden sm:block cursor-pointer group">
-            <Settings className="w-6 h-6 text-gray-500 group-hover:text-[#C45A36] transition-colors" />
-          </div>
-
+          </Link>
           {/* Profile Dropdown */}
           <div
             onClick={() => setShowDropdown((prev) => !prev)}
             className="flex items-center gap-2 sm:gap-3 bg-white hover:bg-gray-200 border border-[#3d116b] rounded-full px-2 sm:px-3 py-1.5 cursor-pointer transition-all"
           >
             <img
-              src={admin.avatar}
-              alt={admin.name}
+              src={admin?.avatar || "http://localhost:5173/logo.png"}
+              alt={admin?.name || "Admin"}
               className="w-8 h-8 rounded-full border border-[#C45A36] object-cover"
             />
             <div className="hidden md:flex flex-col leading-tight">
               <span className="text-sm font-medium text-black">
-                {admin.name}
+                {admin?.name || "Loading..."}
               </span>
-              <span className="text-xs text-gray-500">{admin.role}</span>
+              <span className="text-xs text-gray-500">
+                {admin?.role || "Admin"}
+              </span>
             </div>
             <ChevronDown
               className={`w-4 h-4 text-gray-400 transition-transform ${
@@ -130,9 +159,12 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           {/* Dropdown Menu */}
           {showDropdown && (
             <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded-lg shadow-xl w-44 py-2 text-sm animate-fade-in">
-              <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
+              <Link
+                to="/setting"
+                className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
                 <Settings className="w-4 h-4 mr-2" /> Settings
-              </button>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -144,7 +176,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
         </div>
       </div>
 
-      {/* 🔻 Mobile Search Dropdown */}
+      {/* Mobile Search */}
       {showSearch && (
         <div className="md:hidden px-4 pb-3">
           <div className="relative">

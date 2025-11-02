@@ -382,10 +382,9 @@ const OrderDetails: React.FC = () => {
         <div className="space-y-6">
           {/* ✅ Customer Details */}
           <div className="border rounded-lg p-5 bg-gray-50 shadow-sm">
-            <h3 className="font-semibold text-gray-800 mb-4 text-lg">
-              Customer Details
-            </h3>
-
+           <h1 className="text-2xl font-semibold text-[#2a0a4b] mb-6">
+            🧾 Customer Details
+          </h1>
             <div className="flex items-center gap-4 mb-5">
               <img
                 src={orderData.customer.profileImage}

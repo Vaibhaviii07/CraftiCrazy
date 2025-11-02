@@ -160,7 +160,9 @@ const AllProducts: React.FC = () => {
       {/* Top bar */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Product List</h1>
+         <h1 className="text-2xl font-semibold text-[#2a0a4b] mb-6">
+          🛍️ Product List
+        </h1>
           <p className="text-sm text-gray-500">Manage all store products — edit, delete or view details.</p>
         </div>
 

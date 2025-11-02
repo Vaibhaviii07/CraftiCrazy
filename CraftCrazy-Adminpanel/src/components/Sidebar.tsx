@@ -298,13 +298,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                       transition={{ duration: 0.25 }}
                       className="pl-10 flex flex-col mt-2 space-y-1 overflow-hidden"
                     >
-                      <Link to="/invoice/all" className={menuItemClass("/invoice/all")}>
+                      <Link to="/ListInvoice" className={menuItemClass("/ListInvoice")}>
                         All Invoices
                       </Link>
-                      <Link to="/invoice/create" className={menuItemClass("/invoice/create")}>
+                      <Link to="/CreateInvoice" className={menuItemClass("/CreateInvoice")}>
                         Create Invoice
                       </Link>
-                      <Link to="/invoice/details" className={menuItemClass("/invoice/details")}>
+                      <Link to="/InvoiceDetail" className={menuItemClass("/InvoiceDetail")}>
                         Invoice Details
                       </Link>
                     </motion.div>
@@ -346,42 +346,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                       transition={{ duration: 0.25 }}
                       className="pl-10 flex flex-col mt-2 space-y-1 overflow-hidden"
                     >
-                      <Link to="/customers/all" className={menuItemClass("/customers/all")}>
+                      <Link to="/AllCustomer" className={menuItemClass("/AllCustomer")}>
                         All Customers
                       </Link>
-                      <Link to="/customers/reviews" className={menuItemClass("/customers/reviews")}>
+                      <Link to="/review" className={menuItemClass("/review")}>
                         Reviews & Feedback
                       </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-
-              {/* Feedback */}
-              <Link
-                to="/feedback"
-                className={`flex items-center gap-3 px-5 py-3 mt-4 text-gray-300 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ${
-                  isActive("/feedback")
-                    ? "bg-gradient-to-r from-[#B197FC] to-[#845EF7] text-white shadow-md"
-                    : ""
-                }`}
-              >
-                <MessageSquare size={18} />
-                {!isCollapsed && <span>Feedback</span>}
-              </Link>
-
-              {/* Ratings */}
-              <Link
-                to="/reviews"
-                className={`flex items-center gap-3 px-5 py-3 text-gray-300 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300 ${
-                  isActive("/reviews")
-                    ? "bg-gradient-to-r from-[#845EF7] to-[#B197FC] text-white shadow-md"
-                    : ""
-                }`}
-              >
-                <Star size={18} />
-                {!isCollapsed && <span>Ratings</span>}
-              </Link>
             </nav>
 
             {/* Footer */}
