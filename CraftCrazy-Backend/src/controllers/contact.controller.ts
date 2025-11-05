@@ -1,7 +1,9 @@
 import { Request,Response,NextFunction } from "express";
-import * as ContactService from "../services/contact.service";
+import * as contactService from "../services/contact.service";
+import { getIO } from "../socket/initSocket";
 
-export const addContact = (req:Request,res:Response,next:NextFunction) => {
+
+export const addContact = async(req:Request,res:Response,next:NextFunction) => {
     try {
         const {name,email,phone,message} = req.body;
 
@@ -9,7 +11,8 @@ export const addContact = (req:Request,res:Response,next:NextFunction) => {
             return res.status(400).json({success:false,message:"All required field must be provided."});
         }
 
-        const contact = ContactService.CreateContact({name,email,phone,message});
+        const contact = await contactService.CreateContact({name,email,phone,message});
+        getIO().emit("contact-updated", contact);
         res.status(201).json({success:true,message: "Message submitted successfully!",data:contact});
 
     } catch (error) {
@@ -17,11 +20,33 @@ export const addContact = (req:Request,res:Response,next:NextFunction) => {
     }
 };
 
+export const updateContactStatus = async(req:Request,res:Response,next:NextFunction) => {
+    try {
+        const {id} = req.params;
+        const {status} = req.body;
+
+        if(!status){
+            return res.status(400).json({success:false,message:"Status is required"});
+        }
+
+        const updatedContact = await contactService.updateContactStatusService(id,status);
+        getIO().emit("contact-updated",{id,status});
+        return res.json({
+            success:true,
+            message:"Contact status updated successfully",
+            data:updatedContact
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 
 
 export const getContact = async(req:Request,res:Response,next:NextFunction) => {
     try {
-        const contacts = await ContactService.getAllContacts();
+        const contacts = await contactService.getAllContacts();
+        console.log(contacts);
         res.status(200).json({success:true,data:contacts});
     } catch (error) {
         next(error);

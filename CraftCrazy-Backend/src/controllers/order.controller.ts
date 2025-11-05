@@ -2,7 +2,6 @@ import { Request,Response,NextFunction } from "express";
 import * as orderService from "../services/order.service";
 
 
-
 export const createOrder = async (req:Request, res:Response, next: NextFunction) => {
     try {
         const data = await orderService.createOrderService(req.body);
@@ -24,14 +23,97 @@ export const completeOrder = async (req:Request, res:Response, next:NextFunction
     }
 }
 
-export const getAllOrders = (req:Request,res:Response,next:NextFunction) => {
+export const getAllOrders = async(req:Request,res:Response,next:NextFunction) => {
     try {
-        const allOrders = orderService.getAllOrders();
-        res.status(200).json({success:true,message:"Orders fetched successfully", data:allOrders});
+        const allOrders = await orderService.getAllOrders();
+        res.status(200).json({success:true,message:allOrders.length > 0 ? "Orders fetched successfully" : "No orders found", data:allOrders});
     } catch (error) {   
         next(error);
     }
 }
+
+export const getAllProducts = async(req:Request,res:Response,next:NextFunction) => {
+    try {
+        const allProduct = await orderService.getAllProductsFromOrders();
+        res.status(200).json({
+        success: true,
+        count: allProduct.length,
+        data: allProduct,
+    });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getAllCustomerNames = async (req: Request, res: Response) => {
+  try {
+    const customers = await orderService.getAllCustomerNamesService();
+    res.status(200).json({
+      success: true,
+      count: customers.length,
+      data: customers,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching customer names",
+      error: error.message,
+    });
+  }
+};
+
+export const getOrdersByOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.params;
+    const orders = await orderService.getOrdersByOrderStatusService(status);
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders by orderStatus",
+      error: error.message,
+    });
+  }
+};
+
+export const getOrdersByTransactionStatus = async (req: Request, res: Response) => {
+  try {
+    const { transactionStatus } = req.params;
+    const orders = await orderService.getOrdersByTransactionStatusService(transactionStatus);
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders by transactionStatus",
+      error: error.message,
+    });
+  }
+};
+
+export const getActiveOrders = async (req: Request, res: Response) => {
+  try {
+    const activeOrders = await orderService.getActiveOrdersService();
+    res.status(200).json({
+      success: true,
+      count: activeOrders.length,
+      data: activeOrders,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching active orders",
+      error: error.message,
+    });
+  }
+};
 
 export const updateOrderStatus = async(req:Request,res:Response,next:NextFunction) => {
     try {

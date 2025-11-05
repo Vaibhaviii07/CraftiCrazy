@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     products: false,
     orders: false,
     customers: false,
-    invoices: false, 
+    invoices: false,
   });
 
   const toggleMenu = (menu: string) => {
@@ -50,10 +50,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const isActive = (path: string) => location.pathname === path;
 
   const menuItemClass = (path: string) =>
-    `relative flex items-center gap-3 px-4 py-2 text-sm rounded-xl transition-all duration-300 ${
-      isActive(path)
-        ? "bg-gradient-to-r from-[#845EF7] to-[#B197FC] text-white shadow-[0_0_15px_#845EF760]"
-        : "text-gray-300 hover:text-white hover:bg-white/10"
+    `relative flex items-center gap-3 px-4 py-2 text-sm rounded-xl transition-all duration-300 ${isActive(path)
+      ? "bg-gradient-to-r from-[#845EF7] to-[#B197FC] text-white shadow-[0_0_15px_#845EF760]"
+      : "text-gray-300 hover:text-white hover:bg-white/10"
     }`;
 
   const sectionButtonClass =
@@ -99,9 +98,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             animate={{ x: 0 }}
             exit={{ x: -250 }}
             transition={{ duration: 0.3 }}
-            className={`${
-              isCollapsed ? "w-20" : "w-64"
-            } h-screen fixed left-0 top-0 z-50 flex flex-col
+            className={`${isCollapsed ? "w-20" : "w-64"
+              } h-screen fixed left-0 top-0 z-50 flex flex-col
             bg-gradient-to-b from-[#10002b]/90 to-[#240046]/90
             backdrop-blur-xl border-r border-r-white/10 text-gray-200 transition-all duration-300`}
           >
@@ -130,14 +128,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("dashboard")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <Home size={18} />
                     {!isCollapsed && <span>Dashboard</span>}
@@ -172,14 +168,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("products")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <Package size={18} />
                     {!isCollapsed && <span>Products</span>}
@@ -223,14 +217,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("orders")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <ClipboardList size={18} />
                     {!isCollapsed && <span>Orders</span>}
@@ -268,14 +260,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("invoices")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <FileText size={18} />
                     {!isCollapsed && <span>Invoices</span>}
@@ -316,14 +306,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("customers")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <Users size={18} />
                     {!isCollapsed && <span>Customers</span>}
@@ -352,6 +340,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/review" className={menuItemClass("/review")}>
                         Reviews & Feedback
                       </Link>
+                      <Link to="/contact" className={menuItemClass("/contact")}>
+                        Customer Contact
+                      </Link>
+
+
                     </motion.div>
                   )}
                 </AnimatePresence>

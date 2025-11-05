@@ -9,18 +9,22 @@ dotenv.config();
 
 const app: Application = express();
 
+if (!process.env.FRONTEND_URL || !process.env.ADMIN_PANEL_URL) {
+  throw new Error("Missing FRONTEND_URL or ADMIN_PANEL_URL in .env file");
+}
+
 // Middlewares
 app.use(cors({
-    origin:process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials:true,
+  origin: [process.env.FRONTEND_URL || "", process.env.ADMIN_PANEL_URL || ""],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],
+  credentials: true,
+
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-// app.use("/api/products", productRoutes);
 app.use("/api",routes);
 
 //check route

@@ -47,7 +47,6 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
     if (user) setUserData({ name: user.name, email: user.email });
   }, [user]);
 
-  console.log(userData);
 
   const handleLogout = () => {
     localStorage.removeItem("token");

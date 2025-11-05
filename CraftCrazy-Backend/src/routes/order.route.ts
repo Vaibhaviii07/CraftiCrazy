@@ -8,7 +8,12 @@ router.post("/createOrder",authMiddleware, orderCtrl.createOrder);
 router.post("/orderComplete",authMiddleware, orderCtrl.completeOrder);
 
 //admin routes
-router.get("/order",authMiddleware,adminMiddleware,orderCtrl.getAllOrders);
+router.get("/getOrder",orderCtrl.getAllOrders);
+router.get("/products",orderCtrl.getAllProducts);
+router.get("/customers",orderCtrl.getAllCustomerNames);
+router.get("/status/:status",orderCtrl.getOrdersByOrderStatus);
+router.get("/transaction/:transactionStatus",orderCtrl.getOrdersByTransactionStatus);
+router.get("/active", orderCtrl.getActiveOrders);
 router.patch("/order/:orderId",authMiddleware,adminMiddleware,orderCtrl.updateOrderStatus);
 
 export default router;

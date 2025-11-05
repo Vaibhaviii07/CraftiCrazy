@@ -342,7 +342,7 @@ const CheckoutPage: React.FC = () => {
             />
 
             {/* Customization */}
-            <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Customization</h2>
+            {/* <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Customization</h2>
             <textarea
               name="customization"
               value={formData.customization || ""}
@@ -350,7 +350,7 @@ const CheckoutPage: React.FC = () => {
               placeholder="Write if you want to customize your hamper or product..."
               className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
               rows={3}
-            />
+            /> */}
 
             {/* Payment */}
             <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Payment</h2>

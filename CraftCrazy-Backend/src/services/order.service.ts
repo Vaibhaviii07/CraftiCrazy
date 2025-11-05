@@ -1,6 +1,8 @@
 import { Order,IOrderDocument } from "../models/orderModel";
 import RazorPay from "razorpay";
 import dotenv from "dotenv";
+import { getIO } from "../socket/initSocket";
+
 
 dotenv.config();
 
@@ -26,6 +28,10 @@ export const createOrderService = async (orderData:IOrderDocument) => {
 
         order.razorPayOrderId = razorpayOrder.id;
         await order.save();
+        getIO().emit("order-updated",order);
+        getIO().emit("trend:update");
+
+
 
         return {orderDBId: order._id, orderId: razorpayOrder.id};
     }
@@ -42,12 +48,40 @@ export const completeOrderService = async(orderDBId:string, paymentId:string) =>
     order.transactionStatus = "Payment Succeed";
     order.orderStatus = "Processing";
     await order.save();
+    getIO().emit("order-updated",order);
+    getIO().emit("trend:update");
     return order;
 }
 
 export const getAllOrders = async () => {
     return await Order.find().sort({createdAt:-1});
 }
+
+export const getAllProductsFromOrders = async () => {
+    const orders = await Order.find({}, "items"); 
+    const allProducts = orders.flatMap(order => order.items);
+    return allProducts;
+};
+
+export const getAllCustomerNamesService = async () => {
+  const orders = await Order.find({}, "customer.name");
+  const uniqueCustomers = [...new Set(orders.map(o => o.customer.name))];
+  return uniqueCustomers;
+};
+
+export const getOrdersByOrderStatusService = async (status: string) => {
+  return await Order.find({ orderStatus: status }).sort({ createdAt: -1 });
+};
+
+export const getOrdersByTransactionStatusService = async (transactionStatus: string) => {
+  return await Order.find({ transactionStatus }).sort({ createdAt: -1 });
+};
+
+export const getActiveOrdersService = async () => {
+  return await Order.find({
+    orderStatus: { $in: ["Pending", "Processing"] },
+  }).sort({ createdAt: -1 });
+};
 
 export const orderUpdate = async(orderId:string, Status:string) => {
     const allowedStatuses = ["Processing", "Shipped", "Delivered", "Cancelled"];

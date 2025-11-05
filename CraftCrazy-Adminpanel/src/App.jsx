@@ -17,6 +17,7 @@ import SettingsPage from "./pages/SettingsPage";
 import CreateInvoice from "./pages/CreateInvoice";
 import InvoiceList from "./pages/InvoiceList";
 import InvoiceDetails from "./pages/InvoiceDetails";
+import CustomerContact from "./pages/CustomerContact";
 
 function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -63,6 +64,7 @@ function App() {
               <Route path="/CreateInvoice" element={<CreateInvoice />}/>
               <Route path="/ListInvoice" element={<InvoiceList />}/>
               <Route path="/InvoiceDetail" element={<InvoiceDetails />}/>
+              <Route path="/contact" element={<CustomerContact />} />
 
 
             </Routes>
