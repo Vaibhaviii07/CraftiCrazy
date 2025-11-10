@@ -14,10 +14,10 @@ import {
 
 interface Invoice {
   _id?: string;
-  id: string;
+  invoiceId: string;
   client: string;
   email: string;
-  date: string;
+  dateIssued: string;
   amount: number;
   status: "Paid" | "Pending" | "Overdue" | "Due Soon";
   dueDate: string;
@@ -27,69 +27,31 @@ const InvoiceList: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState("");
 
   // 🔗 Fetch invoices from backend
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
+        setLoading(true);
         const res = await axios.get("http://localhost:5000/api/invoices");
         setInvoices(res.data);
       } catch (err) {
-        console.error("API Error, using fallback data", err);
-        setInvoices([
-          {
-            id: "#SPK12032901",
-            client: "Json Taylor",
-            email: "jsontaylor2416@gmail.com",
-            date: "25, Nov 2022",
-            amount: 17600,
-            status: "Paid",
-            dueDate: "25, Dec 2022",
-          },
-          {
-            id: "#SPK12032912",
-            client: "Suzika Stallone",
-            email: "suzikastallone2314@gmail.com",
-            date: "13, Nov 2022",
-            amount: 42500,
-            status: "Pending",
-            dueDate: "13, Dec 2022",
-          },
-          {
-            id: "#SPK12032945",
-            client: "Roman Killon",
-            email: "romankillon4413@gmail.com",
-            date: "30, Nov 2022",
-            amount: 182000,
-            status: "Overdue",
-            dueDate: "30, Dec 2022",
-          },
-          {
-            id: "#SPK12032922",
-            client: "Charlie Davison",
-            email: "charliedavison85@gmail.com",
-            date: "18, Nov 2022",
-            amount: 130000,
-            status: "Paid",
-            dueDate: "18, Dec 2022",
-          },
-          {
-            id: "#SPK12032932",
-            client: "Selena Deoyl",
-            email: "selenadeoyl114@gmail.com",
-            date: "18, Nov 2022",
-            amount: 405000,
-            status: "Due Soon",
-            dueDate: "18, Dec 2022",
-          },
-        ]);
+        console.error("Error fetching invoices:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchInvoices();
   }, []);
+
+  // 💰 Format currency
+  const formatRupees = (amount: number) =>
+    amount.toLocaleString("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+    });
 
   // 🎨 Status badge colors
   const getStatusColor = (status: string) => {
@@ -107,20 +69,24 @@ const InvoiceList: React.FC = () => {
     }
   };
 
-  // 💰 Format in Rupees
-  const formatRupees = (amount: number) =>
-    amount.toLocaleString("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 2,
-    });
-
   // 🔍 Filter invoices
   const filteredInvoices = invoices.filter(
     (invoice) =>
       invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase())
+      invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // 📊 Summary Calculations
+  const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+  const paidAmount = invoices
+    .filter((inv) => inv.status === "Paid")
+    .reduce((sum, inv) => sum + inv.amount, 0);
+  const pendingAmount = invoices
+    .filter((inv) => inv.status === "Pending")
+    .reduce((sum, inv) => sum + inv.amount, 0);
+  const overdueAmount = invoices
+    .filter((inv) => inv.status === "Overdue")
+    .reduce((sum, inv) => sum + inv.amount, 0);
 
   return (
     <motion.div
@@ -132,7 +98,7 @@ const InvoiceList: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[#2a0a4b]">📜 Invoice List</h1>
         <button
-          onClick={() => (window.location.href = "/create-invoice")}
+          onClick={() => (window.location.href = "/CreateInvoice")}
           className="flex items-center gap-2 bg-[#845EF7] text-white px-4 py-2 rounded-lg hover:bg-[#6f4ad8] transition"
         >
           <Plus size={16} /> Create Invoice
@@ -140,7 +106,7 @@ const InvoiceList: React.FC = () => {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left: Table Section */}
+        {/* Left Section */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border">
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="font-semibold text-gray-700">Manage Invoices</h2>
@@ -156,9 +122,11 @@ const InvoiceList: React.FC = () => {
             </div>
           </div>
 
-          {/* Loader */}
+          {/* Table */}
           {loading ? (
             <div className="p-10 text-center text-gray-500">Loading invoices...</div>
+          ) : error ? (
+            <div className="p-10 text-center text-red-500">{error}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-gray-700">
@@ -174,125 +142,100 @@ const InvoiceList: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInvoices.map((invoice, i) => (
-                    <tr
-                      key={i}
-                      className="border-b hover:bg-gray-50 transition duration-150 cursor-pointer"
-                      onClick={() =>
-                        (window.location.href = `/InvoiceDetail/${invoice._id || invoice.id}`)
-                      }
-                    >
-                      <td className="py-3 px-4">
-                        <div>
-                          <p className="font-medium">{invoice.client}</p>
-                          <p className="text-xs text-gray-500">{invoice.email}</p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-[#845EF7] font-semibold">
-                        {invoice.id}
-                      </td>
-                      <td className="py-3 px-4">{invoice.date}</td>
-                      <td className="py-3 px-4">{formatRupees(invoice.amount)}</td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            invoice.status
-                          )}`}
-                        >
-                          {invoice.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">{invoice.dueDate}</td>
-                      <td
-                        className="py-3 px-4 text-center"
-                        onClick={(e) => e.stopPropagation()}
+                  {filteredInvoices.length > 0 ? (
+                    filteredInvoices.map((invoice) => (
+                      <tr
+                        key={invoice._id}
+                        className="border-b hover:bg-gray-50 transition duration-150 cursor-pointer"
+                        onClick={() =>
+                          (window.location.href = `/InvoiceDetail/${invoice._id}`)
+                        }
                       >
-                        <div className="flex justify-center gap-2">
-                          {/* 👁 View */}
-                          <button
-                            onClick={() =>
-                              (window.location.href = `/invoice-details/${invoice._id || invoice.id}`)
-                            }
-                            className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-full"
-                            title="View Invoice"
+                        <td className="py-3 px-4">
+                          <div>
+                            <p className="font-medium">{invoice.client}</p>
+                            <p className="text-xs text-gray-500">{invoice.email}</p>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-[#845EF7] font-semibold">
+                          {invoice.invoiceId}
+                        </td>
+                        <td className="py-3 px-4">{invoice.dateIssued}</td>
+                        <td className="py-3 px-4">{formatRupees(invoice.amount)}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                              invoice.status
+                            )}`}
                           >
-                            <Eye size={16} />
-                          </button>
-
-                          {/* 🗑 Delete */}
-                          <button
-                            onClick={async () => {
-                              const confirmDelete = window.confirm(
-                                `Are you sure you want to delete invoice ${invoice.id}?`
-                              );
-                              if (!confirmDelete) return;
-
-                              try {
-                                await axios.delete(
-                                  `http://localhost:5000/api/invoices/${invoice._id || invoice.id}`
-                                );
-                                setInvoices((prev) =>
-                                  prev.filter(
-                                    (inv) =>
-                                      inv._id !== invoice._id && inv.id !== invoice.id
-                                  )
-                                );
-                                alert("🗑 Invoice deleted successfully!");
-                              } catch (err) {
-                                console.error("Delete failed:", err);
-                                alert("❌ Failed to delete invoice. Please try again.");
+                            {invoice.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">{invoice.dueDate}</td>
+                        <td
+                          className="py-3 px-4 text-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                (window.location.href = `/invoice-details/${invoice._id}`)
                               }
-                            }}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-full"
-                            title="Delete Invoice"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
+                              className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-full"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (
+                                  !window.confirm(
+                                    `Are you sure you want to delete invoice ${invoice.invoiceId}?`
+                                  )
+                                )
+                                  return;
+                                try {
+                                  await axios.delete(
+                                    `http://localhost:5000/api/invoices/${invoice._id}`
+                                  );
+                                  setInvoices((prev) =>
+                                    prev.filter((inv) => inv._id !== invoice._id)
+                                  );
+                                  alert("🗑 Invoice deleted successfully!");
+                                } catch (err) {
+                                  console.error("Delete failed:", err);
+                                  alert("❌ Failed to delete invoice.");
+                                }
+                              }}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-full"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="text-center py-6 text-gray-500">
+                        No invoices found.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
-
-              {filteredInvoices.length === 0 && (
-                <div className="text-center text-gray-500 py-6">
-                  No invoices found.
-                </div>
-              )}
             </div>
           )}
-
-          {/* Pagination */}
-          <div className="flex justify-between items-center p-4 border-t">
-            <p className="text-sm text-gray-500">Showing 1 to 5 of 10 entries</p>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-100">
-                Previous
-              </button>
-              <button className="px-3 py-1 border rounded-md bg-[#845EF7] text-white text-sm">
-                1
-              </button>
-              <button className="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-100">
-                2
-              </button>
-              <button className="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-100">
-                Next
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Right: Summary Cards */}
+        {/* Right Summary Cards */}
         <div className="space-y-6">
           <div className="bg-white p-5 rounded-xl shadow-sm border flex items-center gap-4">
             <div className="bg-[#845EF7]/10 p-3 rounded-lg">
               <FileText className="text-[#845EF7]" size={22} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Invoices Amount</p>
-              <h3 className="text-xl font-semibold">{formatRupees(192870)}</h3>
-              <p className="text-green-600 text-xs">↑ 3.25% this month</p>
+              <p className="text-sm text-gray-500">Total Invoice Amount</p>
+              <h3 className="text-xl font-semibold">{formatRupees(totalAmount)}</h3>
             </div>
           </div>
 
@@ -301,9 +244,8 @@ const InvoiceList: React.FC = () => {
               <Wallet className="text-green-600" size={22} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Paid Invoices</p>
-              <h3 className="text-xl font-semibold">{formatRupees(68830)}</h3>
-              <p className="text-red-600 text-xs">↓ 1.86% this month</p>
+              <p className="text-sm text-gray-500">Paid Invoices</p>
+              <h3 className="text-xl font-semibold">{formatRupees(paidAmount)}</h3>
             </div>
           </div>
 
@@ -313,8 +255,7 @@ const InvoiceList: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Pending Invoices</p>
-              <h3 className="text-xl font-semibold">{formatRupees(81570)}</h3>
-              <p className="text-green-600 text-xs">↑ 0.25% this month</p>
+              <h3 className="text-xl font-semibold">{formatRupees(pendingAmount)}</h3>
             </div>
           </div>
 
@@ -324,8 +265,7 @@ const InvoiceList: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Overdue Invoices</p>
-              <h3 className="text-xl font-semibold">{formatRupees(32470)}</h3>
-              <p className="text-green-600 text-xs">↑ 0.46% this month</p>
+              <h3 className="text-xl font-semibold">{formatRupees(overdueAmount)}</h3>
             </div>
           </div>
         </div>
