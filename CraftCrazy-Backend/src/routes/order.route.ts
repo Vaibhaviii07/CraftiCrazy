@@ -14,6 +14,6 @@ router.get("/customers",orderCtrl.getAllCustomerNames);
 router.get("/status/:status",orderCtrl.getOrdersByOrderStatus);
 router.get("/transaction/:transactionStatus",orderCtrl.getOrdersByTransactionStatus);
 router.get("/active", orderCtrl.getActiveOrders);
-router.patch("/order/:orderId",authMiddleware,adminMiddleware,orderCtrl.updateOrderStatus);
+router.patch("/updateStatus/:orderId",orderCtrl.updateOrderStatus);
 
 export default router;

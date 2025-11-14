@@ -84,17 +84,19 @@ export const getActiveOrdersService = async () => {
 };
 
 export const orderUpdate = async(orderId:string, Status:string) => {
-    const allowedStatuses = ["Processing", "Shipped", "Delivered", "Cancelled"];
+   const allowedStatuses = ["Pending", "Shipped", "Delivered", "Cancelled"];
+
 
     if(!allowedStatuses.includes(Status)){
         throw new Error("invalid order status");
-    }
+    };
 
     const order = await Order.findById(orderId);
     if(!order) throw new Error("Order not found");
 
     order.orderStatus = Status;
     await order.save();
+    getIO().emit("trend:update");
 
     return order;
 }
