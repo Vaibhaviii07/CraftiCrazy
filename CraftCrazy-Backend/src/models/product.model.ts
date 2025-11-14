@@ -15,7 +15,7 @@ export interface IProduct extends Document {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image?: string;
+  imageUrl: string;
   occasion?: string;
   material?: string;
   dimensions?: string;
@@ -29,7 +29,7 @@ export interface IProduct extends Document {
   customizationOptions?: string;
 }
 
-const ProductSchema = new Schema<IProduct>(
+const productSchema = new Schema<IProduct>(
   {
     name: { type: String, required: true },
     description: String,
@@ -45,7 +45,7 @@ const ProductSchema = new Schema<IProduct>(
     inStock: { type: Boolean, default: true },
     warranty: String,
     returnPolicy: String,
-    image: String,
+    imageUrl: { type: String, required: true },
     occasion: String,
     material: String,
     dimensions: String,
@@ -61,4 +61,4 @@ const ProductSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
-export const Product = mongoose.model<IProduct>("Product", ProductSchema);
+export const Product = mongoose.model<IProduct>("Product", productSchema);

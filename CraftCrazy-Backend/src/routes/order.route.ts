@@ -16,4 +16,5 @@ router.get("/transaction/:transactionStatus",orderCtrl.getOrdersByTransactionSta
 router.get("/active", orderCtrl.getActiveOrders);
 router.patch("/order/:orderId",authMiddleware,adminMiddleware,orderCtrl.updateOrderStatus);
 
+
 export default router;

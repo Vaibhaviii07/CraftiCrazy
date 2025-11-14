@@ -1,4 +1,3 @@
-// src/Pages/Holi/HoliKitPage.tsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -54,7 +53,6 @@ export default function HoliKitPage() {
 
   return (
     <section className="min-h-screen bg-[#fffdfc]">
-      {/* Hero Section */}
       <div className="text-center mt-10 mb-8 px-4">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Holi Celebration Kits
@@ -66,9 +64,7 @@ export default function HoliKitPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6">
-        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -90,8 +86,6 @@ export default function HoliKitPage() {
               ))}
             </ul>
           </div>
-
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -112,9 +106,7 @@ export default function HoliKitPage() {
           </div>
         </aside>
 
-        {/* Product Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
@@ -131,11 +123,10 @@ export default function HoliKitPage() {
             </select>
           </div>
 
-          {/* Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             <AnimatePresence>
               {sortedItems.map(item => {
-                const [loaded, setLoaded] = useState(false); // Lazy loader state
+                const [loaded, setLoaded] = useState(false);
                 return (
                   <motion.div
                     key={item.id}

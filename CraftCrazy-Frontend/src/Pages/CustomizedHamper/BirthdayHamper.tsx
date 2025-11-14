@@ -1,10 +1,8 @@
-// src/Pages/BirthdayHampers/BirthdayHamperPage.tsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { birthdayHampers, Variant } from "../../Data/BirthdayHampersdata";
 import { Link } from "react-router-dom";
 
-// ✅ LazyImage Component
 const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -47,7 +45,6 @@ export default function BirthdayHamperPage() {
   const categories = [...new Set(birthdayHampers.map((i) => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
 
-  // Filtered & Highlighted Hampers
   const filteredHampers = useMemo(() => {
     return birthdayHampers.filter((item) => {
       const categoryMatch =
@@ -69,7 +66,6 @@ export default function BirthdayHamperPage() {
     });
   }, [selectedCategories, highlight]);
 
-  // Sorted Hampers
   const sortedHampers = useMemo(() => {
     const sorted = [...filteredHampers];
     switch (sortOption) {
@@ -90,7 +86,6 @@ export default function BirthdayHamperPage() {
 
   return (
     <section className="min-h-screen">
-      {/* Hero Section */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Birthday Hamper
@@ -101,11 +96,8 @@ export default function BirthdayHamperPage() {
         </p>
       </div>
 
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
@@ -126,7 +118,6 @@ export default function BirthdayHamperPage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
@@ -147,9 +138,7 @@ export default function BirthdayHamperPage() {
           </div>
         </aside>
 
-        {/* Product Cards */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">Showing {sortedHampers.length} results</p>
             <select

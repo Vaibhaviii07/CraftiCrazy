@@ -8,24 +8,28 @@ interface LayoutProps {
 
 const AdminLayout: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className="flex bg-gray-50 min-h-screen transition-all duration-300">
-      {/* Sidebar */}
+
+      {/* Sidebar with correct props */}
       <Sidebar
-        isOpen={isSidebarOpen}
+        isSidebarOpen={isSidebarOpen}
+        isCollapsed={isCollapsed}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        toggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
 
-      {/* Main content */}
+      {/* Main Content */}
       <div
-        className={`flex-1 transition-all duration-300 ${
-          isSidebarOpen ? "lg:ml-64" : "ml-0"
-        }`}
+        className={`flex-1 transition-all duration-300
+          ${isCollapsed ? "md:ml-20" : "md:ml-64"}`}
       >
         <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="p-4 sm:p-8">{children}</main>
       </div>
+
     </div>
   );
 };

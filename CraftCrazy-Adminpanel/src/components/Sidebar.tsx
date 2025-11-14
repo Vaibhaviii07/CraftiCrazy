@@ -294,9 +294,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/CreateInvoice" className={menuItemClass("/CreateInvoice")}>
                         Create Invoice
                       </Link>
-                      <Link to="/InvoiceDetail" className={menuItemClass("/InvoiceDetail")}>
-                        Invoice Details
-                      </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>

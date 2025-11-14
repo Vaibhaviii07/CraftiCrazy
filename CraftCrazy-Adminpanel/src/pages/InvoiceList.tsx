@@ -34,7 +34,7 @@ const InvoiceList: React.FC = () => {
     const fetchInvoices = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:5000/api/invoices");
+        const res = await axios.get("http://localhost:8000/api/invoice/");
         setInvoices(res.data);
       } catch (err) {
         console.error("Error fetching invoices:", err);

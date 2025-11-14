@@ -63,8 +63,10 @@ function App() {
               <Route path="/setting" element={<SettingsPage />}/>
               <Route path="/CreateInvoice" element={<CreateInvoice />}/>
               <Route path="/ListInvoice" element={<InvoiceList />}/>
-              <Route path="/InvoiceDetail" element={<InvoiceDetails />}/>
+              <Route path="/InvoiceDetail/:id" element={<InvoiceDetails />}/>
               <Route path="/contact" element={<CustomerContact />} />
+              {/* <Route path="/InvoiceDetail/:id" element={<InvoiceDetail />} /> */}
+
 
 
             </Routes>

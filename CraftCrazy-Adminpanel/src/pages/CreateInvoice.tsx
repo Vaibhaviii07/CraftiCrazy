@@ -12,7 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import toast from "react-hot-toast"; 
+import toast from "react-hot-toast";
 
 interface Product {
   name: string;
@@ -114,8 +114,17 @@ const CreateInvoice: React.FC = () => {
   };
 
   const saveAsPDF = () => {
-    window.print();
+    const printContent = document.getElementById("print-area")?.innerHTML;
+    const originalContent = document.body.innerHTML;
+
+    if (printContent) {
+      document.body.innerHTML = printContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      window.location.reload();
+    }
   };
+
 
   return (
     <motion.div
@@ -284,9 +293,8 @@ const CreateInvoice: React.FC = () => {
             <div className="flex gap-2 mb-3">
               <button
                 onClick={() => setPaymentMode("upi")}
-                className={`flex-1 px-3 py-1 rounded text-sm border ${
-                  paymentMode === "upi" ? "bg-[#845EF7] text-white border-[#845EF7]" : "bg-white text-gray-600"
-                }`}
+                className={`flex-1 px-3 py-1 rounded text-sm border ${paymentMode === "upi" ? "bg-[#845EF7] text-white border-[#845EF7]" : "bg-white text-gray-600"
+                  }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <QrCode size={14} /> UPI
@@ -294,9 +302,8 @@ const CreateInvoice: React.FC = () => {
               </button>
               <button
                 onClick={() => setPaymentMode("card")}
-                className={`flex-1 px-3 py-1 rounded text-sm border ${
-                  paymentMode === "card" ? "bg-[#845EF7] text-white border-[#845EF7]" : "bg-white text-gray-600"
-                }`}
+                className={`flex-1 px-3 py-1 rounded text-sm border ${paymentMode === "card" ? "bg-[#845EF7] text-white border-[#845EF7]" : "bg-white text-gray-600"
+                  }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <CreditCard size={14} /> Card
@@ -388,6 +395,108 @@ const CreateInvoice: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* PRINTABLE INVOICE VIEW */}
+      <div
+        id="print-area"
+        className="hidden print:block px-12 py-10 text-black font-sans text-[14px]"
+      >
+
+        {/* HEADER BRANDING */}
+        <div className="flex justify-between items-center border-b-2 pb-3 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-wide">{billingFrom.name}</h1>
+            <p className="text-sm text-gray-600">{billingFrom.address}</p>
+            <p className="text-sm text-gray-600">{billingFrom.email}</p>
+            <p className="text-sm text-gray-600">{billingFrom.phone}</p>
+          </div>
+
+          <div className="text-right">
+            <h2 className="text-3xl font-semibold">INVOICE</h2>
+            <p className="text-sm mt-1">Invoice ID: <strong>{invoiceDetails.invoiceId}</strong></p>
+            <p className="text-sm">Issue Date: {invoiceDetails.issueDate}</p>
+            <p className="text-sm">Due Date: {invoiceDetails.dueDate || "-"}</p>
+          </div>
+        </div>
+
+        {/* CUSTOMER DETAILS */}
+        <div className="flex justify-between mb-8">
+          <div className="w-1/2">
+            <h3 className="font-semibold text-gray-700 mb-1">Bill To:</h3>
+            <p>{billingTo.name}</p>
+            <p>{billingTo.address}</p>
+            <p>{billingTo.email}</p>
+            <p>{billingTo.phone}</p>
+          </div>
+
+          <div className="w-1/2 text-right">
+            <h3 className="font-semibold text-gray-700 mb-1">Payment Method:</h3>
+            <p>{billingTo.currency ? "Online / UPI" : "Cash"}</p>
+          </div>
+        </div>
+
+        {/* PRODUCTS TABLE */}
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-y bg-gray-100 font-medium">
+              <th className="text-left py-2 px-2">Product</th>
+              <th className="text-left py-2 px-2">Description</th>
+              <th className="text-center py-2 px-2">Qty</th>
+              <th className="text-center py-2 px-2">Price</th>
+              <th className="text-center py-2 px-2">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((p, i) => (
+              <tr key={i} className="border-b">
+                <td className="py-2 px-2">{p.name}</td>
+                <td className="py-2 px-2 text-gray-600">{p.description}</td>
+                <td className="py-2 px-2 text-center">{p.quantity}</td>
+                <td className="py-2 px-2 text-center">{billingTo.currency}{p.price.toFixed(2)}</td>
+                <td className="py-2 px-2 text-center font-medium">
+                  {billingTo.currency}{(p.price * p.quantity).toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* TOTAL SUMMARY BOX */}
+        <div className="flex justify-end mt-8">
+          <div className="w-64 border rounded-md p-4 text-sm space-y-1 bg-gray-50">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{billingTo.currency}{subtotal.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Discount (10%)</span>
+              <span>-{billingTo.currency}{discount.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>VAT (5%)</span>
+              <span>{billingTo.currency}{vat.toFixed(2)}</span>
+            </div>
+
+            <hr className="my-2" />
+
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total</span>
+              <span>{billingTo.currency}{total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <div className="mt-12 text-center text-gray-500 text-[12px] italic border-t pt-4">
+          Thank you for your business. We appreciate your trust in us.
+        </div>
+
+      </div>
+
+
+
     </motion.div>
   );
 };

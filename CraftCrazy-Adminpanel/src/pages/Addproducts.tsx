@@ -1,8 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import { motion } from "framer-motion";
-import { Image as ImageIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-interface Product {
+interface ProductForm {
   name: string;
   description?: string;
   price: string;
@@ -17,7 +19,6 @@ interface Product {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image: File | null;
   occasion?: string;
   material?: string;
   dimensions?: string;
@@ -29,10 +30,11 @@ interface Product {
   deliveryEstimated?: string;
   customizationAvailable: boolean;
   customizationOptions?: string;
+  image: File | null;
 }
 
-const AddProducts: React.FC = () => {
-  const [product, setProduct] = useState<Product>({
+const AddProducts = () => {
+  const [form, setForm] = useState<ProductForm>({
     name: "",
     description: "",
     price: "",
@@ -47,7 +49,6 @@ const AddProducts: React.FC = () => {
     inStock: true,
     warranty: "",
     returnPolicy: "",
-    image: null,
     occasion: "",
     material: "",
     dimensions: "",
@@ -59,266 +60,219 @@ const AddProducts: React.FC = () => {
     deliveryEstimated: "",
     customizationAvailable: false,
     customizationOptions: "",
+    image: null,
   });
 
   const [preview, setPreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(false);
 
-  // handle input changes
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  // 🎨 image preview
+  useEffect(() => {
+    if (!form.image) {
+      setPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(form.image);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [form.image]);
+
+  // auto hide success
+  useEffect(() => {
+    if(successMsg){
+      setTimeout(()=> setSuccessMsg(false), 2500);
+    }
+  }, [successMsg]);
+
+  // Form handler
+  const handleChange = (e: any) => {
     const { name, value, type } = e.target;
+
     if (type === "checkbox") {
-      const checkbox = e.target as HTMLInputElement;
-      setProduct({ ...product, [name]: checkbox.checked });
-    } else {
-      setProduct({ ...product, [name]: value });
+      setForm(prev => ({ ...prev, [name]: e.target.checked }));
+    } 
+    else if (type === "file") {
+      const file = e.target.files?.[0];
+      setForm(prev => ({ ...prev, image: file || null }));
+    }
+    else {
+      setForm(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  // handle image change
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProduct({ ...product, image: file });
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // handle submit
-  const handleSubmit = (e: FormEvent) => {
+  // Submit Product
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    console.log("📦 Product submitted:", product);
-    alert("✅ Product added successfully!");
+
+    if(submitting) return;
+
+    if (!form.image) {
+      toast.error("Product image is required");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const fd = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (key === "image") {
+          if (value) fd.append("image", value);
+        } else {
+          fd.append(key, value as string);
+        }
+      });
+
+      const res = await axios.post(
+        "http://localhost:8000/api/products/add",
+        fd,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (res.status === 201) {
+        toast.success("Product created successfully!");
+        setSuccessMsg(true);
+
+        setForm({
+          name: "",
+          description: "",
+          price: "",
+          rating: "",
+          reviews: "",
+          discount: "",
+          highlight: "",
+          category: "",
+          tags: "",
+          brand: "",
+          seller: "",
+          inStock: true,
+          warranty: "",
+          returnPolicy: "",
+          occasion: "",
+          material: "",
+          dimensions: "",
+          weight: "",
+          careInstructions: "",
+          maxOrderQuantity: "",
+          deliveryType: "",
+          deliveryAvailability: "",
+          deliveryEstimated: "",
+          customizationAvailable: false,
+          customizationOptions: "",
+          image: null,
+        });
+        setPreview(null);
+      }
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create product!");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="p-8"
-    >
-      <h1 className="text-2xl font-semibold text-[#2a0a4b] mb-6">
-        ➕ Add New Product
-      </h1>
+    <section className="min-h-screen bg-[#FFFDF9] p-6 sm:p-10">
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-5xl mx-auto bg-white p-6 sm:p-10 shadow-2xl rounded-3xl border border-gray-200"
       >
-        {/* Left Section */}
-        <div className="space-y-6">
-          {/* Basic Info */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-[#2a0a4b] mb-4">
-              Product Information
-            </h2>
+        <h1 className="text-3xl sm:text-4xl font-serif text-[#8b5e34] font-bold text-center mb-6">
+          Add New Product
+        </h1>
 
-            <div className="space-y-4">
-              {[
-                { label: "Name", name: "name", placeholder: "Product Name" },
-                {
-                  label: "Category",
-                  name: "category",
-                  placeholder: "Category (e.g., Earrings)",
-                },
-                { label: "Brand", name: "brand", placeholder: "Brand Name" },
-                { label: "Seller", name: "seller", placeholder: "Seller Name" },
-                { label: "Tags", name: "tags", placeholder: "tag1, tag2, tag3" },
-              ].map(({ label, name, placeholder }) => (
-                <div key={name}>
-                  <label className="text-gray-600 text-sm">{label}</label>
-                  <input
-                    type="text"
-                    name={name}
-                    value={(product as any)[name]}
-                    onChange={handleChange}
-                    placeholder={placeholder}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#C45A36] outline-none"
-                  />
-                </div>
-              ))}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-              <div>
-                <label className="text-gray-600 text-sm">Description</label>
-                <textarea
-                  name="description"
-                  value={product.description}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#C45A36]"
-                  placeholder="Enter description..."
-                />
-              </div>
-            </div>
-          </div>
+          {/* TEXT FIELDS */}
+          {[
+            "name", "description", "price", "rating", "reviews", "discount", "highlight",
+            "category", "tags", "brand", "seller", "warranty", "returnPolicy",
+            "occasion", "material", "dimensions", "weight", "careInstructions",
+            "maxOrderQuantity", "deliveryType", "deliveryAvailability", "deliveryEstimated",
+            "customizationOptions"
+          ].map((field) => (
+            <input
+              key={field}
+              name={field}
+              type="text"
+              value={form[field as keyof ProductForm] as string}
+              onChange={handleChange}
+              placeholder={field.replace(/([A-Z])/g, " $1").toUpperCase()}
+              className="p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#c9a26d] text-sm"
+            />
+          ))}
 
-          {/* Pricing */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-[#2a0a4b] mb-4">
-              Pricing & Stock
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: "Price (₹)", name: "price" },
-                { label: "Discount (%)", name: "discount" },
-                { label: "Rating", name: "rating" },
-                { label: "Reviews", name: "reviews" },
-              ].map(({ label, name }) => (
-                <div key={name}>
-                  <label className="text-gray-600 text-sm">{label}</label>
-                  <input
-                    type="text"
-                    name={name}
-                    value={(product as any)[name]}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#C45A36]"
-                  />
-                </div>
-              ))}
-            </div>
+          {/* STOCK */}
+          <label className="flex items-center gap-3 col-span-1">
+            <input
+              type="checkbox"
+              name="inStock"
+              checked={form.inStock}
+              onChange={handleChange}
+            />
+            In Stock
+          </label>
 
-            <div className="flex items-center mt-4">
-              <input
-                type="checkbox"
-                name="inStock"
-                checked={product.inStock}
-                onChange={handleChange}
-                className="mr-2 accent-[#C45A36]"
-              />
-              <label className="text-gray-700 text-sm">Available in Stock</label>
-            </div>
-          </div>
-        </div>
+          {/* CUSTOMIZATION AVAILABLE */}
+          <label className="flex items-center gap-3 col-span-1">
+            <input
+              type="checkbox"
+              name="customizationAvailable"
+              checked={form.customizationAvailable}
+              onChange={handleChange}
+            />
+            Customization Available
+          </label>
 
-        {/* Right Section */}
-        <div className="space-y-6">
-          {/* Specifications */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-[#2a0a4b] mb-4">
-              Specifications
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: "Material", name: "material" },
-                { label: "Dimensions", name: "dimensions" },
-                { label: "Weight", name: "weight" },
-                { label: "Occasion", name: "occasion" },
-                { label: "Warranty", name: "warranty" },
-                { label: "Return Policy", name: "returnPolicy" },
-                { label: "Care Instructions", name: "careInstructions" },
-                { label: "Max Order Quantity", name: "maxOrderQuantity" },
-              ].map(({ label, name }) => (
-                <div key={name}>
-                  <label className="text-gray-600 text-sm">{label}</label>
-                  <input
-                    type="text"
-                    name={name}
-                    value={(product as any)[name]}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#C45A36]"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* IMAGE */}
+          <div className="col-span-2">
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleChange}
+              className="p-3 rounded-xl border border-gray-300 w-full"
+            />
 
-          {/* Delivery & Customization */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-[#2a0a4b] mb-4">
-              Delivery & Customization
-            </h2>
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: "Delivery Type", name: "deliveryType" },
-                { label: "Availability", name: "deliveryAvailability" },
-                { label: "Estimated", name: "deliveryEstimated" },
-              ].map(({ label, name }) => (
-                <div key={name}>
-                  <label className="text-gray-600 text-sm">{label}</label>
-                  <input
-                    type="text"
-                    name={name}
-                    value={(product as any)[name]}
-                    onChange={handleChange}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#C45A36]"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center mt-4">
-              <input
-                type="checkbox"
-                name="customizationAvailable"
-                checked={product.customizationAvailable}
-                onChange={handleChange}
-                className="mr-2 accent-[#C45A36]"
-              />
-              <label className="text-gray-700 text-sm">
-                Customization Available
-              </label>
-            </div>
-
-            {product.customizationAvailable && (
-              <div className="mt-4">
-                <label className="text-gray-600 text-sm">
-                  Customization Options
-                </label>
-                <input
-                  type="text"
-                  name="customizationOptions"
-                  value={product.customizationOptions}
-                  onChange={handleChange}
-                  placeholder="e.g., Name engraving, Color choice"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#C45A36]"
-                />
+            {preview && (
+              <div className="mt-3 w-32 h-32 rounded-xl overflow-hidden shadow">
+                <img src={preview} className="w-full h-full object-cover" />
               </div>
             )}
           </div>
-          {/* Image Upload */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-[#2a0a4b] mb-4">
-              Product Image
-            </h2>
-            <div className="border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-6 cursor-pointer hover:bg-gray-50 transition">
-              {preview ? (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="h-40 object-cover rounded-md"
-                />
-              ) : (
-                <div className="flex flex-col items-center text-gray-400">
-                  <ImageIcon className="w-12 h-12 mb-2" />
-                  <p className="text-sm">Click to upload image</p>
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Submit */}
-        <div className="lg:col-span-2 flex justify-end">
-          <button
+          {/* SUBMIT BUTTON */}
+          <motion.button
             type="submit"
-            className="px-6 py-3 bg-[#2a0a4b] hover:bg-[#C45A36] text-white rounded-lg font-medium shadow-md transition-all"
+            whileHover={{ scale: 1.05 }}
+            disabled={submitting}
+            className={`col-span-2 py-3 mt-4 bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl ${
+              submitting ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
-            Add Product
-          </button>
-        </div>
-      </form>
-    </motion.div>
+            {submitting ? "Uploading..." : "Add Product"}
+          </motion.button>
+        </form>
+
+        {/* SUCCESS MESSAGE */}
+        <AnimatePresence>
+          {successMsg && (
+            <motion.p
+              className="text-green-600 text-center mt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              ✅ Product added successfully!
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </section>
   );
 };
 

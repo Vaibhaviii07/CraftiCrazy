@@ -57,7 +57,6 @@ export default function ResinFramePage() {
 
   return (
     <section className="bg-gray-50 min-h-screen">
-      {/* Hero Section */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Resin Frame
@@ -68,9 +67,7 @@ export default function ResinFramePage() {
         </p>
       </div>
 
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 flex flex-col md:flex-row gap-6 md:gap-8">
-        {/* Sidebar / Categories */}
         <aside className="flex-shrink-0 w-full md:w-1/4 bg-white p-4 rounded-lg h-fit shadow">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
@@ -97,7 +94,6 @@ export default function ResinFramePage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -120,9 +116,7 @@ export default function ResinFramePage() {
           </div>
         </aside>
 
-        {/* Products Grid */}
         <div className="flex-1 flex flex-col gap-6">
-          {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
               Showing {sortedFrames.length} results
@@ -139,11 +133,10 @@ export default function ResinFramePage() {
             </select>
           </div>
 
-          {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
               {sortedFrames.map((item) => {
-                const [loaded, setLoaded] = useState(false); // lazy load state
+                const [loaded, setLoaded] = useState(false); 
 
                 return (
                   <motion.div

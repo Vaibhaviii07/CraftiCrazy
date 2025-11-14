@@ -235,12 +235,12 @@ const OrderDetails: React.FC = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/orders/${id}`);
+        const res = await fetch(`http://localhost:8000/api/orders/${id}`);
         if (!res.ok) throw new Error("Failed to fetch order");
         const data = await res.json();
         setOrderData(data);
       } catch (error) {
-        console.warn("⚠️ Using fallback static data:", error);
+        console.warn("Using fallback static data:", error);
         setOrderData(staticData);
       } finally {
         setLoading(false);
