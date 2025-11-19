@@ -31,14 +31,21 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const { isAuthenticated } = useAuth();  
+  const { isAuthenticated } = useAuth();
+
 
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
+    try {
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) {
+        setCart(JSON.parse(storedCart));
+      }
+    } catch (error) {
+      console.error("Cart parse error:", error);
+      localStorage.removeItem("cart"); // clear corrupted cart
     }
   }, []);
+
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -47,13 +54,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const addToCart = async (item: CartItem) => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  if (!token && !isAuthenticated) {
-  toast.error("Please login to add items to your cart!");
-  localStorage.removeItem("token");
-  return;
-}
+    if (!token && !isAuthenticated) {
+      toast.error("Please login to add items to your cart!");
+      localStorage.removeItem("token");
+      return;
+    }
     setCart((prevCart) => {
       const existingItem = prevCart.find((i) => i.id === item.id);
       if (existingItem) {
@@ -92,12 +99,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const updateCartItem = (id:string, updatedItem: CartItem) => {
-      setCart((prev) => (
-        prev.map((item) => (
-          item.id === id ? updatedItem : item 
-        ))
+  const updateCartItem = (id: string, updatedItem: CartItem) => {
+    setCart((prev) => (
+      prev.map((item) => (
+        item.id === id ? updatedItem : item
       ))
+    ))
   }
 
   return (
@@ -110,7 +117,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         increaseQty,
         decreaseQty,
         cartTotal,
-        updateCartItem  
+        updateCartItem
 
       }}
     >
