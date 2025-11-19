@@ -23,7 +23,7 @@ const NewArrivals = () => {
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  // ✅ Fade-in animation
+  // Fade-in animation
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 800);
     return () => clearTimeout(timer);
@@ -37,7 +37,7 @@ const NewArrivals = () => {
       const res = await axios.get("http://localhost:8000/api/products/newarrivals");
       console.log(res);
 
-      // ✅ Your backend returns: res.data.data.allproducts
+      //Your backend returns: res.data.data.allproducts
       const apiData = Array.isArray(res.data?.data?.allproducts)
         ? res.data.data.allproducts
         : [];
@@ -47,7 +47,7 @@ const NewArrivals = () => {
       // Local static products
       const localData = newArrivalsData.freshPicks || [];
 
-      // ✅ Merge local + API (avoid duplicates using product._id)
+      //Merge local + API (avoid duplicates using product._id)
       const merged = [
         ...localData,
         ...apiData.filter(
@@ -60,7 +60,7 @@ const NewArrivals = () => {
     } catch (error) {
       console.error("Error fetching new arrivals:", error);
 
-      // fallback on local data only
+      //fallback on local data only
       setProducts(newArrivalsData.freshPicks || []);
     } finally {
       setLoadingProducts(false);
@@ -104,11 +104,11 @@ const NewArrivals = () => {
     );
   };
 
-  // ✅ Categories & Highlight
+  // Categories & Highlight
   const categories = [...new Set(products.map((i) => i.type || "Others"))];
-  const highlightOptions = ["All Products", "Best Seller", "New Arrivals", "Sale", "Hot Items"];
+  const highlightOptions = ["All Products", "Best Seller", "New Arrivals", "Sale",   "Hot Items"];
 
-  // ✅ Filtering
+  //Filtering
   const filteredProducts = products.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 || selectedCategories.includes(item.type);
@@ -131,7 +131,7 @@ const NewArrivals = () => {
     return categoryMatch && highlightMatch;
   });
 
-  // ✅ Sorting
+  //Sorting 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortOption) {
       case "Sort by popularity":
