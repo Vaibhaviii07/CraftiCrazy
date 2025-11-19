@@ -33,7 +33,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const { isAuthenticated } = useAuth();  
 
-  // Load cart from localStorage on mount
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
@@ -41,27 +40,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  //  Calculate total
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  //  Add item to cart
   const addToCart = async (item: CartItem) => {
   const token = localStorage.getItem("token");
 
-//once backend is ready and payment gateway once done we will uncomment this.
-//   if (!token && !isAuthenticated) {
-//   toast.error("Please login to add items to your cart!");
-//   localStorage.removeItem("token");
-//   return;
-// }
-
-
-    // User logged in — Add or update item
+  if (!token && !isAuthenticated) {
+  toast.error("Please login to add items to your cart!");
+  localStorage.removeItem("token");
+  return;
+}
     setCart((prevCart) => {
       const existingItem = prevCart.find((i) => i.id === item.id);
       if (existingItem) {
@@ -72,33 +64,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [...prevCart, { ...item, quantity: 1 }];
       }
     });
-
-    // Optional Sync cart with backend
-    // try {
-    //   await fetch("http://localhost:5000/api/cart", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     body: JSON.stringify(item),
-    //   });
-    // } catch (error) {
-    //   console.error("Cart sync failed:", error);
-    // }
   };
 
-  //  Remove item
   const removeFromCart = (id: string) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // Clear cart
   const clearCart = () => {
     setCart([]);
   };
 
-  //  Increase quantity
   const increaseQty = (id: string) => {
     setCart((prev) =>
       prev.map((item) =>
@@ -107,7 +82,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  // Decrease quantity
   const decreaseQty = (id: string) => {
     setCart((prev) =>
       prev.map((item) =>
@@ -145,7 +119,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Custom hook to use the cart anywhere
 export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
   if (!context) {

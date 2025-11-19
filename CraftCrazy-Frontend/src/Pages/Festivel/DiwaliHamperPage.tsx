@@ -1,4 +1,3 @@
-// src/Pages/Hampers/DiwaliHamperPage.tsx
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { diwaliHampers } from "../../Data/DiwaliHamperdata";
@@ -18,7 +17,6 @@ export default function DiwaliHamperPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(diwaliHampers.map((item) => item.category))];
 
-  // ✅ Filtering Logic
   const filteredItems = useMemo(() => {
     return diwaliHampers.filter((item) => {
       const categoryMatch =
@@ -41,7 +39,6 @@ export default function DiwaliHamperPage() {
     });
   }, [highlight, selectedCategories]);
 
-  // ✅ Sorting Logic
   const sortedItems = useMemo(() => {
     const items = [...filteredItems];
     switch (sortOption) {
@@ -58,7 +55,6 @@ export default function DiwaliHamperPage() {
 
   return (
     <section className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <div className="text-center mt-10 mb-8 px-4">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Diwali Hampers
@@ -69,12 +65,9 @@ export default function DiwaliHamperPage() {
           Celebrate the festival of lights with premium festive gift hampers.
         </p>
       </div>
-
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
-        {/* Sidebar */}
+
         <aside className="md:col-span-1 bg-white p-4 rounded-lg shadow h-fit mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -100,7 +93,6 @@ export default function DiwaliHamperPage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -122,10 +114,8 @@ export default function DiwaliHamperPage() {
             </ul>
           </div>
         </aside>
-
-        {/* Product Grid */}
+        
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Top Bar */}
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
@@ -142,7 +132,6 @@ export default function DiwaliHamperPage() {
             </select>
           </div>
 
-          {/* Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             <AnimatePresence>
               {sortedItems.map((item) => (

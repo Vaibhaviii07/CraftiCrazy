@@ -23,4 +23,8 @@ export interface IOrder {
     razorPayOrderId?: string;
     razorpayPaymentId?:string;
     createdAt?: Date;
+
+
+    orderStatus?:string;
+    transactionStatus?:string;
 }

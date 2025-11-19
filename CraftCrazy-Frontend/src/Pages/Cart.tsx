@@ -11,7 +11,7 @@ interface CartSidebarProps {
 }
 
 const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
-  const { cart, removeFromCart, increaseQty, decreaseQty,updateCartItem} = useCart();
+  const { cart, removeFromCart, increaseQty, decreaseQty, updateCartItem } = useCart();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const subtotal = cart.reduce(
@@ -78,12 +78,14 @@ const Cart: React.FC<CartSidebarProps> = ({ isOpen, setIsOpen }) => {
             className={`w-full sm:w-[400px] bg-white h-full shadow-2xl flex flex-col relative`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <div className="flex items-center justify-between p-2 border-b border-gray-200 sticky top-0 bg-white z-50">
               <h2 className="text-xl font-bold text-gray-800">Cart</h2>
-              <X
+              <button
                 onClick={() => setIsOpen(false)}
-                className="w-6 h-6 cursor-pointer text-gray-600 hover:text-red-500"
-              />
+                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition"
+              >
+                <X className="w-5 h-5 text-gray-600 hover:text-red-500" />
+              </button>
             </div>
 
             {/* Cart Items */}

@@ -1,6 +1,6 @@
 // src/ProductDetails/HaldiPlatterDetailPage.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { haldiPlatters, HaldiPlatter, Variant } from "../Data/HaldiPlatterData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
-
 
 type Params = { id: string };
 
@@ -24,24 +23,29 @@ function Loader() {
 export default function HaldiPlatterDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
-  const {isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const productFromParams: HaldiPlatter | undefined = haldiPlatters.find(p => String(p.id) === id);
   const [currentProduct, setCurrentProduct] = useState<HaldiPlatter | null>(productFromParams ?? null);
 
-  // Simulate loader
+  // Backend rating
+  const [backendRating, setBackendRating] = useState(0);
+  const [backendReviewsCount, setBackendReviewsCount] = useState(0);
+
+  // Loader simulation
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300);
+    const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Selected variant memo
+  // Selected variant (default 2nd variant if exists)
   const selectedVariant = useMemo<Variant | null>(() => {
     if (!currentProduct) return null;
     return {
@@ -58,7 +62,42 @@ export default function HaldiPlatterDetailPage() {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
     setImgLoaded(false);
+    setBackendRating(0);
+    setBackendReviewsCount(0);
   }, [selectedVariant]);
+
+  // Fetch product from backend
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/haldi-platter/${id}`);
+        const data = await res.json();
+        setCurrentProduct(data?.product ?? productFromParams ?? null);
+      } catch (err) {
+        setCurrentProduct(productFromParams ?? null);
+      }
+    };
+    fetchProduct();
+  }, [id, productFromParams]);
+
+  // Fetch reviews
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
+        const data = await res.json();
+        setBackendRating(data.averageRating || 0);
+        setBackendReviewsCount(data.totalReviews || 0);
+      } catch {
+        setBackendRating(currentProduct?.rating || 0);
+        setBackendReviewsCount(currentProduct?.reviews || 0);
+      }
+    };
+
+    fetchReviews();
+  }, [id, currentProduct]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
@@ -71,13 +110,18 @@ export default function HaldiPlatterDetailPage() {
       image: currentVariant.image,
     });
 
-    
     if (isAuthenticated) {
       setToast(`${currentProduct.name} added to cart`);
-    } else {
-      return;
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
 
   if (loading) return <Loader />;
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
@@ -85,7 +129,7 @@ export default function HaldiPlatterDetailPage() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Hero Image */}
+        {/* Left: Image */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
@@ -96,9 +140,7 @@ export default function HaldiPlatterDetailPage() {
             <motion.img
               src={currentVariant.image}
               alt={currentProduct.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
@@ -118,16 +160,13 @@ export default function HaldiPlatterDetailPage() {
                   key={i}
                   onClick={() => setCurrentVariant(v)}
                   className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant?.image === v.image
-                      ? "border-[#b46029] ring-2 ring-[#b46029]"
-                      : "border-gray-300"
+                    currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"
                   }`}
                   whileHover={{ scale: 1.05 }}
-                  aria-label={`Select variant ${i + 1}`}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
-                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                    <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
                     </span>
                   )}
@@ -141,25 +180,20 @@ export default function HaldiPlatterDetailPage() {
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {currentProduct.highlight && (
-            <span className="inline-block bg-[#C45A36] text-white px-2 py-1 text-sm rounded-md">{currentProduct.highlight}</span>
-          )}
-
           {/* Rating + Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+              {Array.from({ length: Math.floor(backendRating) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
+              <span className="ml-1 text-gray-600 text-sm">({backendRating.toFixed(1)} | {backendReviewsCount} reviews)</span>
             </div>
             <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{currentVariant?.price}</span>
-            {currentVariant?.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
-            )}
+            {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
           {/* Structured Info */}
           <div className="space-y-3 text-gray-700">
@@ -173,15 +207,17 @@ export default function HaldiPlatterDetailPage() {
           {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
-            </span>
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{currentProduct.inStock ? "In Stock" : "Out of Stock"}</span>
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* Quantity + Add to Cart */}
           <div className="flex flex-wrap gap-3 mt-4 items-center">
-            <button onClick={handleAddToCart} className="flex items-center gap-2 px-6 py-3 bg-[#C45A36] hover:bg-[#8c4a20] text-white rounded-full font-medium shadow-lg">
+            <button
+              onClick={handleAddToCart}
+              disabled={!currentProduct.inStock}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+            >
               <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
             </button>
           </div>
@@ -220,9 +256,19 @@ export default function HaldiPlatterDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Reviews Section */}
-      <CustomerReview productId={currentProduct.id} />
-      <FloatingReviewChat productId={currentProduct.id} />
+
+    
+      {/* Reviews */}
+      {currentProduct && (
+        <>
+          <CustomerReview
+            productId={currentProduct.id}
+            setBackendRating={setBackendRating}
+            setBackendReviewsCount={setBackendReviewsCount}
+          />
+          <FloatingReviewChat productId={currentProduct.id} />
+        </>
+      )}
     </div>
   );
 }

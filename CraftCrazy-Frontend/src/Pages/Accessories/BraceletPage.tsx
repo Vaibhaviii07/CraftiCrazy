@@ -58,7 +58,6 @@ export default function BraceletPage() {
 
   return (
     <section className="min-h-screen">
-      {/* Page Header */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Bracelets
@@ -69,12 +68,8 @@ export default function BraceletPage() {
         </p>
       </div>
 
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-        
-        {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
+                <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -97,7 +92,6 @@ export default function BraceletPage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -120,7 +114,6 @@ export default function BraceletPage() {
           </div>
         </aside>
 
-        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>

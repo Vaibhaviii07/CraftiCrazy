@@ -47,6 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
     if (user) setUserData({ name: user.name, email: user.email });
   }, [user]);
 
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUserData(null);
@@ -180,14 +181,14 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
         <div className="hidden md:flex items-center gap-6">
           {userData ? (
             <div className="relative">
-              <button onClick={() => setUserDropdown(!userDropdown)} className="hover:scale-110 transition-transform">
+              <button onClick={() => setUserDropdown(!userDropdown)} className="hover:scale-110 cursor-pointer transition-transform">
                 <User size={22} className="text-[#7f5539]" />
               </button>
               {userDropdown && (
                 <div className="absolute right-0 mt-3 bg-white shadow-lg rounded-lg w-56 border border-[#e6ccb2] z-50">
                   <div className="px-4 py-3 border-b">
-                    <p className="font-semibold text-[#432818]">{userData.name}</p>
-                    <p className="text-sm text-gray-500">{userData.email}</p>
+                    <p className="font-semibold text-black">{userData.name}</p>
+                    <p className="text-sm text-black">{userData.email}</p>
                   </div>
                   <button
                     onClick={handleLogout}
@@ -225,7 +226,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
           <button onClick={() => setCartOpen(true)} className="relative">
             <ShoppingCart size={24} className="text-[#7f5539]" />
             {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-amber-400 text-black text-xs font-bold rounded-full px-1">
+              <span className="absolute -top-2 -right-4 bg-amber-400 text-black text-xs font-bold rounded-full px-1">
                 {cart.length}
               </span>
             )}
@@ -234,6 +235,7 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
             {open ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
+
       </div>
 
       {/* Desktop Nav */}
@@ -284,9 +286,8 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
                   >
                     <span>{link.name}</span>
                     <ChevronDown
-                      className={`transform transition-transform ${
-                        mobileDropdown === idx ? "rotate-180" : ""
-                      }`}
+                      className={`transform transition-transform ${mobileDropdown === idx ? "rotate-180" : ""
+                        }`}
                       size={16}
                     />
                   </button>

@@ -11,7 +11,7 @@ export default function ToteBagPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000); // simulate loading time
+    const timer = setTimeout(() => setLoading(false), 1000); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -24,7 +24,6 @@ export default function ToteBagPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(toteBags.map((i) => i.category))];
 
-  // Filtering
   const filteredItems = toteBags.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 ||
@@ -44,7 +43,6 @@ export default function ToteBagPage() {
     return categoryMatch && highlightMatch;
   });
 
-  // Sorting
   const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
@@ -60,7 +58,6 @@ export default function ToteBagPage() {
 
   return (
     <section className="min-h-screen">
-      {/* Hero Section */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Tote Bags
@@ -71,11 +68,8 @@ export default function ToteBagPage() {
         </p>
       </div>
 
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-6 sm:mt-12 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8">
-        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -101,7 +95,6 @@ export default function ToteBagPage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -124,9 +117,7 @@ export default function ToteBagPage() {
           </div>
         </aside>
 
-        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-4">
-          {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
@@ -143,11 +134,10 @@ export default function ToteBagPage() {
             </select>
           </div>
 
-          {/* Product Cards with Lazy Loader */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12">
             <AnimatePresence>
               {loading
-                ? // Skeletons while loading
+                ? 
                   Array.from({ length: 6 }).map((_, i) => (
                     <motion.div
                       key={i}
@@ -159,7 +149,7 @@ export default function ToteBagPage() {
                       <div className="w-full max-w-[320px] bg-gray-200 animate-pulse rounded-2xl h-[300px] sm:h-[340px]"></div>
                     </motion.div>
                   ))
-                : // Actual Products
+                :
                   sortedItems.map((item) => (
                     <motion.div
                       key={item.id}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Instagram, MessageCircle, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type FormState = { name: string; email: string; phone: string; message: string; };
 const initialForm: FormState = { name: "", email: "", phone: "", message: "" };
@@ -16,11 +18,46 @@ const ContactUs: React.FC = () => {
     };
 
   const handleSubmit = async (ev: React.FormEvent) => {
-    ev.preventDefault();
-    await new Promise((res) => setTimeout(res, 1000)); // Simulate async send
-    setForm(initialForm);
-    setSent(true);
-  };
+  ev.preventDefault();
+
+  try {
+    const res = await fetch("http://localhost:8000/api/contact/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setSent(true);
+       toast.success(`Your Message Sent Successfully we will connect you soon.`, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      setForm(initialForm);
+    } else {
+      toast.error("Message Not sent some error occured.", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert("Something went wrong! Please try again later.");
+  }
+};
+
 
   // Auto-hide toast using useEffect
   useEffect(() => {
@@ -32,6 +69,7 @@ const ContactUs: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+     <ToastContainer />
       {/* Header */}
       <div className="bg-gray-50 text-center py-13 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 shadow-md">
         <h1 className="text-4xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
@@ -115,7 +153,7 @@ const ContactUs: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="w-40 bg-gradient-to-r from-[#AB420A] to-[#D98B4A] text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-[#ddbea9] transition"
+                className="w-40 bg-gradient-to-r cursor-pointer from-[#AB420A] to-[#D98B4A] text-white py-3 rounded-xl font-semibold shadow-lg hover:bg-[#ddbea9] transition"
               >
                 Send Message
               </motion.button>

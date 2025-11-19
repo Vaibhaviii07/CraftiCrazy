@@ -33,7 +33,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("http://localhost:8000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -43,10 +43,10 @@ const Login = () => {
       
       if(res.ok && data.token){
         //we have to check the data is coming properly or not when we are working with backend
-        login(data.token);
+        login(data.user,data.token);
         toast.success(`Welcome back, ${data.user?.name}!`, {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 4000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -61,12 +61,12 @@ const Login = () => {
         pauseOnHover: true,
         draggable: true,
       });
-        setError(data.message || "Login failed");
+        setError(data.message || "Invalid Credentials");
         setLoading(false);
         return;
       }
 
-      setTimeout(() => navigate("/home"), 2000);
+      setTimeout(() => navigate("/"), 2000);
 
     } catch (err) {
       console.error(err);
@@ -147,7 +147,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg shadow-md transition text-sm sm:text-base ${
+            className={`w-full flex items-center cursor-pointer justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg shadow-md transition text-sm sm:text-base ${
               loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >

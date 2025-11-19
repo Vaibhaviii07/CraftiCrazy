@@ -1,28 +1,44 @@
+// socket/initSocket.ts
 import { Server } from "socket.io";
-import http from "http";
+import { Server as HTTPServer } from "http";
+import dotenv from "dotenv";
 
-export const initSocket = (server: http.Server) => {
-  const io = new Server(server, {
+let io: Server;
+dotenv.config();
+
+export const initSocket = (server: HTTPServer) => {
+  io = new Server(server, {
     cors: {
-    origin: process.env.FRONTEND_URL, // same frontend URL
-    methods: ["GET", "POST"],
-    credentials: true, 
-    },
+      origin: process.env.ADMIN_PANEL_URL, // you can restrict to your admin panel domain
+      methods: ["GET", "POST","PATCH"]
+    }
   });
 
   io.on("connection", (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+    console.log("New Client Connected:", socket.id);
 
-    // Example event: Product updates or notifications
-    socket.on("sendMessage", (data) => {
-      console.log("Message:", data);
-      io.emit("receiveMessage", data); // broadcast message to all
+    // when admin triggers message
+    socket.on("admin-message", (data) => {
+      console.log("Admin Sent:", data);
+      io.emit("broadcast-message", data); // broadcast to all panel clients
+    });
+
+    // when order is placed from admin panel user
+    socket.on("order-created", (orderData) => {
+      console.log("New Order Created:", orderData);
+      io.emit("order-updated", orderData); //send update to admin panel UI
+      io.emit("trend:update");  
+    });
+
+    //for contact 
+    socket.on("contact-created",(data)=> {
+      io.emit("contact-updated",data);
     });
 
     socket.on("disconnect", () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+      console.log("Client Disconnected:", socket.id);
     });
   });
-
-  return io;
 };
+
+export const getIO = () => io;

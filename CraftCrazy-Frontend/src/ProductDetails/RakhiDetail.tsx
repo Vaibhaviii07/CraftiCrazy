@@ -1,6 +1,6 @@
 // src/Pages/Rakhi/RakhiDetailPage.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { rakhiKits, RakhiKit, Variant } from "../Data/RakhiData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -14,22 +14,78 @@ type Params = { id: string };
 export default function RakhiDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
-  const {isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Backend rating & reviews
+  const [backendRating, setBackendRating] = useState<number>(0);
+  const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
+
+  // Find product from static data initially
   const productFromParams: RakhiKit | undefined = rakhiKits.find(p => String(p.id) === id);
-  const [currentProduct] = useState<RakhiKit | null>(productFromParams ?? null);
+  const [currentProduct, setCurrentProduct] = useState<RakhiKit | null>(productFromParams ?? null);
 
+  // Loading simulation
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  // Fetch product from backend, fallback to static
+  useEffect(() => {
+    if (!id) return;
 
-  const selectedVariantDefault = useMemo(() => ({
-    image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
-    price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-    discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/rakhis/${id}`);
+        if (!res.ok) throw new Error("Product fetch failed");
+        const data = await res.json();
+        if (data?.product) setCurrentProduct(data.product);
+        else {
+          const staticProd = rakhiKits.find(p => String(p.id) === id);
+          setCurrentProduct(staticProd ?? null);
+        }
+      } catch (err) {
+        const staticProd = rakhiKits.find(p => String(p.id) === id);
+        setCurrentProduct(staticProd ?? null);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  // Fetch reviews (average rating & total reviews)
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
+        if (!res.ok) throw new Error("Reviews fetch failed");
+        const data: { averageRating?: number; totalReviews?: number } = await res.json();
+
+        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
+        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
+      } catch (err) {
+        setBackendRating(0);
+        setBackendReviewsCount(0);
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
+
+  // Selected variant
+  const selectedVariantDefault: Variant = useMemo(() => ({
+    image: currentProduct?.variants?.[0]?.image ?? currentProduct?.image ?? "",
+    price: currentProduct?.variants?.[0]?.price ?? currentProduct?.price ?? 0,
+    discount: currentProduct?.variants?.[0]?.discount ?? currentProduct?.discount ?? 0,
   }), [currentProduct]);
 
   const [selectedVariant, setSelectedVariant] = useState<Variant>(selectedVariantDefault);
@@ -38,8 +94,11 @@ export default function RakhiDetailPage() {
     setSelectedVariant(selectedVariantDefault);
     setQuantity(1);
     setImgLoaded(false);
+    setBackendRating(0);
+    setBackendReviewsCount(0);
   }, [selectedVariantDefault]);
 
+  // Handle Add to Cart
   const handleAddToCart = () => {
     if (!currentProduct || !selectedVariant || !currentProduct.inStock) return;
 
@@ -49,37 +108,55 @@ export default function RakhiDetailPage() {
       price: selectedVariant.price,
       quantity,
       image: selectedVariant.image,
-     
     });
 
-    
     if (isAuthenticated) {
       setToast(`${currentProduct.name} added to cart`);
-    } else {
-      return;
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-96">
+      <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+
+  // Final rating
+  const finalRating = backendRating > 0 ? backendRating : currentProduct.rating ?? 0;
+  const finalReviewsCount = backendReviewsCount > 0 ? backendReviewsCount : currentProduct.reviews ?? 0;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Hero Image + Thumbnails */}
+        {/* Left: Image */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
               <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
             </div>
           )}
+
           {selectedVariant && (
             <motion.img
               src={selectedVariant.image}
               alt={currentProduct.name}
               className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
-              onLoad={() => setImgLoaded(true)}
             />
           )}
+
           {selectedVariant.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {selectedVariant.discount}% OFF
@@ -89,7 +166,7 @@ export default function RakhiDetailPage() {
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-              {currentProduct.variants.map((v, i) => (
+              {currentProduct.variants.map((v: Variant, i: number) => (
                 <motion.div
                   key={i}
                   onClick={() => setSelectedVariant(v)}
@@ -113,17 +190,15 @@ export default function RakhiDetailPage() {
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {currentProduct.highlight && (
-            <span className="inline-block bg-[#b46029] text-white px-2 py-1 text-sm rounded-md">{currentProduct.highlight}</span>
-          )}
-
-          {/* Rating + Price */}
+          {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
+              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
             </div>
+
             <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{selectedVariant.price}</span>
             {selectedVariant.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
@@ -139,16 +214,15 @@ export default function RakhiDetailPage() {
             </span>
           </div>
 
-          {/* Additional details */}
+          {/* Additional Details */}
           <div className="mt-4 space-y-2 text-gray-700">
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
             {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* Quantity & Add to Cart */}
+          {/* Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
@@ -159,13 +233,13 @@ export default function RakhiDetailPage() {
             </button>
           </div>
 
-          {/* Structured Sections */}
+          {/* Contents / Customization */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
+                  {currentProduct.contents.map((item: string, idx: number) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
@@ -193,9 +267,18 @@ export default function RakhiDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Reviews Section */}
-      <CustomerReview productId={currentProduct.id} />
-      <FloatingReviewChat productId={currentProduct.id} />
+
+      {/* Reviews */}
+      {currentProduct && (
+        <>
+          <CustomerReview
+            productId={currentProduct.id}
+            setBackendRating={setBackendRating}
+            setBackendReviewsCount={setBackendReviewsCount}
+          />
+          <FloatingReviewChat productId={currentProduct.id} />
+        </>
+      )}
     </div>
   );
 }

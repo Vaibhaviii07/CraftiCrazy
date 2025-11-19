@@ -1,10 +1,8 @@
-// src/Pages/WomenAccessories/WomenAccessoriesPage.tsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { womenAccessories } from "../../Data/WomenAccessoriesData";
 import { Link } from "react-router-dom";
 
-// ✅ LazyImage Component
 const LazyImage = ({ src, alt }: { src: string; alt: string }) => (
   <img
     src={src}
@@ -28,7 +26,6 @@ export default function WomenAccessoriesPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(womenAccessories.map((i) => i.category))];
 
-  // Filtering
   const filteredItems = womenAccessories.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 ||
@@ -48,7 +45,6 @@ export default function WomenAccessoriesPage() {
     return categoryMatch && highlightMatch;
   });
 
-  // Sorting
   const sortedItems = [...filteredItems].sort((a, b) => {
     switch (sortOption) {
       case "Price: Low to High":
@@ -64,7 +60,6 @@ export default function WomenAccessoriesPage() {
 
   return (
     <section className="min-h-screen">
-      {/* Hero Section */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Women Accessories
@@ -75,12 +70,9 @@ export default function WomenAccessoriesPage() {
         </p>
       </div>
 
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         
-        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Categories
@@ -106,7 +98,6 @@ export default function WomenAccessoriesPage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
               Highlight
@@ -129,9 +120,7 @@ export default function WomenAccessoriesPage() {
           </div>
         </aside>
 
-        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
@@ -148,7 +137,6 @@ export default function WomenAccessoriesPage() {
             </select>
           </div>
 
-          {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
               {sortedItems.map((item) => (
@@ -166,7 +154,6 @@ export default function WomenAccessoriesPage() {
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
                       
-                      {/* ✅ Lazy Image */}
                       <LazyImage src={item.image} alt={item.name} />
 
                       {item.discount && (

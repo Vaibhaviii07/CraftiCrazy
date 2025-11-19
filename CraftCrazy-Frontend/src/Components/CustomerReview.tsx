@@ -15,36 +15,69 @@ export interface Review {
 
 interface CustomerReviewProps {
   productId: string;
+
+  // ⭐ Added for backend rating like Birthday & Bracelet
+  setBackendRating?: (rating: number) => void;
+  setBackendReviewsCount?: (count: number) => void;
 }
 
-const CustomerReview: React.FC<CustomerReviewProps> = ({ productId }) => {
+const CustomerReview: React.FC<CustomerReviewProps> = ({
+  productId,
+  setBackendRating,
+  setBackendReviewsCount
+}) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // ⭐ Load reviews from localStorage
   const loadReviews = () => {
     const stored = localStorage.getItem(`reviews_${productId}`);
-    setReviews(stored ? JSON.parse(stored) : []);
+    const parsed = stored ? JSON.parse(stored) : [];
+    setReviews(parsed);
+
+    // ⭐ Update backend rating counts (same logic as Birthday)
+    if (setBackendRating && setBackendReviewsCount) {
+      if (parsed.length > 0) {
+        const avg =
+          parsed.reduce((acc: number, r: Review) => acc + r.rating, 0) /
+          parsed.length;
+
+        setBackendRating(avg);
+        setBackendReviewsCount(parsed.length);
+      } else {
+        setBackendRating(0);
+        setBackendReviewsCount(0);
+      }
+    }
   };
 
   useEffect(() => {
     loadReviews();
+
     const handleNewReview = (e: any) => {
       if (e.detail === productId) loadReviews();
     };
+
     window.addEventListener("new-review", handleNewReview);
     return () => window.removeEventListener("new-review", handleNewReview);
   }, [productId]);
 
+  // ⭐ Delete review
   const deleteReview = (index: number) => {
     const updated = [...reviews];
     updated.splice(index, 1);
     setReviews(updated);
+
     localStorage.setItem(`reviews_${productId}`, JSON.stringify(updated));
+
     window.dispatchEvent(new CustomEvent("new-review", { detail: productId }));
   };
 
-  const scrollLeft = () => scrollRef.current?.scrollBy({ left: -250, behavior: "smooth" });
-  const scrollRight = () => scrollRef.current?.scrollBy({ left: 250, behavior: "smooth" });
+  // ⭐ Scroll buttons
+  const scrollLeft = () =>
+    scrollRef.current?.scrollBy({ left: -250, behavior: "smooth" });
+  const scrollRight = () =>
+    scrollRef.current?.scrollBy({ left: 250, behavior: "smooth" });
 
   return (
     <div className="py-12 sm:py-16 border-t mt-6">
@@ -54,7 +87,7 @@ const CustomerReview: React.FC<CustomerReviewProps> = ({ productId }) => {
           Customer Feedback
         </h2>
         <p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-[#6B3F28] max-w-xl sm:max-w-2xl mx-auto italic leading-relaxed">
-          Real stories from those who chose handcrafted perfection for their special moments.
+          Real stories from those who chose handcrafted perfection.
         </p>
       </div>
 
@@ -90,7 +123,11 @@ const CustomerReview: React.FC<CustomerReviewProps> = ({ productId }) => {
                       />
                       <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#f8e6db] rounded-md px-2 py-1 flex gap-1 shadow-md text-xs sm:text-sm">
                         {Array.from({ length: review.rating }).map((_, j) => (
-                          <Star key={j} size={14} className="text-yellow-500 fill-yellow-500" />
+                          <Star
+                            key={j}
+                            size={14}
+                            className="text-yellow-500 fill-yellow-500"
+                          />
                         ))}
                       </div>
                     </div>
@@ -101,10 +138,16 @@ const CustomerReview: React.FC<CustomerReviewProps> = ({ productId }) => {
                       {review.name}
                     </h3>
                     {review.title && (
-                      <p className="text-gray-500 text-xs sm:text-sm mb-1">{review.title}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm mb-1">
+                        {review.title}
+                      </p>
                     )}
-                    <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{review.comment}</p>
-                    <p className="text-xs text-gray-400 mt-2">{new Date(review.date).toLocaleDateString()}</p>
+                    <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                      {review.comment}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {new Date(review.date).toLocaleDateString()}
+                    </p>
 
                     {/* Delete Button */}
                     <button

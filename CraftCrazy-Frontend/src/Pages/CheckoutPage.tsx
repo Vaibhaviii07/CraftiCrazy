@@ -52,6 +52,7 @@ const CheckoutPage: React.FC = () => {
   const [formData, setFormData] = useState<IOrder>(initialFormData);
   const [toast, setToast] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const token = localStorage.getItem("token");
 
   // Load Razorpay script dynamically
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -92,83 +93,97 @@ const CheckoutPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
- const handleRazorpayPayment = async (amount: number) => {
-  setLoading(true);
-  const res = await loadRazorpayScript();
-  if (!res) {
-    setToast("Razorpay SDK failed to load. Are you online?");
-    setLoading(false);
-    return;
-  }
+  const handleRazorpayPayment = async (amount: number) => {
+    setLoading(true);
+    const res = await loadRazorpayScript();
+    if (!res) {
+      setToast("Razorpay SDK failed to load. Are you online?");
+      setLoading(false);
+      return;
+    }
 
-  try {
-    // Calling  backend to create order
-    const { data } = await axios.post("http://localhost:8000/api/order/createOrder", {
-      customer: {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.emailOrPhone.includes("@") ? formData.emailOrPhone : "",
-        contact: formData.phone || formData.emailOrPhone,
-        address: formData.address,
-        apartment: formData.apartment,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode,
+    console.log("Payment Api is running...");
+
+    try {
+      // Calling  backend to create order
+      const { data } = await axios.post("http://localhost:8000/api/order/createOrder", {
+        customer: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.emailOrPhone.includes("@") ? formData.emailOrPhone : "",
+          contact: formData.phone || formData.emailOrPhone,
+          address: formData.address,
+          apartment: formData.apartment,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+        },
+        items: cart.map(item => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          customization: item.customization?.userInput || "",
+        })),
+        totalAmount: amount,
+        paymentMethod: formData.paymentMethod,
       },
-      items: cart.map(item => ({
-        productId: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        customization: item.customization?.userInput || "",
-      })),
-      totalAmount: amount,
-      paymentMethod: formData.paymentMethod,
-    });
-
-    const options = {
-      key: "rzp_test_RW8DPbQWX8F2bT",
-      amount: amount * 100,
-      currency: "INR",
-      name: "CraftiCrazy",
-      description: "Order Payment",
-      order_id: data.orderId, // use Razorpay order ID from backend
-      handler: async function (response: any) {
-        try {
-          // Call backend to mark order as paid
-          await axios.post("http://localhost:8000/api/order/orderComplete", { 
-            orderDBId: data.orderDBId,
-            paymentId: response.razorpay_payment_id,
-          });
-
-          setToast("Payment successful! Thank you for shopping with us.");
-          clearCart();
-          setFormData(initialFormData);
-          setLoading(false);
-          navigate("/success", {
-            state: { message: "Your order has been placed successfully!" },
-          });
-        } catch (err) {
-          console.error(err);
-          setToast("Payment successful but confirmation failed. Contact support.");
-          setLoading(false);
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      },
-      prefill: {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.emailOrPhone.includes("@") ? formData.emailOrPhone : "",
-        contact: formData.phone || formData.emailOrPhone,
-      },
-      theme: { color: "#5b2232" },
-    };
+      );
+      const options = {
+        key: "rzp_test_RW8DPbQWX8F2bT",
+        amount: amount * 100,
+        currency: "INR",
+        name: "CraftiCrazy",
+        description: "Order Payment",
+        order_id: data.orderId, // use Razorpay order ID from backend
+        handler: async function (response: any) {
+          try {
+            // Call backend to mark order as paid
+            await axios.post("http://localhost:8000/api/order/orderComplete",
+              {
+                orderDBId: data.orderDBId,
+                paymentId: response.razorpay_payment_id,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
 
-    const razor = new (window as any).Razorpay(options);
-    razor.open();
-  } catch (err) {
-    console.error(err);
-    setToast("Payment initiation failed. Please try again.");
-    setLoading(false);
-  }
-};
+            setToast("Payment successful! Thank you for shopping with us.");
+            clearCart();
+            setFormData(initialFormData);
+            setLoading(false);
+            navigate("/success", {
+              state: { message: "Your order has been placed successfully!" },
+            });
+          } catch (err) {
+            console.error(err);
+            setToast("Payment successful but confirmation failed. Contact support.");
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.emailOrPhone.includes("@") ? formData.emailOrPhone : "",
+          contact: formData.phone || formData.emailOrPhone,
+        },
+        theme: { color: "#5b2232" },
+      };
+
+      const razor = new (window as any).Razorpay(options);
+      razor.open();
+    } catch (err) {
+      console.error(err);
+      setToast("Payment initiation failed. Please try again.");
+      setLoading(false);
+    }
+  };
 
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -327,7 +342,7 @@ const CheckoutPage: React.FC = () => {
             />
 
             {/* Customization */}
-            <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Customization</h2>
+            {/* <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Customization</h2>
             <textarea
               name="customization"
               value={formData.customization || ""}
@@ -335,7 +350,7 @@ const CheckoutPage: React.FC = () => {
               placeholder="Write if you want to customize your hamper or product..."
               className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
               rows={3}
-            />
+            /> */}
 
             {/* Payment */}
             <h2 className="text-lg sm:text-xl font-semibold text-[#5b2232] mb-2">Payment</h2>
@@ -355,7 +370,7 @@ const CheckoutPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full py-3 bg-[#5b2232] text-white font-semibold rounded-md hover:bg-[#451a27] transition duration-200"
+              className="w-full py-3 bg-[#5b2232] cursor-pointer text-white font-semibold rounded-md hover:bg-[#451a27] transition duration-200"
             >
               {isLoading ? "Processing Payment..." : "Pay Now"}
             </button>

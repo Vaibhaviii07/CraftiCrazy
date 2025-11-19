@@ -1,6 +1,6 @@
-// src/ProductDetails/WomenAccessoryDetailPage.tsx
+
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { womenAccessories, WomenAccessory, Variant } from "../Data/WomenAccessoriesData";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart, Star } from "lucide-react";
@@ -11,26 +11,77 @@ import { useAuth } from "../AuthContext/AuthContext";
 
 type Params = { id: string };
 
+function Loader() {
+  return (
+    <div className="flex items-center justify-center w-full h-64">
+      <div className="w-12 h-12 border-4 border-gray-200 border-t-[#b46029] rounded-full animate-spin"></div>
+    </div>
+  );
+}
+
 export default function WomenAccessoryDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
-  const {isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [currentProduct, setCurrentProduct] = useState<WomenAccessory | null>(null);
+  const [backendRating, setBackendRating] = useState<number>(0);
+  const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
   const productFromParams: WomenAccessory | undefined = womenAccessories.find(p => String(p.id) === id);
-  const [currentProduct, setCurrentProduct] = useState<WomenAccessory | null>(productFromParams ?? null);
 
-  
+  useEffect(() => {
+    setCurrentProduct(productFromParams ?? null);
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, [productFromParams]);
 
-  const selectedVariant = useMemo(() => {
+  // Fetch product from backend
+  useEffect(() => {
+    if (!id) return;
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/womenAccessories/${id}`);
+        if (!res.ok) throw new Error("Product fetch failed");
+        const data = await res.json();
+        if (data?.product) setCurrentProduct(data.product);
+      } catch {
+        setCurrentProduct(productFromParams ?? null);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  // Fetch reviews
+  useEffect(() => {
+    if (!id) return;
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
+        if (!res.ok) throw new Error("Reviews fetch failed");
+        const data: { averageRating?: number; totalReviews?: number } = await res.json();
+        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
+        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
+      } catch {
+        setBackendRating(0);
+        setBackendReviewsCount(0);
+      }
+    };
+    fetchReviews();
+  }, [id]);
+
+  const selectedVariant: Variant | null = useMemo(() => {
     if (!currentProduct) return null;
     return {
-      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
+      image: currentProduct.variants?.[0]?.image ?? currentProduct.image ?? "",
+      price: currentProduct.variants?.[0]?.price ?? currentProduct.price ?? 0,
+      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount ?? 0,
     };
   }, [currentProduct]);
 
@@ -53,15 +104,24 @@ export default function WomenAccessoryDetailPage() {
       image: currentVariant.image,
     });
 
-    
     if (isAuthenticated) {
       setToast(`${currentProduct.name} added to cart`);
-    } else {
-      return;
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  if (loading) return <Loader />;
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+
+  const finalRating = backendRating > 0 ? backendRating : currentProduct.rating ?? 0;
+  const finalReviewsCount = backendReviewsCount > 0 ? backendReviewsCount : currentProduct.reviews ?? 0;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -96,13 +156,8 @@ export default function WomenAccessoryDetailPage() {
                 <motion.div
                   key={i}
                   onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant?.image === v.image
-                      ? "border-[#b46029] ring-2 ring-[#b46029]"
-                      : "border-gray-300"
-                  }`}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant?.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
                   whileHover={{ scale: 1.05 }}
-                  aria-label={`Select variant ${i + 1}`}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
                   {v.discount && (
@@ -120,19 +175,20 @@ export default function WomenAccessoryDetailPage() {
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Rating & Price */}
+          {/* Price & Rating */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(currentProduct.rating || 0) }).map((_, i) => (
+              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
                 <Star key={i} className="w-5 h-5 text-yellow-400" />
               ))}
+              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
             </div>
             <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{currentVariant?.price}</span>
             {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
           {/* Description */}
-          {currentProduct.description && <p className="text-gray-600 leading-relaxed">{currentProduct.description}</p>}
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
           {/* Structured Info */}
           <div className="mt-2 space-y-2 text-gray-700">
@@ -197,9 +253,18 @@ export default function WomenAccessoryDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
-       {/* Reviews Section */}
-      <CustomerReview productId={currentProduct.id} />
-      <FloatingReviewChat productId={currentProduct.id} />
+
+      {/* Reviews */}
+      {currentProduct && (
+        <>
+          <CustomerReview
+            productId={currentProduct.id}
+            setBackendRating={setBackendRating}
+            setBackendReviewsCount={setBackendReviewsCount}
+          />
+          <FloatingReviewChat productId={currentProduct.id} />
+        </>
+      )}
     </div>
   );
 }

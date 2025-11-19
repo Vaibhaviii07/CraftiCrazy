@@ -15,7 +15,7 @@ interface DecodedToken {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (data:any,token: string) => void;
   logout: () => void;
 }
 
@@ -49,11 +49,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // Login function store token + decode user info
-  const login = (token: string) => {
-    localStorage.setItem("token", token);
-    const decoded: DecodedToken = jwtDecode(token);
-    setUser({ name: decoded.name, email: decoded.email });
+  const login = (data:any,token: string) => {
+    setUser(data);
     setIsAuthenticated(true);
+    localStorage.setItem("token", token);
   };
 
   // Logout function clear all user data
@@ -64,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated,login, logout }}>
       {children}
     </AuthContext.Provider>
   );
