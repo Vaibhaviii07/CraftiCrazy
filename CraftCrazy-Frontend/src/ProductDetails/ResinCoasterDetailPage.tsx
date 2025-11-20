@@ -191,27 +191,50 @@ export default function ResinCoasterDetailPage() {
             {currentVariant.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
-          {/* Description */}
-          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
+          {/* DESCRIPTION */}
+          <div className="space-y-3 text-gray-700">
+            {currentProduct.description && <p>{currentProduct.description}</p>}
+            {currentProduct.material && (
+              <p>
+                <span className="font-semibold">Material:</span> {currentProduct.material}
+              </p>
+            )}
+            {currentProduct.dimensions && (
+              <p>
+                <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
+              </p>
+            )}
+            {currentProduct.weight && (
+              <p>
+                <span className="font-semibold">Weight:</span> {currentProduct.weight}
+              </p>
+            )}
+            {currentProduct.careInstructions && (
+              <p>
+                <span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}
+              </p>
+            )}
+          </div>
 
-          {/* Tags / Stock / Warranty */}
+          {/* TAGS / STOCK / WARRANTY */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+            {currentProduct.tags?.map((tag, idx) => (
+              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
+                {tag}
+              </span>
+            ))}
+
+            <span
+              className={`px-2 py-1 rounded ${
+                currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
+            >
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
+
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
-            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
           </div>
 
-          {/* Additional Details */}
-          <div className="mt-4 space-y-2 text-gray-700">
-            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
-            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
-            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
-            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
-          </div>
 
           {/* Add to Cart */}
           <div className="flex flex-wrap gap-3 mt-4 items-center">
@@ -224,7 +247,8 @@ export default function ResinCoasterDetailPage() {
             </button>
           </div>
 
-          {/* Contents / Customization */}
+
+           {/* Extra Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
@@ -234,25 +258,25 @@ export default function ResinCoasterDetailPage() {
                 </ul>
               </div>
             )}
+
             {currentProduct.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
-          </div>
 
-          {/* Specifications */}
-          {currentProduct.specifications && (
-            <div className="mt-4 bg-gray-50 p-3 rounded-md">
-              <h3 className="font-semibold text-gray-800">Specifications</h3>
-              <ul className="text-gray-600">
-                {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
-                  <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {currentProduct.specifications && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Specifications</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
+                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

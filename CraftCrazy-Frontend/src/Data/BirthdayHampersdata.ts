@@ -140,7 +140,7 @@ export const birthdayHampers: BirthdayHamper[] = [
     price: 999,
     rating: 3,
     reviews: 90,
-    discount: 0,
+    discount: undefined,
     highlight: "Budget",
     category: "Friend",
     tags: ["budget", "gift", "chocolates", "photo"],

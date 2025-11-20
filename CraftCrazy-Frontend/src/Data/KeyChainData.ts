@@ -209,7 +209,7 @@ export const keyChains: KeyChain[] = [
     price: 250,
     rating: 4.2,
     reviews: 65,
-    discount: 0,
+    discount: undefined,
     highlight: "Trendy",
     category: "Fashion",
     tags: ["tassel", "trendy", "fashion"],
@@ -220,7 +220,7 @@ export const keyChains: KeyChain[] = [
     returnPolicy: "7-day returns",
     image: "/keychain2.jpg",
     variants: [
-      { image: "/keychain2.jpg", price: 250, discount: 0 },
+      { image: "/keychain2.jpg", price: 250, discount: undefined },
       { image: "/keychain2-1.jpg", price: 270, discount: 2 },
       { image: "/keychain2-2.jpg", price: 270, discount: 2 },
       { image: "/keychain2-3.jpg", price: 270, discount: 2 },

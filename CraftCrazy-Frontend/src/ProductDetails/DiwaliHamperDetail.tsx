@@ -230,30 +230,48 @@ export default function DiwaliHamperDetailPage() {
             )}
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
           <div className="space-y-3 text-gray-700">
-            {currentProduct.description && (
-              <p>{currentProduct.description}</p>
+            {currentProduct.description && <p>{currentProduct.description}</p>}
+            {currentProduct.material && (
+              <p>
+                <span className="font-semibold">Material:</span> {currentProduct.material}
+              </p>
+            )}
+            {currentProduct.dimensions && (
+              <p>
+                <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
+              </p>
+            )}
+            {currentProduct.weight && (
+              <p>
+                <span className="font-semibold">Weight:</span> {currentProduct.weight}
+              </p>
+            )}
+            {currentProduct.careInstructions && (
+              <p>
+                <span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}
+              </p>
             )}
           </div>
 
-          {/* Stock & Warranty */}
-          <div className="flex flex-wrap gap-3 text-gray-500">
+          {/* TAGS / STOCK / WARRANTY */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.tags?.map((tag, idx) => (
+              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
+                {tag}
+              </span>
+            ))}
+
             <span
               className={`px-2 py-1 rounded ${
-                currentProduct.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
+                currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
               }`}
             >
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
 
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">
-                {currentProduct.warranty}
-              </span>
-            )}
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* Add to Cart */}
@@ -271,29 +289,35 @@ export default function DiwaliHamperDetailPage() {
             </button>
           </div>
 
-          {/* Contents */}
-          {currentProduct.contents && (
-            <div className="bg-gray-50 p-3 rounded-md mt-4">
-              <h3 className="font-semibold text-gray-800">Contents</h3>
-              <ul className="list-disc list-inside text-gray-600 space-y-1">
-                {currentProduct.contents.map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Extra Sections */}
+          <div className="mt-6 flex flex-col gap-4">
+            {currentProduct.contents && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Contents</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
+                </ul>
+              </div>
+            )}
 
-          {/* Customization */}
-          {currentProduct.customization?.available && (
-            <div className="bg-gray-50 p-3 rounded-md mt-3">
-              <h3 className="font-semibold text-gray-800">
-                Customization Options
-              </h3>
-              <p className="text-gray-600">
-                {currentProduct.customization.options?.join(", ")}
-              </p>
-            </div>
-          )}
+            {currentProduct.customization?.available && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Customization Options</h3>
+                <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
+              </div>
+            )}
+
+            {currentProduct.specifications && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Specifications</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
+                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

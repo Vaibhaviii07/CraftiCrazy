@@ -124,7 +124,7 @@ export const resinKeychains: ResinKeychain[] = [
     price: 200,
     rating: 4.9,
     reviews: 150,
-    discount: 0,
+    discount: undefined,
     highlight: "Trending",
     category: "Alphabet",
     tags: ["alphabet", "personalized", "gift", "handmade"],

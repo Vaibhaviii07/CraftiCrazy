@@ -34,6 +34,7 @@ type Bracelet = {
   customization?: { available: boolean; options?: string[] };
   material?: string;
   dimensions?: string;
+  
   weight?: string;
   careInstructions?: string;
   specifications?: Record<string, string>;
@@ -231,42 +232,24 @@ export default function BraceletDetails() {
             )}
           </div>
 
-          {/* DESCRIPTION */}
-          <p className="text-gray-600 leading-relaxed">
-            {currentProduct.description}
-          </p>
+           {/* Description */}
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
-          {/* TAGS */}
-          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
-            {currentProduct.brand && (
-              <span className="bg-gray-100 px-2 py-1 rounded">
-                {currentProduct.brand}
-              </span>
-            )}
-            {currentProduct.seller && (
-              <span className="bg-gray-100 px-2 py-1 rounded">
-                {currentProduct.seller}
-              </span>
-            )}
-            <span
-              className={`px-2 py-1 rounded ${
-                currentProduct.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
+          {/* Structured Info */}
+          <div className="mt-2 space-y-2 text-gray-700">
+            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+          </div>
+
+          {/* Tags / Stock / Warranty */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">
-                {currentProduct.warranty}
-              </span>
-            )}
-            {currentProduct.returnPolicy && (
-              <span className="bg-gray-100 px-2 py-1 rounded">
-                {currentProduct.returnPolicy}
-              </span>
-            )}
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
 
           {/* ADD TO CART */}

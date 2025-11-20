@@ -187,23 +187,21 @@ export default function VarmalaDetailPage() {
           {/* Description */}
           {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
-          {/* Tags / Brand / Stock / Warranty / Seller / Return Policy */}
+          {/* Tags / Stock / Brand */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
             <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
-            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
           </div>
 
-          {/* Additional Info */}
+          {/* Additional Details */}
           <div className="mt-4 space-y-2 text-gray-700">
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
             {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
           {/* Quantity & Add to Cart */}
@@ -217,14 +215,8 @@ export default function VarmalaDetailPage() {
             </button>
           </div>
 
-          {/* Structured Sections */}
+           {/* Extra Sections */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.tags && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Tags</h3>
-                <p className="text-gray-600">{currentProduct.tags.join(", ")}</p>
-              </div>
-            )}
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
@@ -233,12 +225,14 @@ export default function VarmalaDetailPage() {
                 </ul>
               </div>
             )}
+
             {currentProduct.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
+
             {currentProduct.specifications && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
@@ -249,15 +243,10 @@ export default function VarmalaDetailPage() {
                 </ul>
               </div>
             )}
-            {currentProduct.delivery && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Delivery</h3>
-                <p className="text-gray-600">{currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
+
 
       {/* Toast */}
       <AnimatePresence>

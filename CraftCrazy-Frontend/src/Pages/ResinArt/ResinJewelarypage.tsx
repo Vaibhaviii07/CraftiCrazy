@@ -1,7 +1,35 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { resinJewelry } from "../../Data/ResinJewelryData";
+import { resinJewelry, ResinJewelry } from "../../Data/ResinJewelryData";
 import { Link } from "react-router-dom";
+
+// LazyImage for smooth fade-in
+const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className={`w-full h-full ${!visible ? "bg-gray-200 animate-pulse" : ""}`}>
+      {visible && <img src={src} alt={alt} className={className} loading="lazy" />}
+    </div>
+  );
+};
 
 export default function ResinJewelryPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -17,7 +45,6 @@ export default function ResinJewelryPage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinJewelry.map((i) => i.category))];
 
-  // Filtered Items
   const filteredItems = useMemo(() => {
     return resinJewelry.filter((item) => {
       const categoryMatch =
@@ -38,7 +65,6 @@ export default function ResinJewelryPage() {
     });
   }, [selectedCategories, highlight]);
 
-  // Sorted Items
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
     switch (sortOption) {
@@ -59,7 +85,7 @@ export default function ResinJewelryPage() {
 
   return (
     <section className="bg-gray-50 min-h-screen">
-      {/* Hero Section */}
+      {/* Hero */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Resin Jewelry
@@ -72,11 +98,10 @@ export default function ResinJewelryPage() {
         </p>
       </div>
 
-      {/* Main Layout */}
+      {/* Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
@@ -95,7 +120,6 @@ export default function ResinJewelryPage() {
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
@@ -114,7 +138,6 @@ export default function ResinJewelryPage() {
 
         {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
             <select
@@ -129,61 +152,51 @@ export default function ResinJewelryPage() {
             </select>
           </div>
 
-          {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedItems.map((item) => {
-                const [loaded, setLoaded] = useState(false); // lazy load state
-
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex justify-center"
+              {sortedItems.map((item: ResinJewelry) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex justify-center"
+                >
+                  <Link
+                    to={`/jewelarydetail/${item.id}`}
+                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
-                    <Link
-                      to={`/jewelarydetail/${item.id}`}
-                      className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
-                    >
-                      <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                        <motion.img
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: loaded ? 1 : 0 }}
-                          transition={{ duration: 0.5 }}
-                          onLoad={() => setLoaded(true)}
-                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                        {item.discount && (
-                          <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                          >
-                            {item.discount}% OFF
-                          </motion.span>
-                        )}
-                      </div>
+                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                      <LazyImage
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
+                    </div>
 
-                      <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                        <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
-                        {item.description && (
-                          <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
-                        )}
-                        <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                          <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">₹{item.price}</span>
-                        </div>
+                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                      {item.description && (
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                      )}
+                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">₹{item.price}</span>
                       </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
             </AnimatePresence>
           </div>
         </div>

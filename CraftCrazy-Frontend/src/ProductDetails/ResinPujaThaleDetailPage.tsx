@@ -215,7 +215,7 @@ export default function ResinPujaThaleDetailPage() {
             </button>
           </div>
 
-          {/* Contents / Customization */}
+          {/* Extra Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
@@ -225,10 +225,22 @@ export default function ResinPujaThaleDetailPage() {
                 </ul>
               </div>
             )}
+
             {currentProduct.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
+              </div>
+            )}
+
+            {currentProduct.specifications && (
+              <div className="bg-gray-50 p-3 rounded-md">
+                <h3 className="font-semibold text-gray-800">Specifications</h3>
+                <ul className="list-disc list-inside text-gray-600 space-y-1">
+                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
+                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>

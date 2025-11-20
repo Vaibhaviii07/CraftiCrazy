@@ -180,7 +180,7 @@ export default function DiwaliHamperPage() {
                         </p>
                       )}
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#F7B77A] font-cinzel">
+                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
                           ₹{item.price}
                         </span>
                         {item.discount && (
