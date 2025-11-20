@@ -1,5 +1,6 @@
 // src/Pages/ResinArt/ResinPhotoFramesPage.tsx
-import { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { resinFrames } from "../../Data/ResinFramedata";
 import { Link } from "react-router-dom";
@@ -14,6 +15,14 @@ export default function ResinPhotoFramesPage() {
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinFrames.map((i) => i.category))];

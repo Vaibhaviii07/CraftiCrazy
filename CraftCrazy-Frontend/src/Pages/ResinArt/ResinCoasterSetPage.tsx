@@ -1,5 +1,6 @@
 // src/Pages/ResinArt/ResinCoasterSetPage.tsx
-import { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { resinCoasterSets } from "../../Data/ResinCoasterSetData";
 import { Link } from "react-router-dom";
@@ -17,6 +18,14 @@ export default function ResinCoasterSetPage() {
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinCoasterSets.map((i) => i.category))];
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   const filteredItems = useMemo(() => {
     return resinCoasterSets.filter((item) => {

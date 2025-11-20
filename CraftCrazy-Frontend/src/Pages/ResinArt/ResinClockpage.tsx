@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { resinClocks, ResinClock } from "../../Data/ResinWallClockdata";
 import { Link } from "react-router-dom";
@@ -32,6 +33,14 @@ export default function ResinClockPage() {
 
     addToCart(cartItem);
   };
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>

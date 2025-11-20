@@ -21,6 +21,14 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
       },
       { threshold: 0.1 }
     );
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
     if (imgRef.current) observer.observe(imgRef.current);
     return () => observer.disconnect();

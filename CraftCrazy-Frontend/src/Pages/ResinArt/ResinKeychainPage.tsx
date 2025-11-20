@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { resinKeychains, ResinKeychain } from "../../Data/ResinKeychainData";
 import { Link } from "react-router-dom";
@@ -16,6 +17,14 @@ export default function ResinKeychainPage() {
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinKeychains.map(item => item.category))];
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   // Filtered Items
   const filteredItems = useMemo(() => {

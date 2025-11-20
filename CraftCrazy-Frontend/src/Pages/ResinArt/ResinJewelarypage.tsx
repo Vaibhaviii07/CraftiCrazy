@@ -23,6 +23,14 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   return (
     <div ref={ref} className={`w-full h-full ${!visible ? "bg-gray-200 animate-pulse" : ""}`}>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinPujaThales, ResinPujaThale } from "../../Data/ResinPujaThaleData";
 import { Link } from "react-router-dom";
@@ -13,6 +13,14 @@ export default function ResinPujaThalePage() {
       prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinPujaThales.map(item => item.category))];

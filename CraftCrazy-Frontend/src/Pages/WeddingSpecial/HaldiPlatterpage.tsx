@@ -8,6 +8,14 @@ import { Link } from "react-router-dom";
 const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

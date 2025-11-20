@@ -43,6 +43,15 @@ export default function VarmalaPreservationPage() {
       prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
+  useEffect(() => {
+  // Scroll to top after 100ms delay
+  const timer = setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
+
 
   const categories = [...new Set(varmalaPreservations.map(i => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
