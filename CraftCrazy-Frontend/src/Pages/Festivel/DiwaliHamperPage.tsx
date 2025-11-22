@@ -1,12 +1,51 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { diwaliHampers } from "../../Data/DiwaliHamperdata";
+import { diwaliHampers, DiwaliHamper } from "../../Data/DiwaliHamperdata";
 import { Link } from "react-router-dom";
 
 export default function DiwaliHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<DiwaliHamper[]>(diwaliHampers);
+
+  // Fetch API and merge with local data
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const url = `http://localhost:8000/api/products?category=${encodeURIComponent(
+          "Diwali Hampers"
+        )}`;
+
+        const res = await fetch(url);
+        const apiResponse = await res.json();
+        console.log(apiResponse);
+
+        const apiData: DiwaliHamper[] = apiResponse.map((item: any) => ({
+          ...item,
+          id: item._id,
+          image: item.imageUrl,
+          price: Number(item.price),
+          rating: Number(item.rating),
+          discount: Number(item.discount),
+        }));
+
+        const merged = [
+          ...apiData,
+          ...diwaliHampers.filter((local) => !apiData.some((api) => api.id === local.id)),
+        ];
+
+
+        console.log(`merged data ${merged}`);
+
+        setAllProducts(merged);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -15,10 +54,10 @@ export default function DiwaliHamperPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(diwaliHampers.map((item) => item.category))];
+  const categories = [...new Set(allProducts.map((item) => item.category))];
 
   const filteredItems = useMemo(() => {
-    return diwaliHampers.filter((item) => {
+    return allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 ||
         selectedCategories.includes(item.category);
@@ -29,15 +68,14 @@ export default function DiwaliHamperPage() {
         const lowerHighlight = (item.highlight || "").toLowerCase();
         const hasBestTag =
           item.tags?.some((tag) => tag.toLowerCase().includes("best")) ?? false;
-        highlightMatch =
-          lowerHighlight.includes("best") || hasBestTag || false;
+        highlightMatch = lowerHighlight.includes("best") || hasBestTag;
       } else if (highlight === "Discounted") {
         highlightMatch = (item.discount ?? 0) > 0;
       }
 
       return categoryMatch && highlightMatch;
     });
-  }, [highlight, selectedCategories]);
+  }, [highlight, selectedCategories, allProducts]); // <-- FIXED
 
   const sortedItems = useMemo(() => {
     const items = [...filteredItems];
@@ -102,11 +140,10 @@ export default function DiwaliHamperPage() {
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer transition-colors duration-200 ${
-                    highlight === opt
+                  className={`text-sm cursor-pointer transition-colors duration-200 ${highlight === opt
                       ? "text-[#F7B77A] font-semibold"
                       : "text-gray-700 hover:text-[#F7B77A]"
-                  }`}
+                    }`}
                 >
                   {opt}
                 </li>
@@ -114,7 +151,7 @@ export default function DiwaliHamperPage() {
             </ul>
           </div>
         </aside>
-        
+
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm text-gray-600">

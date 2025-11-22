@@ -1,5 +1,5 @@
 // src/Pages/Bracelets/BraceletPage.tsx
-import { useState, useMemo } from "react";
+import { useState,useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { bracelets, Bracelet } from "../../Data/BraceletData";
 import { Link } from "react-router-dom";
@@ -8,6 +8,33 @@ export default function BraceletPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<Bracelet[]>(bracelets);
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=bracelets");
+            const apiData: Bracelet[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...bracelets.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -16,10 +43,10 @@ export default function BraceletPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(bracelets.map(item => item.category))];
+  const categories = [...new Set(allProducts.map(item => item.category))];
 
   const filteredItems = useMemo(() => {
-    return bracelets.filter((item: Bracelet) => {
+    return allProducts.filter((item: Bracelet) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 

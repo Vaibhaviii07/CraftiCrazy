@@ -1,7 +1,7 @@
 // src/Pages/Accessories/ToteBagPage.tsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toteBags } from "../../Data/ToteBagData";
+import { toteBags,ToteBag } from "../../Data/ToteBagData";
 import { Link } from "react-router-dom";
 
 export default function ToteBagPage() {
@@ -9,6 +9,34 @@ export default function ToteBagPage() {
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
   const [loading, setLoading] = useState(true);
+  const [allProducts,setAllProducts] = useState<ToteBag[]>(toteBags);
+
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=totebags");
+            const apiData: ToteBag[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...toteBags.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000); 
@@ -22,9 +50,9 @@ export default function ToteBagPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(toteBags.map((i) => i.category))];
+  const categories = [...new Set(allProducts.map((i) => i.category))];
 
-  const filteredItems = toteBags.filter((item) => {
+  const filteredItems = allProducts.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 ||
       selectedCategories.includes(item.category);

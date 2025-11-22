@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { womenAccessories } from "../../Data/WomenAccessoriesData";
+import { womenAccessories,WomenAccessory } from "../../Data/WomenAccessoriesData";
 import { Link } from "react-router-dom";
 
 const LazyImage = ({ src, alt }: { src: string; alt: string }) => (
@@ -10,12 +10,39 @@ const LazyImage = ({ src, alt }: { src: string; alt: string }) => (
     loading="lazy"
     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
   />
-);
+);      
 
 export default function WomenAccessoriesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<WomenAccessory[]>(womenAccessories);
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=womenaccessories");
+            const apiData: WomenAccessory[] = await res.json();
+            
+            // Merge API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...womenAccessories.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -24,9 +51,9 @@ export default function WomenAccessoriesPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(womenAccessories.map((i) => i.category))];
+  const categories = [...new Set(allProducts.map((i) => i.category))];
 
-  const filteredItems = womenAccessories.filter((item) => {
+  const filteredItems = allProducts.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 ||
       selectedCategories.includes(item.category);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { rakhiKits, RakhiKit } from "../../Data/RakhiData";
@@ -7,6 +7,38 @@ export default function RakhiPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<RakhiKit[]>(rakhiKits);
+  const [imageLoaded, setImageLoaded] = useState<{ [key: string]: boolean }>({});
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const encodedCategory = encodeURIComponent("rakhi hits");
+        const res = await fetch(`http://localhost:8000/api/products?category=${encodedCategory}`);
+        const apiResponse = await res.json();
+
+        const apiData: RakhiKit[] = apiResponse.map((item: any) => ({
+          ...item,
+          id: item._id,
+          image: item.imageUrl,
+          price: Number(item.price),
+          rating: Number(item.rating),
+          discount: Number(item.discount),
+        }));
+
+        const merged = [
+          ...apiData,
+          ...rakhiKits.filter((local) => !apiData.some((api) => api.id === local.id)),
+        ];
+
+        setAllProducts(merged);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -15,10 +47,10 @@ export default function RakhiPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted", "Luxury Edition"];
-  const categories = [...new Set(rakhiKits.map((i: RakhiKit) => i.category))];
+  const categories = [...new Set(allProducts.map((i: RakhiKit) => i.category))];
 
   const filteredItems = useMemo(() => {
-    return rakhiKits.filter(item => {
+    return allProducts.filter(item => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
@@ -38,7 +70,7 @@ export default function RakhiPage() {
       }
       return categoryMatch && highlightMatch;
     });
-  }, [selectedCategories, highlight]);
+  }, [selectedCategories, highlight, allProducts]);
 
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
@@ -58,6 +90,7 @@ export default function RakhiPage() {
     return sorted;
   }, [filteredItems, sortOption]);
 
+<<<<<<< Updated upstream
   const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
     const [loaded, setLoaded] = useState(false);
     return (
@@ -75,6 +108,8 @@ export default function RakhiPage() {
       </div>
     );
   };
+=======
+>>>>>>> Stashed changes
 
   return (
     <section className="min-h-screen bg-[#fffdfc]">
@@ -91,6 +126,10 @@ export default function RakhiPage() {
 
       {/* Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6">
+<<<<<<< Updated upstream
+=======
+        
+>>>>>>> Stashed changes
         {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           <div className="mb-6">
@@ -118,7 +157,12 @@ export default function RakhiPage() {
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
+<<<<<<< Updated upstream
                   className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
+=======
+                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
+                    }`}
+>>>>>>> Stashed changes
                 >
                   {opt}
                 </li>
@@ -127,7 +171,11 @@ export default function RakhiPage() {
           </div>
         </aside>
 
+<<<<<<< Updated upstream
         {/* Products Grid */}
+=======
+        {/* Product Grid */}
+>>>>>>> Stashed changes
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
@@ -143,7 +191,11 @@ export default function RakhiPage() {
             </select>
           </div>
 
+<<<<<<< Updated upstream
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+=======
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
+>>>>>>> Stashed changes
             <AnimatePresence>
               {sortedItems.map(item => (
                 <motion.div
@@ -159,6 +211,7 @@ export default function RakhiPage() {
                     className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
                     <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+<<<<<<< Updated upstream
                       <LazyImage
                         src={item.image}
                         alt={item.name}
@@ -176,6 +229,33 @@ export default function RakhiPage() {
                       )}
                     </div>
 
+=======
+                      <motion.img
+                        src={item.image}
+                        alt={item.name}
+                        loading="lazy"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: imageLoaded[item.id] ? 1 : 0 }}
+                        transition={{ duration: 0.5 }}
+                        onLoad={() =>
+                          setImageLoaded(prev => ({ ...prev, [item.id]: true }))
+                        }
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          {item.discount}% OFF
+                        </motion.span>
+                      )}
+                    </div>
+
+>>>>>>> Stashed changes
                     <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
                       <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
                       {item.description && (

@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 import React, { useState, useMemo, useRef, useEffect } from "react";
+=======
+import { useState,useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
 import { glassFrames, GlassFrame, Variant } from "../../Data/GlassFramedata";
 import { Link } from "react-router-dom";
@@ -35,6 +39,32 @@ export default function GlassFramePage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<GlassFrame[]>(glassFrames);
+
+   // Fetch API data and merge
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const res = await fetch("http://localhost:8000/api/products?category=glassframes");
+          const apiData: GlassFrame[] = await res.json();
+          
+          // Merge: API data first, keep local data that API doesn't have
+          const merged = [
+            ...apiData,
+            ...glassFrames.filter(
+              (local) => !apiData.some((api) => api.id === local.id)
+            ),
+          ];
+  
+          setAllProducts(merged);
+        } catch (error) {
+          console.error("Failed to fetch products", error);
+        }
+      }
+  
+      fetchData();
+    }, []);
+
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -43,12 +73,20 @@ export default function GlassFramePage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
+<<<<<<< Updated upstream
   const categories = [...new Set(glassFrames.map((item) => item.category))];
 
   const filteredFrames = useMemo(() => {
     return glassFrames.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
+=======
+  const categories = [...new Set(allProducts.map(item => item.category))];
+
+  const filteredFrames = allProducts.filter((item: GlassFrame) => {
+    const categoryMatch =
+      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+>>>>>>> Stashed changes
 
       let highlightMatch = true;
       switch (highlight) {

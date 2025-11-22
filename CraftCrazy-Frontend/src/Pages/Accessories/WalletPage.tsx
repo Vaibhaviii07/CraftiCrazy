@@ -8,6 +8,33 @@ export default function WalletPage() {
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
   const [displayedWallets, setDisplayedWallets] = useState<Wallet[]>(wallets);
+  const [allProducts,setAllProducts] = useState<Wallet[]>(wallets);
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=wallet");
+            const apiData: Wallet[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...wallets.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -16,10 +43,10 @@ export default function WalletPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(wallets.map((item) => item.category))];
+  const categories = [...new Set(allProducts.map((item) => item.category))];
 
   useEffect(() => {
-    let filtered = wallets.filter((item) => {
+    let filtered = allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 

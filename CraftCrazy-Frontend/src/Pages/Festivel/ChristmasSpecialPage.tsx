@@ -1,27 +1,75 @@
+<<<<<<< Updated upstream
 // src/Pages/ChristmasSpecial/ChristmasSpecialPage.tsx
 import { useState, useMemo } from "react";
+=======
+import { useState, useEffect } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
-import { christmasSpecials } from "../../Data/ChristmasSpecialdata";
+import { christmasSpecials, ChristmasSpecial } from "../../Data/ChristmasSpecialdata";
 import { Link } from "react-router-dom";
 
 export default function ChristmasSpecialPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<ChristmasSpecial[]>(christmasSpecials);
+
+  // NEW STATE FIX (Store loaded status for each product)
+  const [imageLoaded, setImageLoaded] = useState<Record<string, boolean>>({});
+
+  // Fetch API and merge with local data
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const url = `http://localhost:8000/api/products?category=${encodeURIComponent(
+          "Christmas Special"
+        )}`;
+
+        const res = await fetch(url);
+        const apiResponse = await res.json();
+
+        const apiData: ChristmasSpecial[] = apiResponse.map((item: any) => ({
+          ...item,
+          id: item._id,
+          image: item.imageUrl,
+          price: Number(item.price),
+          rating: Number(item.rating),
+          discount: Number(item.discount),
+        }));
+
+        const merged = [
+          ...apiData,
+          ...christmasSpecials.filter((local) => !apiData.some((api) => api.id === local.id)),
+        ];
+
+        setAllProducts(merged);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(christmasSpecials.map(item => item.category))];
+  const categories = [...new Set(allProducts.map((item) => item.category))];
 
+<<<<<<< Updated upstream
   const filteredItems = useMemo(() => {
     return christmasSpecials.filter(item => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
+=======
+  const filteredItems = allProducts.filter((item) => {
+    const categoryMatch =
+      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+>>>>>>> Stashed changes
 
       let highlightMatch = true;
       switch (highlight) {
@@ -82,36 +130,51 @@ export default function ChristmasSpecialPage() {
     );
   };
 
+  // Handler to update image load state
+  const handleImageLoad = (id: string) => {
+    setImageLoaded((prev) => ({ ...prev, [id]: true }));
+  };
+
   return (
     <section className="bg-gray-50 min-h-screen">
       {/* Hero Section */}
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
-          Christmas Specials
+          🎄 Christmas Specials 🎁
           <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 
+<<<<<<< Updated upstream
             bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse">
           </span>
+=======
+            bg-gradient-to-r from-red-600 via-green-400 to-red-600 rounded-full animate-pulse"></span>
+>>>>>>> Stashed changes
         </h2>
         <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
           Celebrate the festive season with our specially curated Christmas hampers and treats.
         </p>
       </div>
 
+<<<<<<< Updated upstream
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
+=======
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
+        
+        {/* FILTER SIDEBAR */}
+>>>>>>> Stashed changes
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
+                    className="h-4 w-4 text-red-600 border-gray-300 rounded"
                   />
                   <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
                     {cat}
@@ -124,11 +187,17 @@ export default function ChristmasSpecialPage() {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
-              {highlightOptions.map(opt => (
+              {highlightOptions.map((opt) => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
+<<<<<<< Updated upstream
                   className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
+=======
+                  className={`text-sm cursor-pointer ${
+                    highlight === opt ? "text-red-600 font-semibold" : "text-gray-700"
+                  }`}
+>>>>>>> Stashed changes
                 >
                   {opt}
                 </li>
@@ -137,6 +206,7 @@ export default function ChristmasSpecialPage() {
           </div>
         </aside>
 
+<<<<<<< Updated upstream
         {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
@@ -146,6 +216,16 @@ export default function ChristmasSpecialPage() {
               value={sortOption}
               onChange={e => setSortOption(e.target.value)}
               className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
+=======
+        {/* PRODUCTS GRID */}
+        <div className="md:col-span-4 flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+            <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-red-600 focus:border-red-600"
+>>>>>>> Stashed changes
             >
               <option>Default sorting</option>
               <option>Price: Low to High</option>
@@ -157,7 +237,11 @@ export default function ChristmasSpecialPage() {
           {/* Product Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-16">
             <AnimatePresence>
+<<<<<<< Updated upstream
               {sortedItems.map(item => (
+=======
+              {sortedItems.map((item) => (
+>>>>>>> Stashed changes
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -167,6 +251,7 @@ export default function ChristmasSpecialPage() {
                   className="flex justify-center"
                 >
                   <Link
+<<<<<<< Updated upstream
                     to={`/christmasdetail/${item.id}`}
                     className="w-full max-w-[330px] flex flex-col"
                   >
@@ -200,6 +285,48 @@ export default function ChristmasSpecialPage() {
                             ₹{Math.round(item.price / (1 - item.discount / 100))}
                           </span>
                         )}
+=======
+                    to={`/ChristmasDetail/${item.id}`}
+                    className="w-full max-w-[330px] flex flex-col"
+                  >
+                    <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
+                      <motion.img
+                        src={item.image}
+                        alt={item.name}
+                        loading="lazy"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: imageLoaded[item.id] ? 1 : 0 }}
+                        transition={{ duration: 0.5 }}
+                        onLoad={() => handleImageLoad(item.id)}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+
+                      {item.discount && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="absolute top-2 right-2 bg-red-600 text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                        >
+                          🎁 {item.discount}% OFF
+                        </motion.span>
+                      )}
+                    </div>
+
+                    <div className="mt-2 sm:mt-3 text-center px-1">
+                      <p className="text-sm sm:text-lg text-gray-900 font-[Playfair_Display]">
+                        {item.name}
+                      </p>
+                      {item.description && (
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="mt-2 flex justify-center items-baseline gap-2">
+                        <span className="text-lg sm:text-2xl text-green-700 font-bold">
+                          ₹{item.price}
+                        </span>
+>>>>>>> Stashed changes
                       </div>
                     </div>
                   </Link>

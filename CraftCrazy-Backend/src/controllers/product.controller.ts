@@ -13,7 +13,7 @@ export const createProductController = async (req: Request, res: Response, next:
     const data = req.body;
     console.log(data);
     let imageUrl: string | null = req.body?.imageUrl || null;
-    
+
     // If no file and no URL
     if (!req.file && !imageUrl) {
       return res.status(400).json({
@@ -48,10 +48,10 @@ export const createProductController = async (req: Request, res: Response, next:
   }
 };
 
-export const getAllProdutsController = async(req:Request,res:Response,next:NextFunction) => {
+export const getAllProdutsController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const allProudcts = await productService.getAllProductsService();
-    res.status(200).json({allProudcts});
+    res.status(200).json({ allProudcts });
   } catch (error) {
     next(error);
   }
@@ -95,3 +95,16 @@ export const deleteProductController = async (req: Request, res: Response, next:
     next(error);
   }
 };
+
+export const getFilteredProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const category = req.query.category?.toString().toLowerCase();
+    console.log(category);
+    console.log("filtered api is running...");
+    const products = await productService.getFilteredProductServices(category);
+    console.log(products);
+    res.status(200).json(products);
+  } catch (error) {
+    next(error);
+  }
+}

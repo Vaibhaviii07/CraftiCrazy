@@ -1,7 +1,7 @@
 // src/Pages/VarmalaPreservation/VarmalaPreservationPage.tsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { varmalaPreservations } from "../../Data/VarmalaPreservationdata";
+import { varmalaPreservations,VarmalaPreservation } from "../../Data/VarmalaPreservationdata";
 import { Link } from "react-router-dom";
 
 // ✅ LazyImage Component
@@ -37,6 +37,34 @@ export default function VarmalaPreservationPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<VarmalaPreservation[]>(varmalaPreservations);
+
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=varmalaPreservation");
+            const apiData: VarmalaPreservation[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...varmalaPreservations.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -53,12 +81,12 @@ export default function VarmalaPreservationPage() {
 }, []);
 
 
-  const categories = [...new Set(varmalaPreservations.map(i => i.category))];
+  const categories = [...new Set(allProducts.map(i => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
 
   // Filtered & Highlighted Items
   const filteredItems = useMemo(() => {
-    return varmalaPreservations.filter(item => {
+    return allProducts.filter(item => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 

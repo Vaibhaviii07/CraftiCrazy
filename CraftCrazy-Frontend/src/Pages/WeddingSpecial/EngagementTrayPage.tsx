@@ -1,7 +1,7 @@
 // src/Pages/EngagementTray/EngagementTrayPage.tsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { engagementTrays } from "../../Data/EngagementTrayData";
+import { engagementTrays, EngagementTray } from "../../Data/EngagementTrayData";
 import { Link } from "react-router-dom";
 
 // ✅ LazyImage Component
@@ -45,19 +45,60 @@ export default function EngagementTrayPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("Default sorting");
   const [highlight, setHighlight] = useState("All");
+  const [allProducts, setAllProducts] = useState<EngagementTray[]>(engagementTrays);
 
+
+
+  // Fetch API and merge with local data
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const url = `http://localhost:8000/api/products?category=${encodeURIComponent(
+          "Engagement Tray"
+        )}`;
+
+        const res = await fetch(url);
+        const apiResponse = await res.json();
+        console.log(apiResponse);
+
+        const apiData: EngagementTray[] = apiResponse.map((item: any) => ({
+          ...item,
+          id: item._id,
+          image: item.imageUrl,
+          price: Number(item.price),
+          rating: Number(item.rating),
+          discount: Number(item.discount),
+        }));
+
+        const merged = [
+          ...apiData,
+          ...engagementTrays.filter((local) => !apiData.some((api) => api.id === local.id)),
+        ];
+
+
+        console.log(`merged data ${merged}`);
+
+        setAllProducts(merged);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    }
+
+    fetchData();
+  }, []);
+  
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
       prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
 
-  const categories = [...new Set(engagementTrays.map(item => item.category))];
+  const categories = [...new Set(allProducts.map(item => item.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
 
   // Filtered & Highlighted Trays
   const filteredTrays = useMemo(() => {
-    return engagementTrays.filter(item => {
+    return allProducts.filter(item => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
@@ -140,9 +181,8 @@ export default function EngagementTrayPage() {
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer transition-colors duration-300 ${
-                    highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700 hover:text-[#C45A36]"
-                  }`}
+                  className={`text-sm cursor-pointer transition-colors duration-300 ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700 hover:text-[#C45A36]"
+                    }`}
                 >
                   {opt}
                 </li>

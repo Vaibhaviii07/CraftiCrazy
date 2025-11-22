@@ -1,14 +1,43 @@
+<<<<<<< Updated upstream
 // src/Pages/ResinArt/ResinCoasterSetPage.tsx
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
+=======
+import { useState, useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
-import { resinCoasterSets } from "../../Data/ResinCoasterSetData";
+import { resinCoasterSets, ResinCoasterSet } from "../../Data/ResinCoasterSetData";
 import { Link } from "react-router-dom";
 
 export default function ResinCoasterSetPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<ResinCoasterSet[]>(resinCoasterSets);
+
+  // Fetch API data and merge
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("http://localhost:8000/api/products?category=resinCoasterSet");
+        const apiData: ResinCoasterSet[] = await res.json();
+        
+        // Merge: API data first, keep local data that API doesn't have
+        const merged = [
+          ...apiData,
+          ...resinCoasterSets.filter(
+            (local) => !apiData.some((api) => api.id === local.id)
+          ),
+        ];
+
+        setAllProducts(merged);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -17,6 +46,7 @@ export default function ResinCoasterSetPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
+<<<<<<< Updated upstream
   const categories = [...new Set(resinCoasterSets.map((i) => i.category))];
 useEffect(() => {
   // Scroll to top after 100ms delay
@@ -26,9 +56,12 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, []);
+=======
+  const categories = [...new Set(allProducts.map((i) => i.category))];
+>>>>>>> Stashed changes
 
   const filteredItems = useMemo(() => {
-    return resinCoasterSets.filter((item) => {
+    return allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
@@ -45,7 +78,7 @@ useEffect(() => {
       }
       return categoryMatch && highlightMatch;
     });
-  }, [selectedCategories, highlight]);
+  }, [selectedCategories, highlight, allProducts]);
 
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];

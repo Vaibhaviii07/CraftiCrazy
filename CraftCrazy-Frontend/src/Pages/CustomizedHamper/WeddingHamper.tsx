@@ -1,7 +1,12 @@
+<<<<<<< Updated upstream
 import React, { useState, useMemo, useRef, useEffect } from "react";
+=======
+import React, { useState,useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
 import { weddingHampers, WeddingHamper, Variant } from "../../Data/WeddingData";
 import { Link } from "react-router-dom";
+import { CorporateHamper, corporateHampers } from "../../Data/CorporateData";
 
 // LazyImage component for lazy loading
 const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
@@ -35,7 +40,37 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
 export default function WeddingHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("Default sorting");
+<<<<<<< Updated upstream
   const [highlight, setHighlight] = useState("All");
+=======
+  const [allProducts,setAllProducts] = useState<WeddingHamper[]>(weddingHampers);
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=rakhihits");
+            const apiData: CorporateHamper[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...corporateHampers.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
+>>>>>>> Stashed changes
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -43,6 +78,7 @@ export default function WeddingHamperPage() {
     );
   };
 
+<<<<<<< Updated upstream
   const categories = [...new Set(weddingHampers.map((i) => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
 
@@ -64,6 +100,16 @@ export default function WeddingHamperPage() {
       }
 
       return categoryMatch && highlightMatch;
+=======
+  const categories = [...new Set(allProducts.map((i) => i.category))];
+
+  const filteredHampers = useMemo(() => {
+    return allProducts.filter((item) => {
+      return (
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.category)
+      );
+>>>>>>> Stashed changes
     });
   }, [selectedCategories, highlight]);
 

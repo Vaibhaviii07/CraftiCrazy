@@ -4,7 +4,7 @@ export type Variant = {
   discount?: number;
 };
 
-export type ResinCoaster = {
+export type ResinCoasterSet = {
   id: string;
   sku: string;
   name: string;
@@ -40,7 +40,7 @@ export type ResinCoaster = {
   specifications?: { [key: string]: string };
 };
 
-export const resinCoasterSets: ResinCoaster[] = [
+export const resinCoasterSets: ResinCoasterSet[] = [
   {
     id: "cset-1",
     sku: "RC-OCW-001",

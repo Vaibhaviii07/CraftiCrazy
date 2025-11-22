@@ -217,9 +217,13 @@ export default function GlassFrameDetailPage() {
               </p>
             )}
             {currentProduct.dimensions && (
+<<<<<<< Updated upstream
               <p>
                 <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
               </p>
+=======
+              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}(Almost A4 size)   we will provide you A4/A3 size once you order we will confirm from our side.😊</p>
+>>>>>>> Stashed changes
             )}
             {currentProduct.weight && (
               <p>

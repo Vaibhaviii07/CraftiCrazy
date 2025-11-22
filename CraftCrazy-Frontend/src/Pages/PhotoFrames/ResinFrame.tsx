@@ -1,6 +1,12 @@
+<<<<<<< Updated upstream
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinFrames, ResinFrame, Variant } from "../../Data/ResinFramedata";
+=======
+import { useState,useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { resinFrames,ResinFrame } from "../../Data/ResinFramedata";
+>>>>>>> Stashed changes
 import { Link } from "react-router-dom";
 
 // LazyImage component for smooth lazy-loading
@@ -35,6 +41,32 @@ export default function ResinFramePage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<ResinFrame[]>(resinFrames);
+
+
+   // Fetch API data and merge
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const res = await fetch("http://localhost:8000/api/products?category=resinFrames");
+          const apiData: ResinFrame[] = await res.json();
+          
+          // Merge: API data first, keep local data that API doesn't have
+          const merged = [
+            ...apiData,
+            ...resinFrames.filter(
+              (local) => !apiData.some((api) => api.id === local.id)
+            ),
+          ];
+  
+          setAllProducts(merged);
+        } catch (error) {
+          console.error("Failed to fetch products", error);
+        }
+      }
+  
+      fetchData();
+    }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -43,10 +75,14 @@ export default function ResinFramePage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
+<<<<<<< Updated upstream
   const categories = [...new Set(resinFrames.map((item) => item.category))];
+=======
+  const categories = [...new Set(allProducts.map((i) => i.category))];
+>>>>>>> Stashed changes
 
   const filteredFrames = useMemo(() => {
-    return resinFrames.filter((item) => {
+    return allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 

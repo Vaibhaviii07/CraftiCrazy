@@ -1,37 +1,66 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
+=======
+import { useState, useMemo, useEffect } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
 import { resinClocks, ResinClock } from "../../Data/ResinWallClockdata";
 import { Link } from "react-router-dom";
 import { useCart } from "../../AuthContext/CartContext";
 import { useAuth } from "../../AuthContext/AuthContext";
+import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
-
 export default function ResinClockPage() {
+  const [products, setProducts] = useState<ResinClock[]>(resinClocks); // start with local data
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
 
   const { addToCart } = useCart();
-  const {isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  // Convert ResinClock → CartItem before adding
+  // Fetch API products and merge with local data
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/products?category=ResinClock");
+        const apiData: ResinClock[] = (res.data.products || []).map((p: any) => ({
+          ...p,
+          id: p._id ?? String(Math.random().toString(36).slice(2)), // normalize id
+        }));
+
+        // Merge API data at the start + keep local data (avoid duplicates by id)
+        const merged = [
+          ...apiData,
+          ...resinClocks.filter((local) => !apiData.some((api) => api.id === local.id)),
+        ];
+
+        setProducts(merged);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load new products. Showing local products.");
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const handleAddToCart = (item: ResinClock) => {
-    const token = localStorage.getItem("token");
-    if (!token && !isAuthenticated) {
+    if (!isAuthenticated) {
+      toast.warning("Please login first");
       return;
     }
 
-    const cartItem = {
+    addToCart({
       id: item.id,
       name: item.name,
       price: item.price,
       image: item.image,
       quantity: 1,
-    };
-
-    addToCart(cartItem);
+    });
+    toast.success(`${item.name} added to cart`);
   };
 useEffect(() => {
   // Scroll to top after 100ms delay
@@ -49,13 +78,11 @@ useEffect(() => {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinClocks.map((item) => item.category))];
+  const categories = [...new Set(products.map((item) => item.category))];
 
-  // Filter items
-  const filteredItems = resinClocks.filter((item: ResinClock) => {
+  const filteredItems = products.filter((item) => {
     const categoryMatch =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(item.category);
+      selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
     let highlightMatch = true;
     switch (highlight) {
@@ -72,7 +99,6 @@ useEffect(() => {
     return categoryMatch && highlightMatch;
   });
 
-  // Sort items
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
     switch (sortOption) {
@@ -83,7 +109,7 @@ useEffect(() => {
         sorted.sort((a, b) => Number(b.price) - Number(a.price));
         break;
       case "Rating":
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       default:
         break;

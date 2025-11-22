@@ -1,10 +1,10 @@
 // src/Pages/HaldiPlatter/HaldiPlatterPage.tsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { haldiPlatters } from "../../Data/HaldiPlatterData";
+import { haldiPlatters,HaldiPlatter } from "../../Data/HaldiPlatterData";
 import { Link } from "react-router-dom";
 
-// ✅ LazyImage Component
+//  LazyImage Component
 const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -45,6 +45,46 @@ export default function HaldiPlatterPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<HaldiPlatter[]>(haldiPlatters);
+
+  
+   // Fetch API and merge with local data
+   useEffect(() => {
+     async function fetchData() {
+       try {
+         const url = `http://localhost:8000/api/products?category=${encodeURIComponent(
+           "haldi platter"
+         )}`;
+ 
+         const res = await fetch(url);
+         const apiResponse = await res.json();
+         console.log(apiResponse);
+ 
+         const apiData: HaldiPlatter[] = apiResponse.map((item: any) => ({
+           ...item,
+           id: item._id,
+           image: item.imageUrl,
+           price: Number(item.price),
+           rating: Number(item.rating),
+           discount: Number(item.discount),
+         }));
+ 
+         const merged = [
+           ...apiData,
+           ...haldiPlatters.filter((local) => !apiData.some((api) => api.id === local.id)),
+         ];
+ 
+ 
+         console.log(`merged data ${merged}`);
+ 
+         setAllProducts(merged);
+       } catch (error) {
+         console.error("Failed to fetch products", error);
+       }
+     }
+ 
+     fetchData();
+   }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -52,12 +92,12 @@ export default function HaldiPlatterPage() {
     );
   };
 
-  const categories = [...new Set(haldiPlatters.map(i => i.category))];
+  const categories = [...new Set(allProducts.map(i => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
 
   // Filtered & Highlighted Platters
   const filteredPlatters = useMemo(() => {
-    return haldiPlatters.filter(item => {
+    return allProducts.filter(item => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 

@@ -1,14 +1,45 @@
 // src/Pages/ResinArt/ResinPhotoFramesPage.tsx
+<<<<<<< Updated upstream
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
+=======
+import { useState,useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
-import { resinFrames } from "../../Data/ResinFramedata";
+import { resinFrames,ResinFrame } from "../../Data/ResinFramedata";
 import { Link } from "react-router-dom";
 
 export default function ResinPhotoFramesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<ResinFrame[]>(resinFrames);
+
+   // Fetch API data and merge
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const res = await fetch("http://localhost:8000/api/products?category=resinFrames");
+          const apiData: ResinFrame[] = await res.json();
+          
+          // Merge: API data first, keep local data that API doesn't have
+          const merged = [
+            ...apiData,
+            ...resinFrames.filter(
+              (local) => !apiData.some((api) => api.id === local.id)
+            ),
+          ];
+  
+          setAllProducts(merged);
+        } catch (error) {
+          console.error("Failed to fetch products", error);
+        }
+      }
+  
+      fetchData();
+    }, []);
+  
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -25,11 +56,11 @@ useEffect(() => {
 }, []);
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinFrames.map((i) => i.category))];
+  const categories = [...new Set(allProducts.map((i) => i.category))];
 
   // Filtered frames
   const filteredFrames = useMemo(() => {
-    return resinFrames.filter((item) => {
+    return allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 ||
         selectedCategories.includes(item.category);

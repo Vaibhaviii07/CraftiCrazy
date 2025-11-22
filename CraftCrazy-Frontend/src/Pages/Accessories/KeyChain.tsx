@@ -1,7 +1,7 @@
 // src/Pages/Accessories/KeyChainPage.tsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { keyChains } from "../../Data/KeyChainData";
+import { keyChains,KeyChain } from "../../Data/KeyChainData";
 import { Link } from "react-router-dom";
 
 export default function KeyChainPage() {
@@ -9,6 +9,33 @@ export default function KeyChainPage() {
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
   const [loading, setLoading] = useState(true);
+  const [allProducts,setAllProducts]= useState<KeyChain[]>(keyChains);
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=keychains");
+            const apiData: KeyChain[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...keyChains.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000); // simulate loading
@@ -22,9 +49,9 @@ export default function KeyChainPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(keyChains.map((i) => i.category))];
+  const categories = [...new Set(allProducts.map((i) => i.category))];
 
-  const filteredKeyChains = keyChains.filter((item) => {
+  const filteredKeyChains = allProducts.filter((item) => {
     const categoryMatch =
       selectedCategories.length === 0 ||
       selectedCategories.includes(item.category);

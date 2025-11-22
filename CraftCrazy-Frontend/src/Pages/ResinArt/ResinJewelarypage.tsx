@@ -1,6 +1,12 @@
+<<<<<<< Updated upstream
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinJewelry, ResinJewelry } from "../../Data/ResinJewelryData";
+=======
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { originalResinJewelry, ResinJewelry } from "../../Data/ResinJewelryData";
+>>>>>>> Stashed changes
 import { Link } from "react-router-dom";
 
 // LazyImage for smooth fade-in
@@ -43,6 +49,31 @@ export default function ResinJewelryPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<ResinJewelry[]>(originalResinJewelry);
+
+  // Fetch API data and merge
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("http://localhost:8000/api/products?category=resinJewelry"); // replace with your API
+        const apiData: ResinJewelry[] = await res.json();
+
+        // Merge: API data first, then keep local data that API doesn't have
+        const merged = [
+          ...apiData,
+          ...originalResinJewelry.filter(
+            (local) => !apiData.some((api) => api.id === local.id)
+          ),
+        ];
+
+        setAllProducts(merged);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -51,10 +82,10 @@ export default function ResinJewelryPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinJewelry.map((i) => i.category))];
+  const categories = [...new Set(allProducts.map((i) => i.category))];
 
   const filteredItems = useMemo(() => {
-    return resinJewelry.filter((item) => {
+    return allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 
@@ -71,7 +102,7 @@ export default function ResinJewelryPage() {
       }
       return categoryMatch && highlightMatch;
     });
-  }, [selectedCategories, highlight]);
+  }, [selectedCategories, highlight, allProducts]);
 
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];

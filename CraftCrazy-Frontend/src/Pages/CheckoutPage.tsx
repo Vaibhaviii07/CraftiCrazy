@@ -282,14 +282,14 @@ const CheckoutPage: React.FC = () => {
                 className="border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
               />
             </div>
-
+            
             <input
               type="text"
               name="address"
               value={formData.address || ""}
               onChange={handleChange}
               required
-              placeholder="Address"
+              placeholder="Address" 
               className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#5b2232] outline-none"
             />
             <input

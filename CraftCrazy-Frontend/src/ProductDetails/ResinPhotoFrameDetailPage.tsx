@@ -193,11 +193,26 @@ export default function ResinFrameDetailPage() {
 
           {/* Structured Info */}
           <div className="mt-4 space-y-2 text-gray-700">
+<<<<<<< Updated upstream
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
             {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
             {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
+=======
+            {currentProduct.material && (
+              <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>
+            )}
+            {currentProduct.dimensions && (
+              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions} (Almost A4 size) we will provide you A4/A3 size once you order we will confirm from our side.😊</p>
+            )}
+            {currentProduct.weight && (
+              <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>
+            )}
+            {currentProduct.careInstructions && (
+              <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>
+            )}
+>>>>>>> Stashed changes
           </div>
 
           {/* Tags / Stock / Warranty */}

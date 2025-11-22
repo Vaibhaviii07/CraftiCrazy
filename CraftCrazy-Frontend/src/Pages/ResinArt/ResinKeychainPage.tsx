@@ -1,5 +1,9 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
+=======
+import { useState,useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
 import { resinKeychains, ResinKeychain } from "../../Data/ResinKeychainData";
 import { Link } from "react-router-dom";
@@ -8,6 +12,33 @@ export default function ResinKeychainPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts, setAllProducts] = useState<ResinKeychain[]>(resinKeychains);
+
+    // Fetch API data and merge
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const res = await fetch("http://localhost:8000/api/products?category=resin");
+          const apiData: ResinKeychain[] = await res.json();
+          
+          // Merge: API data first, keep local data that API doesn't have
+          const merged = [
+            ...apiData,
+            ...resinKeychains.filter(
+              (local) => !apiData.some((api) => api.id === local.id)
+            ),
+          ];
+  
+          setAllProducts(merged);
+        } catch (error) {
+          console.error("Failed to fetch products", error);
+        }
+      }
+  
+      fetchData();
+    }, []);
+
+
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -16,6 +47,7 @@ export default function ResinKeychainPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
+<<<<<<< Updated upstream
   const categories = [...new Set(resinKeychains.map(item => item.category))];
 useEffect(() => {
   // Scroll to top after 100ms delay
@@ -25,6 +57,13 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, []);
+=======
+  const categories = [...new Set(allProducts.map(item => item.category))];
+
+  const filteredItems = allProducts.filter((item: ResinKeychain) => {
+    const categoryMatch =
+      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+>>>>>>> Stashed changes
 
   // Filtered Items
   const filteredItems = useMemo(() => {

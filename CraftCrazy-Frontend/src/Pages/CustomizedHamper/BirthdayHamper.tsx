@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { birthdayHampers, Variant } from "../../Data/BirthdayHampersdata";
+import { birthdayHampers,BirthdayHamper, Variant } from "../../Data/BirthdayHampersdata";
 import { Link } from "react-router-dom";
 
 const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
@@ -35,6 +35,33 @@ export default function BirthdayHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("Default sorting");
   const [highlight, setHighlight] = useState("All");
+  const [allProducts,setAllProducts] = useState<BirthdayHamper[]>(birthdayHampers);
+
+  
+     // Fetch API data and merge
+      useEffect(() => {
+        async function fetchData() {
+          try {
+            const res = await fetch("http://localhost:8000/api/products?category=birthdayHampers");
+            const apiData: BirthdayHamper[] = await res.json();
+            
+            // Merge: API data first, keep local data that API doesn't have
+            const merged = [
+              ...apiData,
+              ...birthdayHampers.filter(
+                (local) => !apiData.some((api) => api.id === local.id)
+              ),
+            ];
+    
+            setAllProducts(merged);
+          } catch (error) {
+            console.error("Failed to fetch products", error);
+          }
+        }
+    
+        fetchData();
+      }, []);
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -42,11 +69,11 @@ export default function BirthdayHamperPage() {
     );
   };
 
-  const categories = [...new Set(birthdayHampers.map((i) => i.category))];
+  const categories = [...new Set(allProducts.map((i) => i.category))];
   const highlightOptions = ["All", "Best Seller", "Discounted"];
 
   const filteredHampers = useMemo(() => {
-    return birthdayHampers.filter((item) => {
+    return allProducts.filter((item) => {
       const categoryMatch =
         selectedCategories.length === 0 || selectedCategories.includes(item.category);
 

@@ -185,10 +185,33 @@ export default function WoodenFrameDetailPage() {
             {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
+<<<<<<< Updated upstream
            {/* Description */}
           {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
           {/* Info Tags */}
+=======
+          {/* Description */}
+          {currentProduct.description && (
+            <p className="text-gray-600 leading-relaxed">{currentProduct.description}</p>
+          )}
+           {/* Additional details */}
+          <div className="mt-4 space-y-2 text-gray-700">
+            {currentProduct.material && (
+              <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>
+            )}
+            {currentProduct.dimensions && (
+              <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}(Almost A4 size)  we will provide you A4/A3 size once you order we will confirm from our side.😊</p>
+            )}
+            {currentProduct.weight && (
+              <p><span className="font-semibold">Weight:</span>{currentProduct.weight}</p>
+            )}
+            {currentProduct.careInstructions && (
+              <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>
+            )}
+          </div>
+          {/* Info Tags / Stock / Brand / Seller / Warranty */}
+>>>>>>> Stashed changes
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentProduct.tags && currentProduct.tags.map((tag, idx) => (
               <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>

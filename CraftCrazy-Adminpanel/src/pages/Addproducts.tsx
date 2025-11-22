@@ -33,6 +33,21 @@ interface ProductForm {
   image: File | null;
 }
 
+const categories = [
+  "resin",
+  "hamper",
+  "home decor",
+  "cake topper",
+  "birthday special",
+  "engagement tray",
+  "anniversary special",
+  "rakhi hits",
+  "haldi platter",
+  "valentine special",
+  "christmas special",
+  "holi hamper",
+];
+
 const AddProducts = () => {
   const [form, setForm] = useState<ProductForm>({
     name: "",
@@ -112,6 +127,11 @@ const AddProducts = () => {
       return;
     }
 
+    if (!form.name || !form.price || !form.category) {
+      toast.error("Please fill required fields (*)");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -131,9 +151,12 @@ const AddProducts = () => {
       );
 
       if (res.status === 201) {
+<<<<<<< Updated upstream
         toast.success("Product created successfully!");
         setSuccessMsg(true);
 
+=======
+>>>>>>> Stashed changes
         setForm({
           name: "",
           description: "",
@@ -163,6 +186,7 @@ const AddProducts = () => {
           image: null,
         });
         setPreview(null);
+        toast.success("Product Created Successfully!");
       }
 
     } catch (error) {
@@ -174,6 +198,7 @@ const AddProducts = () => {
   };
 
   return (
+<<<<<<< Updated upstream
     <section className="min-h-screen bg-[#FFFDF9] p-6 sm:p-10">
 
       <motion.div
@@ -253,6 +278,179 @@ const AddProducts = () => {
             className={`col-span-2 py-3 mt-4 bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl ${
               submitting ? "opacity-60 cursor-not-allowed" : ""
             }`}
+=======
+    <div className="min-h-screen bg-gray-100 p-10">
+      <div className="max-w-7xl mx-auto bg-white shadow-xl p-10 rounded-3xl border">
+        <h1 className="text-gray-800 text-4xl font-extrabold mb-10 text-center">
+          Add New Product
+        </h1>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-2 gap-10">
+            {/* LEFT */}
+            <div className="space-y-8">
+              <div className="bg-white p-6 rounded-2xl shadow-md border">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  General Information
+                </h2>
+
+                {/* CATEGORY DROPDOWN */}
+                <label className="block text-gray-700 font-medium mb-2">
+                  Category *
+                </label>
+
+                <select
+                  name="category"
+                  value={form.category}
+                  required
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      category: e.target.value.toLowerCase(),
+                    }))
+                  }
+                  className="w-full p-3 bg-gray-50 border border-blue-400 rounded-xl mb-4"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat.toLowerCase()}>
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </option>
+                  ))}
+                </select>
+
+                {[
+                  "name",
+                  "description",
+                  "price",
+                  "brand",
+                  "tags",
+                  "highlight",
+                  "rating",
+                  "reviews",
+                  "discount"
+                ].map((field) => (
+                  <input
+                    key={field}
+                    name={field}
+                    type="text"
+                    value={form[field as keyof ProductForm] as string}
+                    onChange={handleChange}
+                    placeholder={field.replace(/([A-Z])/g, " $1")}
+                    className="w-full mb-3 p-3 bg-gray-50 border rounded-xl"
+                  />
+                ))}
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl shadow-md border">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  Inventory
+                </h2>
+
+                <div className="flex items-center gap-3 mb-3">
+                  <input
+                    type="checkbox"
+                    checked={form.inStock}
+                    name="inStock"
+                    onChange={handleChange}
+                  />
+                  <label className="text-gray-700">In Stock</label>
+                </div>
+
+                {["seller", "maxOrderQuantity", "weight", "dimensions"].map(
+                  (field) => (
+                    <input
+                      key={field}
+                      name={field}
+                      type="text"
+                      value={form[field as keyof ProductForm] as string}
+                      onChange={handleChange}
+                      placeholder={field.replace(/([A-Z])/g, " $1")}
+                      className="w-full mb-3 p-3 bg-gray-50 border rounded-xl"
+                    />
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT */}
+            <div className="space-y-8">
+              <div className="bg-white p-6 rounded-2xl shadow-md border">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  Delivery Details
+                </h2>
+
+                {[
+                  "deliveryType",
+                  "deliveryAvailability",
+                  "deliveryEstimated",
+                ].map((field) => (
+                  <input
+                    key={field}
+                    name={field}
+                    type="text"
+                    value={form[field as keyof ProductForm] as string}
+                    onChange={handleChange}
+                    placeholder={field.replace(/([A-Z])/g, " $1")}
+                    className="w-full mb-3 p-3 bg-gray-50 border rounded-xl"
+                  />
+                ))}
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl shadow-md border">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  Customization
+                </h2>
+
+                <div className="flex items-center gap-3 mb-3">
+                  <input
+                    type="checkbox"
+                    name="customizationAvailable"
+                    checked={form.customizationAvailable}
+                    onChange={handleChange}
+                  />
+                  <label className="text-gray-700">
+                    Customization Available
+                  </label>
+                </div>
+
+                <input
+                  name="customizationOptions"
+                  type="text"
+                  value={form.customizationOptions}
+                  onChange={handleChange}
+                  placeholder="Customization Options"
+                  className="w-full mb-3 p-3 bg-gray-50 border rounded-xl"
+                />
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl shadow-md border">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  Product Image *
+                </h2>
+
+                <input
+                  type="file"
+                  name="image"
+                  onChange={handleChange}
+                  className="w-full mb-4 p-3 bg-gray-50 border rounded-xl"
+                  required
+                />
+
+                {preview && (
+                  <div className="w-full h-64 rounded-2xl overflow-hidden border shadow-md">
+                    <img src={preview} className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="mt-10 w-full py-4 text-xl font-semibold rounded-xl 
+            bg-blue-600 text-white shadow-lg cursor-pointer hover:bg-blue-700 transition"
+>>>>>>> Stashed changes
           >
             {submitting ? "Uploading..." : "Add Product"}
           </motion.button>

@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect, useMemo, useRef } from "react";
+=======
+import { useState,useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
 import { resinNameplates, ResinNameplate } from "../../Data/ResinNameplateData";
 import { Link } from "react-router-dom";
@@ -7,6 +11,32 @@ export default function ResinNameplatePage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [allProducts,setAllProducts] = useState<ResinNameplate[]>(resinNameplates);
+
+   // Fetch API data and merge
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const res = await fetch("http://localhost:8000/api/products?category=resinCoasterSet");
+          const apiData: ResinNameplate[] = await res.json();
+          
+          // Merge: API data first, keep local data that API doesn't have
+          const merged = [
+            ...apiData,
+            ...resinNameplates.filter(
+              (local) => !apiData.some((api) => api.id === local.id)
+            ),
+          ];
+  
+          setAllProducts(merged);
+        } catch (error) {
+          console.error("Failed to fetch products", error);
+        }
+      }
+  
+      fetchData();
+    }, []);
+  
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -15,6 +45,7 @@ export default function ResinNameplatePage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
+<<<<<<< Updated upstream
   const categories = [...new Set(resinNameplates.map(item => item.category))];
 useEffect(() => {
   // Scroll to top after 100ms delay
@@ -24,6 +55,13 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, []);
+=======
+  const categories = [...new Set(allProducts.map(item => item.category))];
+
+  const filteredNameplates = allProducts.filter((item: ResinNameplate) => {
+    const categoryMatch =
+      selectedCategories.length === 0 || selectedCategories.includes(item.category);
+>>>>>>> Stashed changes
 
   // Filtered Items
   const filteredNameplates = useMemo(() => {

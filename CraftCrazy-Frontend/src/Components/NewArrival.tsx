@@ -51,6 +51,7 @@ const NewArrivals: React.FC = () => {
       console.log("API HIT: /api/products/newarrivals");
       try {
         const res = await axios.get("http://localhost:8000/api/products/newarrivals");
+<<<<<<< Updated upstream
         const apiData = Array.isArray(res.data?.data?.allproducts)
           ? res.data.data.allproducts
           : [];
@@ -58,6 +59,60 @@ const NewArrivals: React.FC = () => {
         const localData: Product[] = newArrivalsData.freshPicks || [];
 
         const merged: Product[] = [
+=======
+        console.log("API response object:", res);
+
+        // Try multiple possible paths (defensive)
+        const maybe =
+          res.data?.allProducts ??
+          res.data?.allProudcts ??
+          res.data?.data?.allProducts ??
+          res.data?.data?.allProudcts ??
+          res.data ??
+          [];
+
+        const apiRaw: any[] = Array.isArray(maybe) ? maybe : [];
+
+        // Normalize API items
+        const apiData: Product[] = apiRaw.map((p: any) => ({
+          ...p,
+          _id: p._id ?? p.id ?? undefined,
+          id: String(p._id ?? p.id ?? Math.random().toString(36).slice(2)), // fallback id
+          name: String(p.name ?? p.title ?? p.heading ?? "Untitled"),
+          description: p.description ?? p.desc ?? "",
+          price: Number(p.price ?? p.amount ?? 0) || 0,
+          oldPrice: p.oldPrice ? Number(p.oldPrice) : undefined,
+          discount: p.discount ? Number(p.discount) : undefined,
+          type: p.category ?? p.type ?? undefined,
+          image: p.imageUrl ?? p.image ?? p.img ?? "",
+          rating: p.rating ? Number(p.rating) : undefined,
+          popularity: p.popularity ? Number(p.popularity) : undefined,
+          date: p.date ?? p.createdAt ?? undefined,
+        }));
+
+        // Normalize local data (ensure strings for id and numbers for price)
+        const localRaw: any[] = (newArrivalsData as any)?.freshPicks ?? [];
+        const localData: Product[] = Array.isArray(localRaw)
+          ? localRaw.map((p: any) => ({
+            ...p,
+            id: String(p.id ?? p._id ?? Math.random().toString(36).slice(2)),
+            _id: p._id ?? undefined,
+            name: String(p.name ?? p.title ?? "Untitled"),
+            description: p.description ?? "",
+            price: Number(p.price ?? 0) || 0,
+            oldPrice: p.oldPrice ? Number(p.oldPrice) : undefined,
+            discount: p.discount ? Number(p.discount) : undefined,
+            type: p.category ?? p.type ?? undefined,
+            image: p.imageUrl ?? p.image ?? "",
+            rating: p.rating ? Number(p.rating) : undefined,
+            popularity: p.popularity ? Number(p.popularity) : undefined,
+            date: p.date ?? undefined,
+          }))
+          : [];
+
+        // Merge without duplicates (by id)
+        let merged: Product[] = [
+>>>>>>> Stashed changes
           ...localData,
           ...apiData
             .filter((apiItem: any) => !localData.some((localItem) => localItem.id === apiItem._id))
@@ -78,10 +133,34 @@ const NewArrivals: React.FC = () => {
             })),
         ];
 
+        merged.sort((a, b) => {
+          const dateA = a.date ? new Date(a.date).getTime() : 0;
+          const dateB = b.date ? new Date(b.date).getTime() : 0;
+
+          return dateB - dateA; // newest first
+        });
+
         setProducts(merged);
       } catch (err) {
+<<<<<<< Updated upstream
         console.error("API ERROR:", err);
         setProducts(newArrivalsData.freshPicks || []);
+=======
+        console.error("Error fetching new arrivals:", err);
+        // fallback to local data (normalized)
+        const localRaw: any[] = (newArrivalsData as any)?.freshPicks ?? [];
+        const localData: Product[] = Array.isArray(localRaw)
+          ? localRaw.map((p: any) => ({
+            ...p,
+            id: String(p.id ?? p._id ?? Math.random().toString(36).slice(2)),
+            name: String(p.name ?? p.title ?? "Untitled"),
+            description: p.description ?? "",
+            price: Number(p.price ?? 0) || 0,
+            image: p.imageUrl ?? p.image ?? "",
+          }))
+          : [];
+        setProducts(localData);
+>>>>>>> Stashed changes
       } finally {
         setLoadingProducts(false);
       }
@@ -316,6 +395,7 @@ const NewArrivals: React.FC = () => {
           {/* PRODUCT CARDS */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6 ml-5 mb-8">
             <AnimatePresence>
+<<<<<<< Updated upstream
               {loaded && !loadingProducts
                 ? sortedProducts.map((item, index) => (
                     <motion.div
@@ -380,6 +460,36 @@ const NewArrivals: React.FC = () => {
                         </div>
                       </div>
                     ))}
+=======
+              {!loadingProducts && loaded
+                ? sortedProducts.map((item, idx) => (
+                  <motion.div key={item.id} className="bg-white rounded shadow overflow-hidden" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+                    <div className="aspect-[1.3/1] bg-gray-100">
+                      <img src={item.image || "/placeholder.png"} alt={item.name} className={`w-full h-full object-cover ${imagesLoaded[idx] ? "opacity-100" : "opacity-0"}`} onLoad={() => handleImageLoad(idx)} />
+                    </div>
+                    <div className="p-3 text-center">
+                      <h3 className="font-semibold text-sm truncate">{item.name}</h3>
+                      <p className="text-xs text-gray-500 line-clamp-2">{item.description}</p>
+                      <div className="mt-2">
+                        <span className="font-bold text-[#C45A36]">₹{item.price}</span>
+                      </div>
+                      <button className={`mt-3 px-4 py-2 rounded-full text-sm ${cartQuantities[item.id] ? "bg-gray-300" : "bg-[#C45A36] text-white"}`} onClick={() => handleAddToCart(item)} disabled={!!cartQuantities[item.id]}>
+                        {cartQuantities[item.id] ? "Added" : "Add"}
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+                : // skeletons
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-white rounded shadow p-4">
+                    <div className="w-full aspect-[1.3/1] bg-gray-200 animate-pulse" />
+                    <div className="mt-3 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
+                    </div>
+                  </div>
+                ))}
+>>>>>>> Stashed changes
             </AnimatePresence>
           </div>
         </div>
