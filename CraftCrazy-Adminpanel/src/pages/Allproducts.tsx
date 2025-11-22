@@ -14,45 +14,26 @@ import {
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-/**
- * Product interface — use your exact fields
- */
 interface Product {
   _id?: string;
   name: string;
   description?: string;
-  price: string; // using string to match your schema; adapt if number
+  price: string;
   rating?: string;
   reviews?: string;
   discount?: string;
-  highlight?: string;
   category: string;
   tags?: string;
   brand?: string;
-  seller?: string;
   inStock: boolean;
-  warranty?: string;
-  returnPolicy?: string;
-  image: string; // backend should provide a URL
-  occasion?: string;
-  material?: string;
-  dimensions?: string;
-  weight?: string;
-  careInstructions?: string;
-  maxOrderQuantity?: string;
-  deliveryType?: string;
-  deliveryAvailability?: string;
-  deliveryEstimated?: string;
+  imageUrl: string;
   customizationAvailable: boolean;
-  customizationOptions?: string;
 }
 
-/** UI helpers */
 const formatPrice = (p?: string) =>
   p ? `₹${p.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : "—";
 
-const fallbackImage = "/images/default-product.png"; // put a default image in public/images
-
+const fallbackImage = "/images/default-product.png";
 const PAGE_SIZE = 12;
 
 const AllProducts: React.FC = () => {
@@ -64,29 +45,34 @@ const AllProducts: React.FC = () => {
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [brandFilter, setBrandFilter] = useState<string>("All");
-  const [stockFilter, setStockFilter] = useState<string>("All"); // All / InStock / OutOfStock
-  const [sortBy, setSortBy] = useState<string>("newest"); // newest, price-asc, price-desc, rating
+  const [stockFilter, setStockFilter] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<string>("newest");
   const [page, setPage] = useState<number>(1);
 
-//   // Fetch products from backend
-//   useEffect(() => {
-//     const fetchProducts = async () => {
-//       setLoading(true);
-//       setError(null);
-//       try {
-//         const res = await axios.get<Product[]>("/api/products"); // ensure base URL or proxy is configured
-//         setProducts(res.data);
-//       } catch (err: any) {
-//         console.error(err);
-//         setError("Failed to load products.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchProducts();
-//   }, []);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await axios.get("http://localhost:8000/api/products/newarrivals");
+        console.log("API response:", res.data);
 
-  // derive filter lists
+        // ⚠ Correct key according to your backend
+        const productsData = res.data?.allProudcts || [];
+        console.log("Products extracted:", productsData);
+
+        setProducts(productsData);
+      } catch (err: any) {
+        console.error(err);
+        setError("Failed to load products.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Unique categories and brands for filters
   const categories = useMemo(() => {
     const set = new Set<string>(products.map((p) => p.category || "Uncategorized"));
     return ["All", ...Array.from(set)];
@@ -97,11 +83,10 @@ const AllProducts: React.FC = () => {
     return ["All", ...Array.from(set)];
   }, [products]);
 
-  // Filter + search + sort
+  // Apply search, filters, and sorting
   const processed = useMemo(() => {
     let list = products.slice();
 
-    // search
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter(
@@ -112,42 +97,27 @@ const AllProducts: React.FC = () => {
       );
     }
 
-    // category
-    if (categoryFilter !== "All") {
-      list = list.filter((p) => (p.category || "") === categoryFilter);
-    }
-    // brand
-    if (brandFilter !== "All") {
-      list = list.filter((p) => (p.brand || "") === brandFilter);
-    }
-    // stock
+    if (categoryFilter !== "All") list = list.filter((p) => p.category === categoryFilter);
+    if (brandFilter !== "All") list = list.filter((p) => p.brand === brandFilter);
     if (stockFilter === "InStock") list = list.filter((p) => p.inStock === true);
     if (stockFilter === "OutOfStock") list = list.filter((p) => p.inStock === false);
 
-    // sort
-    if (sortBy === "price-asc") {
-      list.sort((a, b) => (parseFloat(a.price || "0") - parseFloat(b.price || "0")));
-    } else if (sortBy === "price-desc") {
-      list.sort((a, b) => (parseFloat(b.price || "0") - parseFloat(a.price || "0")));
-    } else if (sortBy === "rating") {
-      list.sort((a, b) => (parseFloat(b.rating || "0") - parseFloat(a.rating || "0")));
-    } else {
-      // newest - keep API order (or reverse if needed)
-    }
+    if (sortBy === "price-asc") list.sort((a, b) => parseFloat(a.price || "0") - parseFloat(b.price || "0"));
+    else if (sortBy === "price-desc") list.sort((a, b) => parseFloat(b.price || "0") - parseFloat(a.price || "0"));
+    else if (sortBy === "rating") list.sort((a, b) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"));
 
     return list;
   }, [products, query, categoryFilter, brandFilter, stockFilter, sortBy]);
 
-  // pagination
   const totalPages = Math.max(1, Math.ceil(processed.length / PAGE_SIZE));
   const visible = processed.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // actions
+  //you have to work on delete API...
   const handleDelete = async (id?: string) => {
     if (!id) return;
     if (!confirm("Delete this product? This action cannot be undone.")) return;
     try {
-      await axios.delete(`/api/products/${id}`);
+      await axios.delete(`http://localhost:8000/api/products/${id}`);
       setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       alert("Failed to delete product.");
@@ -160,9 +130,7 @@ const AllProducts: React.FC = () => {
       {/* Top bar */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div>
-         <h1 className="text-2xl font-semibold text-[#2a0a4b] mb-6">
-          🛍️ Product List
-        </h1>
+          <h1 className="text-2xl font-semibold text-[#2a0a4b] mb-2">🛍️ Product List</h1>
           <p className="text-sm text-gray-500">Manage all store products — edit, delete or view details.</p>
         </div>
 
@@ -258,17 +226,16 @@ const AllProducts: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid / List — Ynex product card grid */}
+      {/* Grid / List */}
       {loading ? (
         <div className="bg-white rounded-xl p-8 text-center">Loading products…</div>
       ) : error ? (
         <div className="bg-white rounded-xl p-8 text-center text-red-500">{error}</div>
+      ) : visible.length === 0 ? (
+        <div className="bg-white rounded-xl p-8 text-center text-gray-500">No products found.</div>
       ) : (
         <>
-          <motion.div
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {visible.map((p, i) => (
               <motion.div
                 key={p._id ?? i}
@@ -279,12 +246,10 @@ const AllProducts: React.FC = () => {
               >
                 <div className="relative">
                   <img
-                    src={p.image || fallbackImage}
+                    src={p.imageUrl || fallbackImage}
                     alt={p.name}
                     className="w-full h-44 object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = fallbackImage;
-                    }}
+                    onError={(e) => ((e.target as HTMLImageElement).src = fallbackImage)}
                   />
                   {p.discount && (
                     <span className="absolute left-3 top-3 bg-red-500 text-white text-xs px-2 py-1 rounded">
@@ -314,19 +279,25 @@ const AllProducts: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${p.inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                      <div
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${p.inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                          }`}
+                      >
                         {p.inStock ? "In Stock" : "Out of Stock"}
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between gap-2 mt-4">
-                    <Link to={`/products/view/${p._id}`} className="text-sm text-gray-600 hover:text-gray-800">
+                    <Link to={`/products/${p._id}`} className="text-sm text-gray-600 hover:text-gray-800">
                       View Details
                     </Link>
 
                     <div className="flex gap-2">
-                      <Link to={`/products/edit/${p._id}`} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100">
+                      <Link
+                        to={`/products/edit/${p._id}`}
+                        className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100"
+                      >
                         <Edit size={16} />
                       </Link>
                       <button
@@ -366,7 +337,8 @@ const AllProducts: React.FC = () => {
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`px-3 py-1 rounded-md ${page === pageNum ? "bg-[#2a0a4b] text-white" : "border"}`}
+                      className={`px-3 py-1 rounded-md ${page === pageNum ? "bg-[#2a0a4b] text-white" : "border"
+                        }`}
                     >
                       {pageNum}
                     </button>

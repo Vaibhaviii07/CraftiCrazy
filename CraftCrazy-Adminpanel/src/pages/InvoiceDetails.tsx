@@ -67,7 +67,7 @@ const handlePrint = useReactToPrint({
         {/* Header */}
         <div className="flex justify-between border-b pb-4">
           <div>
-            <h1 className="text-3xl font-bold text-[#2a0a4b]">CraftCrazy</h1>
+            <h1 className="text-3xl font-bold text-[#2a0a4b]">CraftiCrazy</h1>
             <p className="text-sm text-gray-600 mt-1">
               Chandrapur, Maharashtra, India <br />
               Phone: +91 XXXXXXXXXX | Email: craftCrazy@gmail.com

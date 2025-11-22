@@ -202,9 +202,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/addproducts" className={menuItemClass("/addproducts")}>
                         Add Product
                       </Link>
-                      <Link to="/product/details" className={menuItemClass("/products/detail")}>
-                        Product Detail
-                      </Link>
                       <Link to="/catogaries" className={menuItemClass("/catogaries")}>
                         Categories
                       </Link>
