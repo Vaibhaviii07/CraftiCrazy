@@ -51,9 +51,9 @@ export default function GiftCollections() {
     {
       id: 3,
       title: "Limited Offer",
-      subtitle: "Gift Hampers for All Festivals",
-      image: "DiwaliHamper.jpeg",
-      link: "/diwali",
+      subtitle: "Gift Hampers for Christmas",
+      image: "ChristmasHamper1-2.jpg",
+      link: "/christmas",
     },
   ];
 

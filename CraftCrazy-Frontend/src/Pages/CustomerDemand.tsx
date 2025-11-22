@@ -22,12 +22,12 @@ const howItWorksSteps = [
 ];
 
 const reels = [
-  { id: 1, video: "holder.mp4" },
+  { id: 1, video: "herhamper.mp4" },
   { id: 2, video: "blood.mp4" },
-  { id: 3, video: "mug.mp4" },
+  { id: 3, video: "diya.mp4" },
   { id: 4, video: "reel1.mp4" },
-  { id: 5, video: "reel2.mp4" },
-  { id: 6, video: "reel3.mp4" },
+  { id: 5, video: "flower.mp4" },
+  { id: 6, video: "lastone.mp4" },
 ];
 
 const CustomerDemandPremium = () => {
