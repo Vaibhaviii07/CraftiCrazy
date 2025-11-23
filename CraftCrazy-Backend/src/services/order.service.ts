@@ -64,9 +64,27 @@ export const getAllProductsFromOrders = async () => {
 };
 
 export const getAllCustomerNamesService = async () => {
-  const orders = await Order.find({}, "customer.name");
-  const uniqueCustomers = [...new Set(orders.map(o => o.customer.name))];
-  return uniqueCustomers;
+   const orders = await Order.find({}, "customer createdAt").sort({ createdAt: -1 });
+
+  // Map to customer objects
+  const customers = orders.map((o) => ({
+    _id: o._id.toString(),
+    name: o.customer.name,
+    email: o.customer.email,
+    phone: o.customer.contact,
+    address: `${o.customer.address}, ${o.customer.apartment || ""} ${o.customer.city}, ${o.customer.state} - ${o.customer.pincode}`.trim(),
+    createdAt: o.createdAt ? o.createdAt.toISOString() : new Date().toISOString(),
+  }));
+
+  // Remove duplicate customers based on email (or name)
+  const uniqueCustomersMap = new Map<string, typeof customers[0]>();
+  customers.forEach((c) => {
+    if (!uniqueCustomersMap.has(c.email)) {
+      uniqueCustomersMap.set(c.email, c);
+    }
+  });
+
+  return Array.from(uniqueCustomersMap.values());
 };
 
 export const getOrdersByOrderStatusService = async (status: string) => {

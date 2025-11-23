@@ -13,7 +13,7 @@ export const createProductController = async (req: Request, res: Response, next:
     const data = req.body;
     console.log(data);
     let imageUrl: string | null = req.body?.imageUrl || null;
-    
+
     // If no file and no URL
     if (!req.file && !imageUrl) {
       return res.status(400).json({
@@ -48,16 +48,16 @@ export const createProductController = async (req: Request, res: Response, next:
   }
 };
 
-export const getAllProdutsController = async(req:Request,res:Response,next:NextFunction) => {
+export const getAllProdutsController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const allProudcts = await productService.getAllProductsService();
-    res.status(200).json({allProudcts});
+    res.status(200).json({ allProudcts });
   } catch (error) {
     next(error);
   }
 }
 
-// ✅ Get Product By ID
+// Get Product By ID
 export const getProductByIdController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const product = await productService.getProductByIdService(req.params.id);
@@ -68,7 +68,7 @@ export const getProductByIdController = async (req: Request, res: Response, next
   }
 };
 
-// ✅ Update Product
+//  Update Product
 export const updateProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     let updateData = req.body;
@@ -86,7 +86,7 @@ export const updateProductController = async (req: Request, res: Response, next:
   }
 };
 
-// ✅ Delete Product
+// Delete Product
 export const deleteProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await productService.deleteProductService(req.params.id);
