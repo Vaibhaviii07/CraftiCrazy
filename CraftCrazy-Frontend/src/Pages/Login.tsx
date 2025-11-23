@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, LogIn } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { useAuth } from "../AuthContext/AuthContext";
 
 interface LoginResponse {
@@ -45,22 +44,18 @@ const Login = () => {
       if (res.ok && data.token) {
         login(data.user, data.token);
 
-        toast.success(`Welcome Back, ${data.user?.name}!`, {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        toast.success(`Welcome Back, ${data.user?.name}!`);
 
-        setTimeout(() => navigate("/"), 1500);
+        // wait for toast to close
+        setTimeout(() => navigate("/"), 2200);
+
         return;
       }
 
       // FAILURE
-      toast.error(data.message || "Invalid Credentials", {
-        position: "top-right",
-        autoClose: 2000,
-      });
-
+      toast.error(data.message || "Invalid Credentials");
       setError(data.message || "Invalid Credentials");
+
     } catch (err) {
       console.error(err);
       setError("Server error. Please try again later.");
@@ -71,8 +66,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6">
-      <ToastContainer />
-
       <div className="w-full max-w-sm bg-white shadow-lg rounded-2xl p-6 sm:p-8">
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-5">
@@ -161,7 +154,6 @@ const Login = () => {
           <div className="flex-1 h-px bg-gray-200"></div>
         </div>
 
-        {/* Signup Link */}
         <p className="text-center text-gray-600 mt-4 text-xs sm:text-sm">
           Don’t have an account?{" "}
           <Link

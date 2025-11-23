@@ -181,9 +181,14 @@ const Navbar: React.FC<NavbarProps> = ({ setCartOpen }) => {
         <div className="hidden md:flex items-center gap-6">
           {userData ? (
             <div className="relative">
-              <button onClick={() => setUserDropdown(!userDropdown)} className="hover:scale-110 cursor-pointer transition-transform">
-                <User size={22} className="text-[#7f5539]" />
-              </button>
+              <button
+              onClick={() => setUserDropdown(!userDropdown)}
+              className="hover:scale-110 cursor-pointer transition-transform"
+              tabIndex={-1}
+            >
+              <User size={22} className="text-[#7f5539]" />
+            </button>
+
               {userDropdown && (
                 <div className="absolute right-0 mt-3 bg-white shadow-lg rounded-lg w-56 border border-[#e6ccb2] z-50">
                   <div className="px-4 py-3 border-b">
