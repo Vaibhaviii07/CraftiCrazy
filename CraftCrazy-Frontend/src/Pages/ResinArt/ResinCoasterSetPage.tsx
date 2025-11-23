@@ -1,6 +1,5 @@
 // src/Pages/ResinArt/ResinCoasterSetPage.tsx
-import React, { useState, useEffect, useMemo, useRef } from "react";
-
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinCoasterSets } from "../../Data/ResinCoasterSetData";
 import { Link } from "react-router-dom";
@@ -18,19 +17,21 @@ export default function ResinCoasterSetPage() {
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinCoasterSets.map((i) => i.category))];
-useEffect(() => {
-  // Scroll to top after 100ms delay
-  const timer = setTimeout(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, 100);
 
-  return () => clearTimeout(timer);
-}, []);
+  // ===== Scroll to top after page load =====
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
+  // ===== Filtered items =====
   const filteredItems = useMemo(() => {
     return resinCoasterSets.filter((item) => {
       const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(item.category);
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.category);
 
       let highlightMatch = true;
       switch (highlight) {
@@ -47,6 +48,7 @@ useEffect(() => {
     });
   }, [selectedCategories, highlight]);
 
+  // ===== Sorted items =====
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
     switch (sortOption) {
@@ -65,6 +67,7 @@ useEffect(() => {
     return sorted;
   }, [filteredItems, sortOption]);
 
+  // ===== Lazy Image component (KEEPING FROM HEAD) =====
   const LazyImage = ({
     src,
     alt,
@@ -76,7 +79,11 @@ useEffect(() => {
   }) => {
     const [loaded, setLoaded] = useState(false);
     return (
-      <div className={`w-full h-full ${!loaded ? "bg-gray-200 animate-pulse" : ""}`}>
+      <div
+        className={`w-full h-full ${
+          !loaded ? "bg-gray-200 animate-pulse" : ""
+        }`}
+      >
         <motion.img
           src={src}
           alt={alt}
@@ -102,7 +109,8 @@ useEffect(() => {
           </span>
         </h2>
         <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
-          Beautifully handcrafted resin coaster sets bringing art, shine, and elegance to every table.
+          Beautifully handcrafted resin coaster sets bringing art, shine, and
+          elegance to every table.
         </p>
       </div>
 
@@ -110,8 +118,11 @@ useEffect(() => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+          {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Categories
+            </h3>
             <ul className="space-y-2">
               {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -122,7 +133,10 @@ useEffect(() => {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -130,14 +144,21 @@ useEffect(() => {
             </ul>
           </div>
 
+          {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Highlight
+            </h3>
             <ul className="space-y-2">
               {highlightOptions.map((opt) => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
+                  className={`text-sm cursor-pointer ${
+                    highlight === opt
+                      ? "text-[#b46029] font-semibold"
+                      : "text-gray-700"
+                  }`}
                 >
                   {opt}
                 </li>
@@ -150,7 +171,9 @@ useEffect(() => {
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
+            <p className="text-sm text-gray-600">
+              Showing {sortedItems.length} results
+            </p>
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -189,7 +212,11 @@ useEffect(() => {
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                          }}
                           className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {item.discount}% OFF
@@ -198,15 +225,24 @@ useEffect(() => {
                     </div>
 
                     <div className="mt-2 sm:mt-3 text-center">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                        {item.name}
+                      </p>
                       {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
                       )}
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">₹{item.price}</span>
+                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
+                          ₹{item.price}
+                        </span>
                         {item.discount && (
                           <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
-                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                            ₹
+                            {Math.round(
+                              item.price / (1 - item.discount / 100)
+                            )}
                           </span>
                         )}
                       </div>

@@ -208,49 +208,25 @@ export default function GlassFrameDetailPage() {
             )}
           </div>
 
-         {/* DESCRIPTION */}
+         {/* Description */}
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
+
+          {/* Structured Info */}
           <div className="space-y-3 text-gray-700">
-            {currentProduct.description && <p>{currentProduct.description}</p>}
-            {currentProduct.material && (
-              <p>
-                <span className="font-semibold">Material:</span> {currentProduct.material}
-              </p>
-            )}
-            {currentProduct.dimensions && (
-              <p>
-                <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
-              </p>
-            )}
-            {currentProduct.weight && (
-              <p>
-                <span className="font-semibold">Weight:</span> {currentProduct.weight}
-              </p>
-            )}
-            {currentProduct.careInstructions && (
-              <p>
-                <span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}
-              </p>
-            )}
+            {currentProduct.material && <p><span className="font-semibold text-gray-900">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold text-gray-900">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold text-gray-900">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold text-gray-900">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+            {currentProduct.delivery && <p><span className="font-semibold text-gray-900">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* TAGS / STOCK / WARRANTY */}
+          {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
-                {tag}
-              </span>
-            ))}
-
-            <span
-              className={`px-2 py-1 rounded ${
-                currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-              }`}
-            >
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
-            </span>
-
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{currentProduct.inStock ? "In Stock" : "Out of Stock"}</span>
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
           </div>
+
           {/* Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button

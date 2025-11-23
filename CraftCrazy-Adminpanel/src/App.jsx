@@ -55,7 +55,7 @@ function App() {
               <Route path="/orders/details" element={<OrderDetails />} />
               <Route path="/addproducts" element={<AddProduct />} />
               <Route path="/allproducts" element={<AllProducts />} />
-              <Route path="/product/details" element={<ProductDetail/>} />
+              <Route path="/products/:id" element={<ProductDetail/>} />
               <Route path="/catogaries" element={<CategoryList/>} />
               <Route path="/AllCustomer" element={<Customers />}/>
               <Route path="/review" element={<CustomerReviewsPage />}/>

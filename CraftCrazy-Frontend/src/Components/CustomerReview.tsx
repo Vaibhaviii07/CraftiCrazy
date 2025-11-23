@@ -16,7 +16,7 @@ export interface Review {
 interface CustomerReviewProps {
   productId: string;
 
-  // ⭐ Added for backend rating like Birthday & Bracelet
+  // ⭐ Added for backend ratings like Birthday/Bracelet system
   setBackendRating?: (rating: number) => void;
   setBackendReviewsCount?: (count: number) => void;
 }
@@ -24,18 +24,18 @@ interface CustomerReviewProps {
 const CustomerReview: React.FC<CustomerReviewProps> = ({
   productId,
   setBackendRating,
-  setBackendReviewsCount
+  setBackendReviewsCount,
 }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // ⭐ Load reviews from localStorage
+  // ⭐ Load reviews from localStorage + update backend rating
   const loadReviews = () => {
     const stored = localStorage.getItem(`reviews_${productId}`);
     const parsed = stored ? JSON.parse(stored) : [];
     setReviews(parsed);
 
-    // ⭐ Update backend rating counts (same logic as Birthday)
+    // ⭐ Update backend rating & review count
     if (setBackendRating && setBackendReviewsCount) {
       if (parsed.length > 0) {
         const avg =
@@ -73,9 +73,10 @@ const CustomerReview: React.FC<CustomerReviewProps> = ({
     window.dispatchEvent(new CustomEvent("new-review", { detail: productId }));
   };
 
-  // ⭐ Scroll buttons
+  // ⭐ Scroll controls
   const scrollLeft = () =>
     scrollRef.current?.scrollBy({ left: -250, behavior: "smooth" });
+
   const scrollRight = () =>
     scrollRef.current?.scrollBy({ left: 250, behavior: "smooth" });
 
@@ -121,6 +122,7 @@ const CustomerReview: React.FC<CustomerReviewProps> = ({
                         alt={review.name}
                         className="w-full h-48 sm:h-56 object-cover"
                       />
+
                       <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#f8e6db] rounded-md px-2 py-1 flex gap-1 shadow-md text-xs sm:text-sm">
                         {Array.from({ length: review.rating }).map((_, j) => (
                           <Star
@@ -137,14 +139,17 @@ const CustomerReview: React.FC<CustomerReviewProps> = ({
                     <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
                       {review.name}
                     </h3>
+
                     {review.title && (
                       <p className="text-gray-500 text-xs sm:text-sm mb-1">
                         {review.title}
                       </p>
                     )}
+
                     <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                       {review.comment}
                     </p>
+
                     <p className="text-xs text-gray-400 mt-2">
                       {new Date(review.date).toLocaleDateString()}
                     </p>

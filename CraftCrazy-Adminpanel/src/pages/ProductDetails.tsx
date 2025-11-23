@@ -37,7 +37,7 @@ interface Product {
   inStock: boolean;
   warranty: string;
   returnPolicy: string;
-  image: string | null;
+  imageUrl: string | null;
   occasion: string;
   material: string;
   dimensions: string;
@@ -63,8 +63,9 @@ const ProductDetail: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-        setProduct(res.data);
+        const res = await axios.get(`http://localhost:8000/api/products/${id}`);
+        console.log(res);
+        setProduct(res.data?.product);
       } catch (error) {
         console.error("❌ Failed to fetch product:", error);
       }
@@ -200,7 +201,7 @@ const ProductDetail: React.FC = () => {
         {/* Left Section */}
         <div className="flex flex-col items-center" ref={shareRef}>
           <img
-            src={product.image || ""}
+            src={product.imageUrl || ""}
             alt={product.name}
             className="rounded-2xl w-full object-cover shadow-md"
           />

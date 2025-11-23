@@ -1,4 +1,4 @@
-// src/Pages/EngagementTray/EngagementTrayPage.tsx
+
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { engagementTrays } from "../../Data/EngagementTrayData";
@@ -21,14 +21,6 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
       },
       { threshold: 0.1 }
     );
-useEffect(() => {
-  // Scroll to top after 100ms delay
-  const timer = setTimeout(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, 100);
-
-  return () => clearTimeout(timer);
-}, []);
 
     if (imgRef.current) observer.observe(imgRef.current);
     return () => observer.disconnect();
@@ -45,6 +37,15 @@ export default function EngagementTrayPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("Default sorting");
   const [highlight, setHighlight] = useState("All");
+
+  // ⭐ Scroll to Top (from HEAD branch)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories(prev =>
@@ -209,7 +210,9 @@ export default function EngagementTrayPage() {
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
                         <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">₹{item.price}</span>
                         {item.discount && (
-                          <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">₹{Math.round(item.price / (1 - item.discount / 100))}</span>
+                          <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
+                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                          </span>
                         )}
                       </div>
                     </div>

@@ -53,6 +53,7 @@ export const getAllCustomerNames = async (req: Request, res: Response) => {
       count: customers.length,
       data: customers,
     });
+    console.log(customers);
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -127,4 +128,3 @@ export const updateOrderStatus = async(req:Request,res:Response,next:NextFunctio
         res.status(400).json({message: error.message});
     }
 }
-

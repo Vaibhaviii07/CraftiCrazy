@@ -3,8 +3,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { weddingHampers, WeddingHamper, Variant } from "../../Data/WeddingData";
 import { Link } from "react-router-dom";
 
-// LazyImage component for lazy loading
-const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+/* -----------------------------
+   LazyImage Component (HEAD)
+--------------------------------*/
+const LazyImage = ({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -22,12 +32,20 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
     );
 
     if (imgRef.current) observer.observe(imgRef.current);
+
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={imgRef} className={`w-full h-full ${!isVisible ? "bg-gray-200 animate-pulse" : ""}`}>
-      {isVisible && <img src={src} alt={alt} className={className} loading="lazy" />}
+    <div
+      ref={imgRef}
+      className={`w-full h-full ${
+        !isVisible ? "bg-gray-200 animate-pulse" : ""
+      }`}
+    >
+      {isVisible && (
+        <img src={src} alt={alt} className={className} loading="lazy" />
+      )}
     </div>
   );
 };
@@ -35,23 +53,33 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
 export default function WeddingHamperPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState("Default sorting");
+
+  // NEW: HEAD feature
   const [highlight, setHighlight] = useState("All");
+  const highlightOptions = ["All", "Best Seller", "Discounted"];
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+      prev.includes(cat)
+        ? prev.filter((c) => c !== cat)
+        : [...prev, cat]
     );
   };
 
   const categories = [...new Set(weddingHampers.map((i) => i.category))];
-  const highlightOptions = ["All", "Best Seller", "Discounted"];
 
+  /* -----------------------------
+     FILTERING (MERGED)
+  --------------------------------*/
   const filteredHampers = useMemo(() => {
     return weddingHampers.filter((item) => {
       const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(item.category);
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.category);
 
+      // HEAD highlight filter
       let highlightMatch = true;
+
       switch (highlight) {
         case "Best Seller":
           highlightMatch = (item.rating ?? 0) >= 4.5;
@@ -67,21 +95,29 @@ export default function WeddingHamperPage() {
     });
   }, [selectedCategories, highlight]);
 
+  /* -----------------------------
+     SORTING (MERGED)
+  --------------------------------*/
   const sortedHampers = useMemo(() => {
     const sorted = [...filteredHampers];
+
     switch (sortOption) {
       case "Price: Low to High":
         sorted.sort((a, b) => Number(a.price) - Number(b.price));
         break;
+
       case "Price: High to Low":
         sorted.sort((a, b) => Number(b.price) - Number(a.price));
         break;
+
       case "Rating":
         sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
+
       default:
         break;
     }
+
     return sorted;
   }, [filteredHampers, sortOption]);
 
@@ -98,10 +134,17 @@ export default function WeddingHamperPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-        {/* Sidebar */}
+        
+        {/* -----------------------------
+            SIDEBAR (KEEP ALL)
+        --------------------------------*/}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+          
+          {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Categories
+            </h3>
             <ul className="space-y-2">
               {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -112,7 +155,10 @@ export default function WeddingHamperPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -120,8 +166,11 @@ export default function WeddingHamperPage() {
             </ul>
           </div>
 
+          {/* Highlight Filter */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Highlight
+            </h3>
             <ul className="space-y-2">
               {highlightOptions.map((opt) => (
                 <li
@@ -140,10 +189,13 @@ export default function WeddingHamperPage() {
           </div>
         </aside>
 
-        {/* Product Grid */}
+        {/* -----------------------------
+            PRODUCT GRID
+        --------------------------------*/}
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">Showing {sortedHampers.length} results</p>
+
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -156,6 +208,7 @@ export default function WeddingHamperPage() {
             </select>
           </div>
 
+          {/* Product Items */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
               {sortedHampers.map((item: WeddingHamper) => {
@@ -179,11 +232,14 @@ export default function WeddingHamperPage() {
                       className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                     >
                       <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                        
+                        {/* USING LAZY IMAGE */}
                         <LazyImage
                           src={variant.image}
                           alt={item.name}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
+
                         {variant.discount && (
                           <motion.span
                             initial={{ scale: 0 }}
@@ -205,10 +261,12 @@ export default function WeddingHamperPage() {
                             {item.description}
                           </p>
                         )}
+
                         <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
                           <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
                             ₹{variant.price}
                           </span>
+
                           {variant.discount && (
                             <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
                               ₹{item.price}

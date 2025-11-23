@@ -58,6 +58,7 @@ export default function RakhiPage() {
     return sorted;
   }, [filteredItems, sortOption]);
 
+  // ⭐ YOUR LazyImage PRESERVED EXACTLY
   const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
     const [loaded, setLoaded] = useState(false);
     return (
@@ -91,6 +92,7 @@ export default function RakhiPage() {
 
       {/* Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6">
+
         {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           <div className="mb-6">
@@ -118,7 +120,9 @@ export default function RakhiPage() {
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
+                  className={`text-sm cursor-pointer ${
+                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
+                  }`}
                 >
                   {opt}
                 </li>

@@ -3,8 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { woodenFrames, WoodenFrame, Variant } from "../../Data/WoodenFramedata";
 import { Link } from "react-router-dom";
 
-// LazyImage component for smoother lazy loading
-const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+// LazyImage component
+const LazyImage = ({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -20,13 +28,21 @@ const LazyImage = ({ src, alt, className }: { src: string; alt: string; classNam
       },
       { threshold: 0.1 }
     );
+
     if (imgRef.current) observer.observe(imgRef.current);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={imgRef} className={`w-full h-full ${!isVisible ? "bg-gray-200 animate-pulse" : ""}`}>
-      {isVisible && <img src={src} alt={alt} className={className} loading="lazy" />}
+    <div
+      ref={imgRef}
+      className={`w-full h-full ${
+        !isVisible ? "bg-gray-200 animate-pulse" : ""
+      }`}
+    >
+      {isVisible && (
+        <img src={src} alt={alt} className={className} loading="lazy" />
+      )}
     </div>
   );
 };
@@ -45,29 +61,26 @@ export default function WoodenFramePage() {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(woodenFrames.map((i) => i.category))];
 
-  // Filter frames based on selected categories and highlight
+  // Filter frames
   const filteredFrames = useMemo(() => {
     return woodenFrames.filter((item) => {
       const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(item.category);
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.category);
 
       let highlightMatch = true;
-      switch (highlight) {
-        case "Best Seller":
-          highlightMatch = (item.rating ?? 0) >= 4.5;
-          break;
-        case "Discounted":
-          highlightMatch = (item.discount ?? 0) > 0;
-          break;
-        default:
-          highlightMatch = true;
+
+      if (highlight === "Best Seller") {
+        highlightMatch = (item.rating ?? 0) >= 4.5;
+      } else if (highlight === "Discounted") {
+        highlightMatch = (item.discount ?? 0) > 0;
       }
 
       return categoryMatch && highlightMatch;
     });
   }, [selectedCategories, highlight]);
 
-  // Sort filtered frames
+  // Sort frames
   const sortedFrames = useMemo(() => {
     const sorted = [...filteredFrames];
     switch (sortOption) {
@@ -99,13 +112,15 @@ export default function WoodenFramePage() {
         </p>
       </div>
 
-      {/* Main Layout */}
+      {/* Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
         {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Categories
+            </h3>
             <ul className="space-y-2">
               {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -116,7 +131,10 @@ export default function WoodenFramePage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -126,7 +144,9 @@ export default function WoodenFramePage() {
 
           {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Highlight
+            </h3>
             <ul className="space-y-2">
               {highlightOptions.map((opt) => (
                 <li
@@ -147,9 +167,11 @@ export default function WoodenFramePage() {
 
         {/* Product Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Top Bar */}
+          {/* Top bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">Showing {sortedFrames.length} results</p>
+            <p className="text-sm text-gray-600">
+              Showing {sortedFrames.length} results
+            </p>
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -162,7 +184,7 @@ export default function WoodenFramePage() {
             </select>
           </div>
 
-          {/* Product Cards */}
+          {/* Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
               {sortedFrames.map((item: WoodenFrame) => {
@@ -212,15 +234,18 @@ export default function WoodenFramePage() {
                         <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
                           {item.name}
                         </p>
+
                         {item.description && (
                           <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
                             {item.description}
                           </p>
                         )}
+
                         <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
                           <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
                             ₹{variant.price}
                           </span>
+
                           {variant.discount && (
                             <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
                               ₹{item.price}

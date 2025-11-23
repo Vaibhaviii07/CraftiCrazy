@@ -105,8 +105,12 @@ export default function GiftCollections() {
             className="w-full h-60 sm:h-[700px] object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex flex-col justify-end p-6 text-white">
-            <p className="text-sm uppercase tracking-wide font-medium">{offers[0].title}</p>
-            <h3 className="text-2xl sm:text-3xl font-serif font-semibold mb-3">{offers[0].subtitle}</h3>
+            <p className="text-sm uppercase tracking-wide font-medium">
+              {offers[0].title}
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-serif font-semibold mb-3">
+              {offers[0].subtitle}
+            </h3>
             <Link
               to={offers[0].link}
               className="border border-white text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white hover:text-[#8C5E3C] transition"
@@ -134,8 +138,12 @@ export default function GiftCollections() {
                 className="w-full h-46 sm:h-85 object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-4 text-white">
-                <p className="text-[10px] sm:text-xs uppercase tracking-wide font-medium">{offer.title}</p>
-                <h3 className="text-sm sm:text-lg font-serif font-semibold mb-2">{offer.subtitle}</h3>
+                <p className="text-[10px] sm:text-xs uppercase tracking-wide font-medium">
+                  {offer.title}
+                </p>
+                <h3 className="text-sm sm:text-lg font-serif font-semibold mb-2">
+                  {offer.subtitle}
+                </h3>
                 <Link
                   to={offer.link}
                   className="border border-white text-white px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-white hover:text-[#8C5E3C] transition"
@@ -154,9 +162,14 @@ export default function GiftCollections() {
           Luxury Gift Collections
         </h1>
         <p className="mt-3 sm:mt-4 text-sm sm:text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
-          Discover <span className="font-semibold italic text-[#A8733B]">artisanal creations</span> blending{" "}
+          Discover{" "}
+          <span className="font-semibold italic text-[#A8733B]">
+            artisanal creations
+          </span>{" "}
+          blending{" "}
           <span className="text-[#8C5E3C] italic font-medium">elegance</span> &{" "}
-          <span className="italic text-[#A8733B]">luxury</span>. Crafted to make every moment unforgettable.
+          <span className="italic text-[#A8733B]">luxury</span>. Crafted to make
+          every moment unforgettable.
         </p>
       </div>
 
@@ -170,7 +183,9 @@ export default function GiftCollections() {
                 <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-[#D9A441]" />
                 {category.name}
               </h2>
-              <p className="text-xs sm:text-base italic text-[#8C5E3C] mt-1">{category.tagline}</p>
+              <p className="text-xs sm:text-base italic text-[#8C5E3C] mt-1">
+                {category.tagline}
+              </p>
             </div>
 
             {/* Product Scroll Cards */}

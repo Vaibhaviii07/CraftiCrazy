@@ -29,6 +29,7 @@ export default function DiwaliHamperPage() {
         const lowerHighlight = (item.highlight || "").toLowerCase();
         const hasBestTag =
           item.tags?.some((tag) => tag.toLowerCase().includes("best")) ?? false;
+
         highlightMatch =
           lowerHighlight.includes("best") || hasBestTag || false;
       } else if (highlight === "Discounted") {
@@ -58,15 +59,17 @@ export default function DiwaliHamperPage() {
       <div className="text-center mt-10 mb-8 px-4">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Diwali Hampers
-          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 
-            bg-gradient-to-r from-[#F7B77A] via-[#C45A36] to-[#F7B77A] rounded-full animate-pulse"></span>
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 
+          w-28 h-1 bg-gradient-to-r from-[#F7B77A] via-[#C45A36] to-[#F7B77A] rounded-full animate-pulse"></span>
         </h2>
         <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
           Celebrate the festival of lights with premium festive gift hampers.
         </p>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
 
+        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg shadow h-fit mb-6 md:mb-0">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
@@ -114,7 +117,8 @@ export default function DiwaliHamperPage() {
             </ul>
           </div>
         </aside>
-        
+
+        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex justify-between items-center mb-2">
             <p className="text-sm text-gray-600">
@@ -123,7 +127,8 @@ export default function DiwaliHamperPage() {
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
-              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#F7B77A] focus:border-[#F7B77A]"
+              className="border border-gray-300 rounded-md text-sm px-3 py-2 
+              focus:ring-[#F7B77A] focus:border-[#F7B77A]"
             >
               <option>Default sorting</option>
               <option>Price: Low to High</option>
@@ -147,13 +152,18 @@ export default function DiwaliHamperPage() {
                     to={`/DiwaliDetail/${item.id}`}
                     className="w-full max-w-[330px] flex flex-col"
                   >
-                    <div className="relative w-full h-[360px] sm:h-[400px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
+                    <div className="relative w-full h-[360px] sm:h-[400px] rounded-2xl 
+                      overflow-hidden shadow-md hover:shadow-xl 
+                      transition-transform duration-300 hover:-translate-y-1"
+                    >
                       <img
                         src={item.image}
                         alt={item.name}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        className="w-full h-full object-cover transition-transform 
+                        duration-300 hover:scale-105"
                       />
+
                       {item.discount && (
                         <motion.span
                           initial={{ scale: 0 }}
@@ -163,7 +173,8 @@ export default function DiwaliHamperPage() {
                             stiffness: 300,
                             damping: 20,
                           }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                          className="absolute top-2 right-2 bg-[#C45A36] text-white 
+                          text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {item.discount}% OFF
                         </motion.span>
@@ -174,15 +185,18 @@ export default function DiwaliHamperPage() {
                       <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
                         {item.name}
                       </p>
+
                       {item.description && (
                         <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
                           {item.description}
                         </p>
                       )}
+
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
+                        <span className="text-lg sm:text-2xl text-[#F7B77A] font-cinzel">
                           ₹{item.price}
                         </span>
+
                         {item.discount && (
                           <span className="line-through text-gray-400 text-sm sm:text-lg ml-1">
                             ₹{Math.round(item.price / (1 - item.discount / 100))}

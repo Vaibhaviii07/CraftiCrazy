@@ -1,6 +1,5 @@
 // src/Pages/ResinArt/ResinPhotoFramesPage.tsx
-import React, { useState, useEffect, useMemo, useRef } from "react";
-
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinFrames } from "../../Data/ResinFramedata";
 import { Link } from "react-router-dom";
@@ -15,19 +14,19 @@ export default function ResinPhotoFramesPage() {
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
-useEffect(() => {
-  // Scroll to top after 100ms delay
-  const timer = setTimeout(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, 100);
 
-  return () => clearTimeout(timer);
-}, []);
+  // Scroll to top (from HEAD)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinFrames.map((i) => i.category))];
 
-  // Filtered frames
+  // Filter logic (merged)
   const filteredFrames = useMemo(() => {
     return resinFrames.filter((item) => {
       const categoryMatch =
@@ -49,7 +48,7 @@ useEffect(() => {
     });
   }, [selectedCategories, highlight]);
 
-  // Sorted frames
+  // Sorting (merged)
   const sortedFrames = useMemo(() => {
     const sorted = [...filteredFrames];
     switch (sortOption) {
@@ -68,7 +67,7 @@ useEffect(() => {
     return sorted;
   }, [filteredFrames, sortOption]);
 
-  // Lazy Image Component
+  // Lazy Image Component (kept from HEAD)
   const LazyImage = ({
     src,
     alt,
@@ -80,7 +79,11 @@ useEffect(() => {
   }) => {
     const [loaded, setLoaded] = useState(false);
     return (
-      <div className={`w-full h-full ${!loaded ? "bg-gray-200 animate-pulse" : ""}`}>
+      <div
+        className={`w-full h-full ${
+          !loaded ? "bg-gray-200 animate-pulse" : ""
+        }`}
+      >
         <motion.img
           src={src}
           alt={alt}
@@ -129,7 +132,10 @@ useEffect(() => {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
                     {cat}
                   </label>
                 </li>
@@ -148,7 +154,9 @@ useEffect(() => {
                   key={opt}
                   onClick={() => setHighlight(opt)}
                   className={`text-sm cursor-pointer ${
-                    highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"
+                    highlight === opt
+                      ? "text-[#b46029] font-semibold"
+                      : "text-gray-700"
                   }`}
                 >
                   {opt}
@@ -158,11 +166,13 @@ useEffect(() => {
           </div>
         </aside>
 
-        {/* Products Grid */}
+        {/* Product Section */}
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">Showing {sortedFrames.length} results</p>
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-600">
+              Showing {sortedFrames.length} results
+            </p>
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -175,7 +185,7 @@ useEffect(() => {
             </select>
           </div>
 
-          {/* Product Cards */}
+          {/* Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
               {sortedFrames.map((item) => (
@@ -191,17 +201,22 @@ useEffect(() => {
                     to={`/photoframedetail/${item.id}`}
                     className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col"
                   >
-                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2">
                       <LazyImage
                         src={item.image}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
+
                       {item.discount && (
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                          }}
                           className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {item.discount}% OFF
@@ -218,13 +233,17 @@ useEffect(() => {
                           {item.description}
                         </p>
                       )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                      <div className="mt-2 flex justify-center gap-2 items-baseline">
                         <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
                           ₹{item.price}
                         </span>
+
                         {item.discount && (
                           <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
-                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                            ₹
+                            {Math.round(
+                              item.price / (1 - item.discount / 100)
+                            )}
                           </span>
                         )}
                       </div>

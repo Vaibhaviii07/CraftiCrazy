@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 
 const reels = [
+
   { id: 1, src: "/Scrapbook.mp4" },
   { id: 2, src: "/Dad.mp4" },
   { id: 3, src: "/Hishamper.mp4" },
   { id: 4, src: "/liveframe.mp4" },
   { id: 5, src: "/Tray.mp4" },
   { id: 6, src: "/flower.mp4" },
+
+  
 ];
 
 const ReelsRow = () => {

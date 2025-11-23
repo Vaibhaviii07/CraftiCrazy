@@ -31,32 +31,47 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const { isAuthenticated } = useAuth();  
+  const { isAuthenticated } = useAuth();
 
+  // Load cart safely from localStorage
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
+    try {
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) {
+        setCart(JSON.parse(storedCart));
+      }
+    } catch (error) {
+      console.error("Cart parse error:", error);
+      localStorage.removeItem("cart"); // clear corrupted cart
     }
   }, []);
 
+  // Save cart on every update
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  // Calculate total price
+  const cartTotal = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
+  // Add item to cart
   const addToCart = async (item: CartItem) => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  if (!token && !isAuthenticated) {
-  toast.error("Please login to add items to your cart!");
-  localStorage.removeItem("token");
-  return;
-}
+    if (!token && !isAuthenticated) {
+      toast.error("Please login to add items to your cart!");
+      localStorage.removeItem("token");
+      return;
+    }
+
     setCart((prevCart) => {
       const existingItem = prevCart.find((i) => i.id === item.id);
+
       if (existingItem) {
+        // If item already exists, increase quantity
         return prevCart.map((i) =>
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
@@ -92,13 +107,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const updateCartItem = (id:string, updatedItem: CartItem) => {
-      setCart((prev) => (
-        prev.map((item) => (
-          item.id === id ? updatedItem : item 
-        ))
-      ))
-  }
+  const updateCartItem = (id: string, updatedItem: CartItem) => {
+    setCart((prev) =>
+      prev.map((item) => (item.id === id ? updatedItem : item))
+    );
+  };
 
   return (
     <CartContext.Provider
@@ -110,8 +123,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         increaseQty,
         decreaseQty,
         cartTotal,
-        updateCartItem  
-
+        updateCartItem,
       }}
     >
       {children}

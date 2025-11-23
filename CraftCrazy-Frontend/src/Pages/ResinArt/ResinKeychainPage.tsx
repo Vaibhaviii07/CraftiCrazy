@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinKeychains, ResinKeychain } from "../../Data/ResinKeychainData";
 import { Link } from "react-router-dom";
@@ -10,27 +9,28 @@ export default function ResinKeychainPage() {
   const [sortOption, setSortOption] = useState("Default sorting");
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(resinKeychains.map(item => item.category))];
-useEffect(() => {
-  // Scroll to top after 100ms delay
-  const timer = setTimeout(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, 100);
+  const categories = [...new Set(resinKeychains.map((item) => item.category))];
 
-  return () => clearTimeout(timer);
-}, []);
+  // ✔ Scroll to top (from HEAD)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Filtered Items
+  // ✔ Filter Items (merged)
   const filteredItems = useMemo(() => {
     return resinKeychains.filter((item: ResinKeychain) => {
       const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(item.category);
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.category);
 
       let highlightMatch = true;
       switch (highlight) {
@@ -43,12 +43,11 @@ useEffect(() => {
         default:
           highlightMatch = true;
       }
-
       return categoryMatch && highlightMatch;
     });
   }, [selectedCategories, highlight]);
 
-  // Sorted Items
+  // ✔ Sort items (unchanged)
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
     switch (sortOption) {
@@ -67,11 +66,24 @@ useEffect(() => {
     return sorted;
   }, [filteredItems, sortOption]);
 
-  // Lazy Image Component
-  const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+  // ✔ Lazy Image Component (from HEAD)
+  const LazyImage = ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) => {
     const [loaded, setLoaded] = useState(false);
+
     return (
-      <div className={`w-full h-full ${!loaded ? "bg-gray-200 animate-pulse" : ""}`}>
+      <div
+        className={`w-full h-full ${
+          !loaded ? "bg-gray-200 animate-pulse" : ""
+        }`}
+      >
         <motion.img
           src={src}
           alt={alt}
@@ -107,7 +119,9 @@ useEffect(() => {
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Categories
+            </h3>
             <ul className="space-y-2">
               {categories.map((cat) => (
                 <li key={cat} className="flex items-center space-x-2">
@@ -118,7 +132,12 @@ useEffect(() => {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
                   />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
+                  <label
+                    htmlFor={cat}
+                    className="text-gray-700 text-sm cursor-pointer"
+                  >
+                    {cat}
+                  </label>
                 </li>
               ))}
             </ul>
@@ -126,13 +145,19 @@ useEffect(() => {
 
           {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
+              Highlight
+            </h3>
             <ul className="space-y-2">
               {highlightOptions.map((opt) => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
+                  className={`text-sm cursor-pointer ${
+                    highlight === opt
+                      ? "text-[#b46029] font-semibold"
+                      : "text-gray-700"
+                  }`}
                 >
                   {opt}
                 </li>
@@ -141,11 +166,13 @@ useEffect(() => {
           </div>
         </aside>
 
-        {/* Products Grid */}
+        {/* Products Section */}
         <div className="md:col-span-4 flex flex-col gap-6">
           {/* Top Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">Showing {sortedItems.length} results</p>
+            <p className="text-sm text-gray-600">
+              Showing {sortedItems.length} results
+            </p>
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -185,7 +212,11 @@ useEffect(() => {
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                          }}
                           className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
                         >
                           {item.discount}% OFF
@@ -194,15 +225,24 @@ useEffect(() => {
                     </div>
 
                     <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                        {item.name}
+                      </p>
                       {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
                       )}
                       <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">₹{item.price}</span>
+                        <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
+                          ₹{item.price}
+                        </span>
                         {item.discount && (
                           <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
-                            ₹{Math.round(item.price / (1 - item.discount / 100))}
+                            ₹
+                            {Math.round(
+                              item.price / (1 - item.discount / 100)
+                            )}
                           </span>
                         )}
                       </div>

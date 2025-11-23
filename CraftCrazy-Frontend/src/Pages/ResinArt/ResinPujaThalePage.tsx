@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { resinPujaThales, ResinPujaThale } from "../../Data/ResinPujaThaleData";
 import { Link } from "react-router-dom";
@@ -13,14 +13,14 @@ export default function ResinPujaThalePage() {
       prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
-useEffect(() => {
-  // Scroll to top after 100ms delay
-  const timer = setTimeout(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, 100);
 
-  return () => clearTimeout(timer);
-}, []);
+  // ✅ Added from HEAD (keep scroll-to-top)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinPujaThales.map(item => item.category))];
@@ -77,6 +77,7 @@ useEffect(() => {
 
       {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
+        
         {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           {/* Categories */}
@@ -154,7 +155,7 @@ useEffect(() => {
   );
 }
 
-/* ✅ Reusable Product Card Component */
+/* Product Card Component */
 const ProductCard = ({ item }: { item: ResinPujaThale }) => {
   const [loaded, setLoaded] = useState(false);
 

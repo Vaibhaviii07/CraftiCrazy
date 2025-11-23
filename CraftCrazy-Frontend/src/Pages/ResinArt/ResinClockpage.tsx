@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { resinClocks, ResinClock } from "../../Data/ResinWallClockdata";
 import { Link } from "react-router-dom";
@@ -7,16 +6,15 @@ import { useCart } from "../../AuthContext/CartContext";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 
-
 export default function ResinClockPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
 
   const { addToCart } = useCart();
-  const {isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  // Convert ResinClock → CartItem before adding
+  // Add to Cart
   const handleAddToCart = (item: ResinClock) => {
     const token = localStorage.getItem("token");
     if (!token && !isAuthenticated) {
@@ -33,15 +31,17 @@ export default function ResinClockPage() {
 
     addToCart(cartItem);
   };
-useEffect(() => {
-  // Scroll to top after 100ms delay
-  const timer = setTimeout(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, 100);
 
-  return () => clearTimeout(timer);
-}, []);
+  // Scroll to top (from HEAD)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }, 100);
 
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Category toggle
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
@@ -51,7 +51,7 @@ useEffect(() => {
   const highlightOptions = ["All", "Best Seller", "Discounted"];
   const categories = [...new Set(resinClocks.map((item) => item.category))];
 
-  // Filter items
+  // Filters
   const filteredItems = resinClocks.filter((item: ResinClock) => {
     const categoryMatch =
       selectedCategories.length === 0 ||
@@ -72,7 +72,7 @@ useEffect(() => {
     return categoryMatch && highlightMatch;
   });
 
-  // Sort items
+  // Sorting
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
     switch (sortOption) {
@@ -93,8 +93,9 @@ useEffect(() => {
 
   return (
     <section className="min-h-screen bg-gray-50 pb-12">
+      <ToastContainer />
+
       {/* Hero Section */}
-       <ToastContainer />
       <div className="text-center mt-10 mb-8">
         <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
           Resin Clocks
@@ -165,6 +166,7 @@ useEffect(() => {
             <p className="text-sm text-gray-600">
               Showing {sortedItems.length} results
             </p>
+
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
@@ -223,6 +225,7 @@ useEffect(() => {
                       <p className="text-base sm:text-lg text-gray-900 font-playfair leading-snug">
                         {item.name}
                       </p>
+
                       {item.description && (
                         <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
                           {item.description}
@@ -233,6 +236,7 @@ useEffect(() => {
                         <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">
                           ₹{item.price}
                         </span>
+
                         {item.discount && (
                           <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
                             ₹
