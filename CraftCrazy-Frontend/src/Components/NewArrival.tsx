@@ -43,7 +43,7 @@ const NewArrivals: React.FC = () => {
   
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
-    // Show loader
+
     setTimeout(() => setLoaded(true), 800);
   }, []);
   useEffect(() => {
