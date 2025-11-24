@@ -11,7 +11,7 @@ const AboutUs: React.FC = () => {
     threshold: 0.2,
   });
 
-  // Handles Play/Pause toggle
+ 
   const toggleVideo = () => {
     const video = document.getElementById("aboutVideo") as HTMLVideoElement;
     if (video) {
@@ -25,7 +25,6 @@ const AboutUs: React.FC = () => {
     }
   };
 
-  // Handles Mute/Unmute toggle
   const toggleMute = () => {
     const video = document.getElementById("aboutVideo") as HTMLVideoElement;
     if (video) {
@@ -34,7 +33,6 @@ const AboutUs: React.FC = () => {
     }
   };
 
-  // Autoplay muted when in view
   useEffect(() => {
     const video = document.getElementById("aboutVideo") as HTMLVideoElement;
     if (video && inView) {
@@ -42,7 +40,6 @@ const AboutUs: React.FC = () => {
       setIsPlaying(true);
     }
 
-    // Cleanup on unmount
     return () => {
       if (video) {
         video.pause();
@@ -57,7 +54,6 @@ const AboutUs: React.FC = () => {
         ref={ref}
         className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-20"
       >
-        {/* ----------- VIDEO SECTION ----------- */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -75,7 +71,6 @@ const AboutUs: React.FC = () => {
               className="w-full h-auto object-cover"
             />
 
-            {/* Play/Pause Overlay Button */}
             <button
               onClick={toggleVideo}
               aria-label={isPlaying ? "Pause video" : "Play video"}

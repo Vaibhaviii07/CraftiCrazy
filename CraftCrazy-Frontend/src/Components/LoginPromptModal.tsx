@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   onClose: () => void;
-  isOpen?: boolean; // optional prop for future control if needed
+  isOpen?: boolean; 
 };
 
 const LoginPromptModal = ({ onClose, isOpen = true }: Props) => {
-  // Prevent background scroll while modal is open
+  
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
