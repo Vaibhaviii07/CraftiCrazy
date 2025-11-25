@@ -5,6 +5,7 @@ import contactRoutes from "./contact.route";
 import demandRoutes from "./demand.route";
 import productRoutes from "./product.route"; 
 import invoiceRoute from "../routes/invoice.route";
+import reviewRoute from "../routes/review.route";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use("/contact", contactRoutes);
 router.use("/demand", demandRoutes);
 router.use("/products", productRoutes); 
 router.use("/invoice",invoiceRoute);
+router.use("/review", reviewRoute);
 
 export default router;

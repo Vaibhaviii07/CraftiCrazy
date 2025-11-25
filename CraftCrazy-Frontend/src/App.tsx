@@ -77,6 +77,8 @@ import ChristmasSpecialPage from "./Pages/Festivel/ChristmasSpecialPage.tsx";
 import HoliKitDetail from "./ProductDetails/HoliKitDetail.tsx";
 import RakhiPage from "./Pages/Festivel/RakhiPage.tsx";
 import RakhiDetailPage from "./ProductDetails/RakhiDetail.tsx";
+import ProductDetailPage from "./Pages/ProductDetailPage.tsx";
+
 
 
 function App() {
@@ -142,6 +144,7 @@ function App() {
         <Route path="/christmas" element={<ChristmasSpecialPage/>} />
         <Route path="/Holi" element={<HoliKitPage/>} />
         <Route path="/rakhi" element={<RakhiPage/>} />
+    <Route path="/product/:id" element={<ProductDetailPage />} />
 
 
 

@@ -1,9 +1,8 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { womenAccessories, WomenAccessory, Variant } from "../Data/WomenAccessoriesData";
 import { useCart } from "../AuthContext/CartContext";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
@@ -34,7 +33,7 @@ export default function WomenAccessoryDetailPage() {
   const [backendRating, setBackendRating] = useState<number>(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
-  const productFromParams: WomenAccessory | undefined = womenAccessories.find(p => String(p.id) === id);
+  const productFromParams = womenAccessories.find(p => String(p.id) === id);
 
   useEffect(() => {
     setCurrentProduct(productFromParams ?? null);
@@ -47,7 +46,7 @@ export default function WomenAccessoryDetailPage() {
     if (!id) return;
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/womenAccessories/${id}`);
+        const res = await fetch(`http://localhost:8000/api/products/${id}`);
         if (!res.ok) throw new Error("Product fetch failed");
         const data = await res.json();
         if (data?.product) setCurrentProduct(data.product);
@@ -58,44 +57,54 @@ export default function WomenAccessoryDetailPage() {
     fetchProduct();
   }, [id]);
 
-  // Fetch reviews
+  // Variant with unique ID
+  type LocalVariant = Variant & { id: string };
+  const selectedVariantDefault: LocalVariant | null = useMemo(() => {
+    if (!currentProduct) return null;
+    const firstVariant = currentProduct.variants?.[0];
+    return {
+      ...(firstVariant || {}),
+      image: firstVariant?.image ?? currentProduct.image,
+      price: firstVariant?.price ?? currentProduct.price,
+      discount: firstVariant?.discount ?? currentProduct.discount,
+      id: (firstVariant as any)?.id ?? `${currentProduct.id}-default`,
+    };
+  }, [currentProduct]);
+
+  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariantDefault);
+
   useEffect(() => {
-    if (!id) return;
+    setCurrentVariant(selectedVariantDefault);
+    setQuantity(1);
+    setImgLoaded(false);
+  }, [selectedVariantDefault]);
+
+  // Fetch reviews for product + variant
+ // Fetch reviews from backend
+  useEffect(() => {
+    if (!currentProduct) return;
+
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
-        if (!res.ok) throw new Error("Reviews fetch failed");
-        const data: { averageRating?: number; totalReviews?: number } = await res.json();
-        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
-        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
-      } catch {
+        const res = await fetch(
+          `http://localhost:8000/api/reviews/product/${currentProduct.id}?limit=8`
+        );
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const data = await res.json();
+        setBackendRating(data.averageRating ?? 0);
+        setBackendReviewsCount(data.reviewCount ?? 0);
+      } catch (err) {
+        console.error("Reviews fetch failed", err);
         setBackendRating(0);
         setBackendReviewsCount(0);
       }
     };
+
     fetchReviews();
-  }, [id]);
-
-  const selectedVariant: Variant | null = useMemo(() => {
-    if (!currentProduct) return null;
-    return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image ?? "",
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price ?? 0,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount ?? 0,
-    };
   }, [currentProduct]);
-
-  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
-
-  useEffect(() => {
-    setCurrentVariant(selectedVariant);
-    setQuantity(1);
-    setImgLoaded(false);
-  }, [selectedVariant]);
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
-
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -103,19 +112,12 @@ export default function WomenAccessoryDetailPage() {
       quantity,
       image: currentVariant.image,
     });
-
     if (isAuthenticated) {
       setToast(`${currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    };
-  }, []);
 
   if (loading) return <Loader />;
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
@@ -126,7 +128,7 @@ export default function WomenAccessoryDetailPage() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Hero Image */}
+        {/* Left: Image + Thumbnails */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
@@ -149,14 +151,17 @@ export default function WomenAccessoryDetailPage() {
             </span>
           )}
 
-          {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant?.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
+                  onClick={() => setCurrentVariant({ ...v, id: (v as any)?.id ?? `${currentProduct.id}-${i}` })}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                    currentVariant?.id === ((v as any)?.id ?? `${currentProduct.id}-${i}`)
+                      ? "border-[#b46029] ring-2 ring-[#b46029]"
+                      : "border-gray-300"
+                  }`}
                   whileHover={{ scale: 1.05 }}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
@@ -171,74 +176,66 @@ export default function WomenAccessoryDetailPage() {
           )}
         </div>
 
-        {/* Right: Product Info */}
+        {/* Right: Info + Add to Cart */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Price & Rating */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400" />
-              ))}
-              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
-            </div>
             <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{currentVariant?.price}</span>
             {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
-          {/* Description */}
+           {/* Description */}
           {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
           {/* Structured Info */}
-          <div className="mt-2 space-y-2 text-gray-700">
+          <div className="mt-4 space-y-2 text-gray-700">
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
             {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* Tags / Stock / Warranty */}
+          {/* Stock / Brand / Warranty / Seller / Return */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
+            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
+            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
             <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
           </div>
 
-          {/* Quantity & Add to Cart */}
+          {/* Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
             >
               <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
             </button>
           </div>
 
-          {/* Extra Sections */}
+          {/* Additional Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
-              <div className="bg-gray-50 p-3 rounded-md">
+              <div>
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
-
             {currentProduct.customization?.available && (
-              <div className="bg-gray-50 p-3 rounded-md">
+              <div>
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
-
             {currentProduct.specifications && (
-              <div className="bg-gray-50 p-3 rounded-md">
+              <div>
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
@@ -267,14 +264,15 @@ export default function WomenAccessoryDetailPage() {
       </AnimatePresence>
 
       {/* Reviews */}
-      {currentProduct && (
+      {currentProduct && currentVariant && (
         <>
           <CustomerReview
             productId={currentProduct.id}
+            variantId={currentVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingReviewChat productId={currentProduct.id} />
+          <FloatingReviewChat productId={currentProduct.id} variantId={currentVariant.id} />
         </>
       )}
     </div>

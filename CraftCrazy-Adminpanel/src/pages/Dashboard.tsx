@@ -32,6 +32,14 @@ type Product = {
   customization?: string;
 };
 
+interface Customer {
+  _id: string;
+  name: string;
+  email?: string;
+  contact?: string;
+  address?: string;
+}
+
 type Order = {
   _id: string;
   customer: { name: string };
@@ -39,7 +47,7 @@ type Order = {
   totalAmount: number;
   orderStatus: string;
   transactionStatus: string;
-  createdAt: string;
+  createdAt?: string; // <- made optional to fix TS error
 };
 
 type KPIs = { customers: number; revenue: number; sales: number };
@@ -48,7 +56,7 @@ const Dashboard: React.FC = () => {
   const [kpis, setKpis] = useState<KPIs>({ customers: 0, revenue: 0, sales: 0 });
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [customers, setCustomers] = useState<string[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
   const [successOrders, setSuccessOrders] = useState<Order[]>([]);
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
@@ -57,7 +65,6 @@ const Dashboard: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState("");
   const [nextReport, setNextReport] = useState("");
 
-  // ✅ MOVE FETCH LOGIC INTO ITS OWN FUNCTION (so we can call again on socket updates)
   const fetchDashboardData = async () => {
     try {
       const [
@@ -103,23 +110,26 @@ const Dashboard: React.FC = () => {
         sales: totalSales,
       });
 
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const weekly = days.map((day) => ({
-      name: day,
-      sales: 0,
-      revenue: 0,
-    }));
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const weekly = days.map((day) => ({
+        name: day,
+        sales: 0,
+        revenue: 0,
+      }));
 
-    allOrders.forEach((order: Order) => {
-      const dayIndex = new Date(order.createdAt).getDay();
-      weekly[dayIndex].sales += 1;
-      weekly[dayIndex].revenue += order.totalAmount;
-    });
+      // FIXED BLOCK
+      allOrders.forEach((order: Order) => {
+        if (!order.createdAt) return;
+        const dayIndex = new Date(order.createdAt).getDay();
+        weekly[dayIndex].sales += 1;
+        weekly[dayIndex].revenue += order.totalAmount || 0;
+      });
 
-    setLineData(weekly);
+      setLineData(weekly);
 
       const now = new Date();
       setLastUpdated(`${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")} updated`);
+
       const tomorrow = new Date();
       tomorrow.setDate(now.getDate() + 1);
       setNextReport(tomorrow.toLocaleDateString("en-US", { month: "short", day: "numeric" }));
@@ -127,26 +137,25 @@ const Dashboard: React.FC = () => {
       console.error("Error fetching dashboard data:", err);
     }
   };
-useEffect(() => {
-  fetchDashboardData();
 
-  // Real-time Order + Trend Update
-  socket.on("order-updated", () => {
-    console.log("⚡ Order Updated → Refresh Dashboard");
+  useEffect(() => {
     fetchDashboardData();
-  });
 
-  socket.on("trend:update", () => {
-    console.log("📊 Sales Trend Updated → Refresh Chart");
-    fetchDashboardData(); // This refreshes lineData too
-  });
+    socket.on("order-updated", () => {
+      console.log("⚡ Order Updated → Refresh Dashboard");
+      fetchDashboardData();
+    });
 
-  return () => {
-    socket.off("order-updated");
-    socket.off("trend:update");
-  };
-}, []);
+    socket.on("trend:update", () => {
+      console.log("📊 Sales Trend Updated → Refresh Chart");
+      fetchDashboardData();
+    });
 
+    return () => {
+      socket.off("order-updated");
+      socket.off("trend:update");
+    };
+  }, []);
 
   const colorClasses: Record<string, string> = {
     green: "bg-green-50 border-green-100",
@@ -155,10 +164,8 @@ useEffect(() => {
     purple: "bg-purple-50 border-purple-100",
   };
 
-  // -------------------- UI --------------------
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 transition-all duration-300">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -192,7 +199,6 @@ useEffect(() => {
         </div>
       </motion.div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: "Total Customers", value: kpis.customers, icon: <Users />, link: "/customers" },
@@ -217,7 +223,6 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Sales Chart + Products */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
@@ -234,7 +239,6 @@ useEffect(() => {
             </ResponsiveContainer>
           </div>
 
-          {/* Products Table */}
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Ordered Products
@@ -266,9 +270,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Right Column */}
         <div className="space-y-6">
-          {/* Deals Summary */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -306,7 +308,7 @@ useEffect(() => {
               {
                 icon: <Clock className="text-purple-600 w-6 h-6" />,
                 color: "purple",
-                label: "Processing Orders", // ✅ NEW BLOCK
+                label: "Processing Orders",
                 count: processingOrders.length,
               },
             ].map((d, i) => (
@@ -325,16 +327,16 @@ useEffect(() => {
             ))}
           </motion.div>
 
-          {/* Customer List */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Customers</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              {customers.map((name, i) => (
-                <li key={i} className="border-b pb-2">
-                  {i + 1}. {name}
-                </li>
-              ))}
-            </ul>
+           <ul className="space-y-2 text-sm text-gray-600">
+  {customers.map((cust, i) => (
+    <li key={cust._id || i} className="border-b pb-2">
+      {i + 1}. {cust.name || "Unknown User"}
+    </li>
+  ))}
+</ul>
+
           </div>
         </div>
       </div>

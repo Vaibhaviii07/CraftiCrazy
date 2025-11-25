@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { varmalaPreservations, VarmalaPreservation, Variant } from "../Data/VarmalaPreservationdata";
 import { useCart } from "../AuthContext/CartContext";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
@@ -13,8 +13,8 @@ type Params = { id: string };
 
 function Loader() {
   return (
-    <div className="flex items-center justify-center w-full h-64">
-      <div className="w-12 h-12 border-4 border-gray-200 border-t-[#C45A36] rounded-full animate-spin"></div>
+    <div className="flex justify-center items-center h-96">
+      <div className="w-12 h-12 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
     </div>
   );
 }
@@ -24,28 +24,25 @@ export default function VarmalaDetailPage() {
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [currentProduct, setCurrentProduct] = useState<VarmalaPreservation | null>(null);
   const [backendRating, setBackendRating] = useState<number>(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
-  const productFromParams: VarmalaPreservation | undefined = varmalaPreservations.find(
-    (p) => String(p.id) === id
-  );
-  useEffect(() => {
-    setCurrentProduct(productFromParams ?? null);
-  }, [productFromParams]);
+  // Local fallback product
+  const productFromParams: VarmalaPreservation | undefined = varmalaPreservations.find(p => String(p.id) === id);
+  useEffect(() => setCurrentProduct(productFromParams ?? null), [productFromParams]);
 
   // Fetch product from backend
   useEffect(() => {
     if (!id) return;
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/varmalas/${id}`);
+        const res = await fetch(`http://localhost:8000/api/products/${id}`);
         if (!res.ok) throw new Error("Product fetch failed");
         const data = await res.json();
         if (data?.product) setCurrentProduct(data.product);
@@ -56,41 +53,55 @@ export default function VarmalaDetailPage() {
     fetchProduct();
   }, [id]);
 
-  // Fetch reviews
+  // Variant type
+  type LocalVariant = Variant & { id: string };
+
+  // Default variant
+  const selectedVariantDefault: LocalVariant | null = useMemo(() => {
+    if (!currentProduct) return null;
+    const firstVariant = currentProduct.variants?.[0];
+    return {
+      ...(firstVariant || {}),
+      image: firstVariant?.image ?? currentProduct.image,
+      price: firstVariant?.price ?? currentProduct.price,
+      discount: firstVariant?.discount ?? currentProduct.discount,
+      id: (firstVariant as any)?.id ?? `${currentProduct.id}-default`,
+    };
+  }, [currentProduct]);
+
+  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariantDefault);
+
   useEffect(() => {
-    if (!id) return;
+    setCurrentVariant(selectedVariantDefault);
+    setQuantity(1);
+    setImgLoaded(false);
+  }, [selectedVariantDefault]);
+
+  // Fetch reviews per variant
+  // Fetch reviews from backend
+  useEffect(() => {
+    if (!currentProduct) return;
+
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
-        if (!res.ok) throw new Error("Reviews fetch failed");
-        const data: { averageRating?: number; totalReviews?: number } = await res.json();
-        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
-        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
-      } catch {
+        const res = await fetch(
+          `http://localhost:8000/api/reviews/product/${currentProduct.id}?limit=8`
+        );
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const data = await res.json();
+        setBackendRating(data.averageRating ?? 0);
+        setBackendReviewsCount(data.reviewCount ?? 0);
+      } catch (err) {
+        console.error("Reviews fetch failed", err);
         setBackendRating(0);
         setBackendReviewsCount(0);
       }
     };
-    fetchReviews();
-  }, [id]);
 
-  // Handle variant selection
-  const selectedVariant: Variant | null = useMemo(() => {
-    if (!currentProduct) return null;
-    return {
-      image: currentProduct.variants?.[0]?.image ?? currentProduct.image ?? "",
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price ?? 0,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount ?? 0,
-    };
+    fetchReviews();
   }, [currentProduct]);
 
-  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
-  useEffect(() => {
-    setCurrentVariant(selectedVariant);
-    setQuantity(1);
-    setImgLoaded(false);
-  }, [selectedVariant]);
-
+  // Add to cart
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
 
@@ -115,7 +126,7 @@ export default function VarmalaDetailPage() {
     };
   }, []);
 
-  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Varmala Preservation not found</p>;
 
   const finalRating = backendRating > 0 ? backendRating : currentProduct.rating ?? 0;
   const finalReviewsCount = backendReviewsCount > 0 ? backendReviewsCount : currentProduct.reviews ?? 0;
@@ -152,8 +163,8 @@ export default function VarmalaDetailPage() {
               {currentProduct.variants.map((v, i) => (
                 <motion.div
                   key={i}
-                  onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"}`}
+                  onClick={() => setCurrentVariant(v as LocalVariant)}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant?.id === (v as LocalVariant).id ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"}`}
                   whileHover={{ scale: 1.05 }}
                 >
                   <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
@@ -172,69 +183,63 @@ export default function VarmalaDetailPage() {
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Price & Rating */}
+          {/* Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400" />
-              ))}
-              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
-            </div>
             <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{currentVariant?.price}</span>
             {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
-          {/* Description */}
+           {/* Description */}
           {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
-          {/* Tags / Stock / Brand */}
-          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
-            </span>
-          </div>
-
-          {/* Additional Details */}
+          {/* Structured Info */}
           <div className="mt-4 space-y-2 text-gray-700">
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
             {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* Quantity & Add to Cart */}
+          {/* Stock / Brand / Warranty / Seller / Return */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
+            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
+            </span>
+            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
+            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
+          </div>
+
+          {/* Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#a1472c] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
             >
               <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
             </button>
           </div>
 
-           {/* Extra Sections */}
+          {/* Additional Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
-              <div className="bg-gray-50 p-3 rounded-md">
+              <div>
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
-
             {currentProduct.customization?.available && (
-              <div className="bg-gray-50 p-3 rounded-md">
+              <div>
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
-
             {currentProduct.specifications && (
-              <div className="bg-gray-50 p-3 rounded-md">
+              <div>
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
@@ -246,8 +251,6 @@ export default function VarmalaDetailPage() {
           </div>
         </div>
       </div>
-
-
       {/* Toast */}
       <AnimatePresence>
         {toast && (
@@ -264,14 +267,18 @@ export default function VarmalaDetailPage() {
       </AnimatePresence>
 
       {/* Reviews */}
-      {currentProduct && (
+      {currentProduct && currentVariant && (
         <>
           <CustomerReview
             productId={currentProduct.id}
+            variantId={currentVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingCustomerReview productId={currentProduct.id} />
+          <FloatingCustomerReview
+            productId={currentProduct.id}
+            variantId={currentVariant.id}
+          />
         </>
       )}
     </div>

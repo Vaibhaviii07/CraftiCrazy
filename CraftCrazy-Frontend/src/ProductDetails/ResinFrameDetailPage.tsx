@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { resinFrames, ResinFrame, Variant } from "../Data/ResinFramedata";
 import { useCart } from "../AuthContext/CartContext";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
@@ -24,7 +24,7 @@ export default function ResinFrameDetailPage() {
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,13 +37,23 @@ export default function ResinFrameDetailPage() {
   const productFromParams: ResinFrame | undefined = resinFrames.find((p) => p.id === id);
   const [currentProduct, setCurrentProduct] = useState<ResinFrame | null>(productFromParams ?? null);
 
-  const selectedVariantDefault: Variant = useMemo(() => ({
-    image: currentProduct?.variants?.[0]?.image ?? currentProduct?.image ?? "",
-    price: currentProduct?.variants?.[0]?.price ?? currentProduct?.price ?? 0,
-    discount: currentProduct?.variants?.[0]?.discount ?? currentProduct?.discount ?? 0,
-  }), [currentProduct]);
+  // Handle variants with local ID for reviews
+  type LocalVariant = Variant & { id: string };
+  const selectedVariantDefault = useMemo<LocalVariant | null>(() => {
+     if (!currentProduct) return null;
+     const firstVariant = currentProduct.variants?.[0];
+     const derivedId = (firstVariant && ((firstVariant as any).id ?? `${currentProduct.id}-default`)) || `${currentProduct.id}-default`;
+     return {
+       ...(firstVariant || {}),
+       image: firstVariant?.image ?? currentProduct.image,
+       price: firstVariant?.price ?? currentProduct.price,
+       discount: firstVariant?.discount ?? currentProduct.discount,
+       id: derivedId,
+     } as LocalVariant;
+   }, [currentProduct]);
+ 
 
-  const [currentVariant, setCurrentVariant] = useState<Variant>(selectedVariantDefault);
+  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariantDefault);
 
   useEffect(() => {
     setCurrentVariant(selectedVariantDefault);
@@ -58,37 +68,42 @@ export default function ResinFrameDetailPage() {
     if (!id) return;
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/resinFrames/${id}`);
+        const res = await fetch(`http://localhost:8000/api/products/${id}`);
         if (!res.ok) throw new Error("Product fetch failed");
         const data = await res.json();
         if (data?.product) setCurrentProduct(data.product);
-        else setCurrentProduct(resinFrames.find(p => p.id === id) ?? null);
-      } catch (err) {
-        setCurrentProduct(resinFrames.find(p => p.id === id) ?? null);
+      } catch {
+        setCurrentProduct(productFromParams ?? null);
       }
     };
     fetchProduct();
   }, [id]);
 
-  // Fetch reviews
+  // Fetch reviews for current product + variant
+  // Fetch reviews from backend
   useEffect(() => {
-    if (!id) return;
+    if (!currentProduct) return;
+
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
-        if (!res.ok) throw new Error("Reviews fetch failed");
-        const data: { averageRating?: number; totalReviews?: number } = await res.json();
-        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
-        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
-      } catch {
+        const res = await fetch(
+          `http://localhost:8000/api/reviews/product/${currentProduct.id}?limit=8`
+        );
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const data = await res.json();
+        setBackendRating(data.averageRating ?? 0);
+        setBackendReviewsCount(data.reviewCount ?? 0);
+      } catch (err) {
+        console.error("Reviews fetch failed", err);
         setBackendRating(0);
         setBackendReviewsCount(0);
       }
     };
-    fetchReviews();
-  }, [id]);
 
-  // Loading
+    fetchReviews();
+  }, [currentProduct]);
+
+  // Loading spinner
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
@@ -97,7 +112,6 @@ export default function ResinFrameDetailPage() {
   // Add to Cart
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
-
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -105,7 +119,6 @@ export default function ResinFrameDetailPage() {
       quantity,
       image: currentVariant.image,
     });
-
     if (isAuthenticated) {
       setToast(`${currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -145,32 +158,50 @@ export default function ResinFrameDetailPage() {
               transition={{ duration: 0.5 }}
             />
           )}
-          {currentVariant.discount && (
+          {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
             </span>
           )}
 
-          {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-              {currentProduct.variants.map((v, i) => (
-                <motion.div
-                  key={i}
-                  onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
-                  {v.discount && (
-                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
-                      {v.discount}% OFF
-                    </span>
+          {/* Thumbnails */}
+                  {currentProduct.variants && currentProduct.variants.length > 1 && (
+                    <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
+                      {currentProduct.variants.map((v, i) => {
+                        const localVariant: LocalVariant = {
+                          ...v,
+                          id: (v as any).id ?? `${currentProduct.id}-variant-${i}`,
+                          image: v.image ?? currentProduct.image,
+                          price: v.price ?? currentProduct.price,
+                          discount: v.discount ?? currentProduct.discount,
+                        };
+                        return (
+                          <motion.div
+                            key={localVariant.id}
+                            onClick={() => setCurrentVariant(localVariant)}
+                            className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                              currentVariant?.id === localVariant.id
+                                ? "border-[#b46029] ring-2 ring-[#b46029]"
+                                : "border-gray-300"
+                            }`}
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            <img
+                              src={localVariant.image}
+                              alt={`thumb-${i}`}
+                              className="h-20 w-20 object-cover rounded-lg"
+                            />
+                            {localVariant.discount && (
+                              <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                                {localVariant.discount}% OFF
+                              </span>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   )}
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
+                  </div>
 
         {/* Right: Product Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
@@ -178,21 +209,23 @@ export default function ResinFrameDetailPage() {
 
           {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400" />
-              ))}
-              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
-            </div>
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{currentVariant.price}</span>
-            {currentVariant.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{currentVariant?.price}</span>
+            {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
           {/* Description */}
-          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
+           {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
-          {/* Structured Info */}
-          <div className="mt-2 space-y-2 text-gray-700">
+          {/* Tags / Stock / Brand */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
+            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
+            </span>
+          </div>
+
+          {/* Additional Details */}
+          <div className="mt-4 space-y-2 text-gray-700">
             {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
             {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
             {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
@@ -200,18 +233,7 @@ export default function ResinFrameDetailPage() {
             {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
           </div>
 
-          {/* Tags / Stock / Brand / Warranty */}
-          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
-            </span>
-            {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
-            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
-          </div>
-
-          {/* Quantity & Add to Cart */}
+          {/* Add to Cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
@@ -222,24 +244,26 @@ export default function ResinFrameDetailPage() {
             </button>
           </div>
 
-          {/* Additional Sections */}
+          {/* Extra Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
+
             {currentProduct.customization?.available && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
                 <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
               </div>
             )}
+
             {currentProduct.specifications && (
-              <div>
+              <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
@@ -251,7 +275,6 @@ export default function ResinFrameDetailPage() {
           </div>
         </div>
       </div>
-
       {/* Toast */}
       <AnimatePresence>
         {toast && (
@@ -268,14 +291,15 @@ export default function ResinFrameDetailPage() {
       </AnimatePresence>
 
       {/* Reviews */}
-      {currentProduct && (
+      {currentProduct && currentVariant && (
         <>
           <CustomerReview
             productId={currentProduct.id}
+            variantId={currentVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingReviewChat productId={currentProduct.id} />
+          <FloatingReviewChat productId={currentProduct.id} variantId={currentVariant.id} />
         </>
       )}
     </div>

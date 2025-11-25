@@ -3,13 +3,16 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { resinClocks, ResinClock, Variant } from "../Data/ResinWallClockdata";
 import { useCart } from "../AuthContext/CartContext";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
 
 type Params = { id: string };
+
+// Extend Variant to include local id
+type LocalVariant = Variant & { id: string };
 
 export default function ResinClockDetailPage() {
   const { id } = useParams<Params>();
@@ -24,8 +27,9 @@ export default function ResinClockDetailPage() {
   const [backendRating, setBackendRating] = useState<number>(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
-  // Loading simulation
   const [loading, setLoading] = useState(true);
+
+  // Loading simulation
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
@@ -41,7 +45,7 @@ export default function ResinClockDetailPage() {
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/resinClocks/${id}`);
+        const res = await fetch(`http://localhost:8000/api/products/${id}`);
         if (!res.ok) throw new Error("Product fetch failed");
         const data = await res.json();
         if (data?.product) setCurrentProduct(data.product);
@@ -56,40 +60,47 @@ export default function ResinClockDetailPage() {
 
   // Fetch reviews from backend
   useEffect(() => {
-    if (!id) return;
+    if (!currentProduct) return;
 
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
-        if (!res.ok) throw new Error("Reviews fetch failed");
-        const data: { averageRating?: number; totalReviews?: number } = await res.json();
-
-        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
-        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
+        const res = await fetch(
+          `http://localhost:8000/api/reviews/product/${currentProduct.id}?limit=8`
+        );
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const data = await res.json();
+        setBackendRating(data.averageRating ?? 0);
+        setBackendReviewsCount(data.reviewCount ?? 0);
       } catch (err) {
+        console.error("Reviews fetch failed", err);
         setBackendRating(0);
         setBackendReviewsCount(0);
       }
     };
 
     fetchReviews();
-  }, [id]);
+  }, [currentProduct]);
 
-  // Selected variant
-  const selectedVariantDefault: Variant = useMemo(() => ({
-    image: currentProduct?.variants?.[0]?.image ?? currentProduct?.image ?? "",
-    price: currentProduct?.variants?.[0]?.price ?? currentProduct?.price ?? 0,
-    discount: currentProduct?.variants?.[0]?.discount ?? currentProduct?.discount ?? 0,
-  }), [currentProduct]);
+  // Selected variant default
+  const selectedVariantDefault = useMemo<LocalVariant | null>(() => {
+    if (!currentProduct) return null;
+    const firstVariant = currentProduct.variants?.[0];
+    const derivedId = (firstVariant && ((firstVariant as any).id ?? `${currentProduct.id}-default`)) || `${currentProduct.id}-default`;
+    return {
+      ...(firstVariant || {}),
+      image: firstVariant?.image ?? currentProduct.image,
+      price: firstVariant?.price ?? currentProduct.price,
+      discount: firstVariant?.discount ?? currentProduct.discount,
+      id: derivedId,
+    } as LocalVariant;
+  }, [currentProduct]);
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>(selectedVariantDefault);
+  const [selectedVariant, setSelectedVariant] = useState<LocalVariant | null>(selectedVariantDefault);
 
   useEffect(() => {
     setSelectedVariant(selectedVariantDefault);
     setQuantity(1);
     setImgLoaded(false);
-    setBackendRating(0);
-    setBackendReviewsCount(0);
   }, [selectedVariantDefault]);
 
   // Add to Cart
@@ -150,7 +161,7 @@ export default function ResinClockDetailPage() {
             />
           )}
 
-          {selectedVariant.discount && (
+          {selectedVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {selectedVariant.discount}% OFF
             </span>
@@ -159,22 +170,30 @@ export default function ResinClockDetailPage() {
           {/* Thumbnails */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-              {currentProduct.variants.map((v: Variant, i: number) => (
-                <motion.div
-                  key={i}
-                  onClick={() => setSelectedVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${selectedVariant.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
-                  whileHover={{ scale: 1.05 }}
-                  aria-label={`Select variant ${i + 1}`}
-                >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
-                  {v.discount && (
-                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
-                      {v.discount}% OFF
-                    </span>
-                  )}
-                </motion.div>
-              ))}
+              {currentProduct.variants.map((v, i) => {
+                const localVariant: LocalVariant = {
+                  ...v,
+                  id: (v as any).id ?? `${currentProduct.id}-variant-${i}`,
+                  image: v.image ?? currentProduct.image,
+                  price: v.price ?? currentProduct.price,
+                  discount: v.discount ?? currentProduct.discount,
+                };
+                return (
+                  <motion.div
+                    key={localVariant.id}
+                    onClick={() => setSelectedVariant(localVariant)}
+                    className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${selectedVariant?.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"}`}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
+                    {v.discount && (
+                      <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
+                        {v.discount}% OFF
+                      </span>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -185,15 +204,8 @@ export default function ResinClockDetailPage() {
 
           {/* Rating & Price */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400" />
-              ))}
-              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
-            </div>
-
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{selectedVariant.price}</span>
-            {selectedVariant.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{selectedVariant?.price}</span>
+            {selectedVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
           </div>
 
           {/* Description */}
@@ -226,7 +238,8 @@ export default function ResinClockDetailPage() {
               <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
             </button>
           </div>
-        {/* Extra Sections */}
+
+          {/* Extra Sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
@@ -274,14 +287,18 @@ export default function ResinClockDetailPage() {
       </AnimatePresence>
 
       {/* Reviews */}
-      {currentProduct && (
+      {currentProduct && selectedVariant && (
         <>
           <CustomerReview
             productId={currentProduct.id}
+            variantId={selectedVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingReviewChat productId={currentProduct.id} />
+          <FloatingReviewChat
+            productId={currentProduct.id}
+            variantId={selectedVariant.id}
+          />
         </>
       )}
     </div>

@@ -3,119 +3,109 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { birthdayHampers, BirthdayHamper, Variant } from "../Data/BirthdayHampersdata";
 import { useCart } from "../AuthContext/CartContext";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
-import FloatingReviewChat from "../Components/FloatingCustomerReview";
+import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
 
 type Params = { id: string };
+type LocalVariant = Variant & { id: string };
 
 export default function BirthdayHamperDetails() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
+
   const [backendRating, setBackendRating] = useState<number>(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const staticProduct = birthdayHampers.find((p) => p.id === id);
+  const [currentProduct, setCurrentProduct] = useState<BirthdayHamper | null>(staticProduct ?? null);
 
-  const productFromParams: BirthdayHamper | undefined = birthdayHampers.find(
-    (p) => p.id === id
-  );
-
-  const [currentProduct, setCurrentProduct] = useState<BirthdayHamper | null>(
-    productFromParams ?? null
-  );
-
- 
+  // small loading animation delay
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
+  // fetch product from backend
   useEffect(() => {
     if (!id) return;
-
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/birthday-hampers/${id}`);
+        const res = await fetch(`http://localhost:8000/api/products/${id}`);
         if (!res.ok) throw new Error("Product fetch failed");
         const data = await res.json();
-        if (data?.product) {
-          setCurrentProduct(data.product);
-        } else {
-          // fallback to static
-          const staticProd = birthdayHampers.find((b) => b.id === id);
-          setCurrentProduct(staticProd ?? null);
-        }
-      } catch (err) {
-        // fallback static
-        const staticProd = birthdayHampers.find((b) => b.id === id);
-        setCurrentProduct(staticProd ?? null);
-     
+        setCurrentProduct(data?.product ?? staticProduct ?? null);
+      } catch {
+        setCurrentProduct(staticProduct ?? null);
       }
     };
-
     fetchProduct();
-  }, [id]);
+  }, [id, staticProduct]);
 
- 
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchReviews = async () => {
-      try {
-       
-        const res = await fetch(`http://localhost:8000/api/reviews/product/${id}`);
-        if (!res.ok) throw new Error("Reviews fetch failed");
-        const data = await res.json();
-
-        if (typeof data.averageRating === "number") setBackendRating(data.averageRating);
-        if (typeof data.totalReviews === "number") setBackendReviewsCount(data.totalReviews);
-      } catch (err) {
-       
-        setBackendRating(0);
-        setBackendReviewsCount(0);
-      }
-    };
-
-    fetchReviews();
-  }, [id]);
-
-  const finalRating = backendRating > 0 ? backendRating : currentProduct?.rating ?? 0;
-  const finalReviewsCount =
-    backendReviewsCount > 0 ? backendReviewsCount : currentProduct?.reviews ?? 0;
-
-  const selectedVariant = useMemo(() => {
+  // Build selected variant with guaranteed `id`
+  const selectedVariant = useMemo<LocalVariant | null>(() => {
     if (!currentProduct) return null;
+    const firstVariant = currentProduct.variants?.[0];
+    const derivedId =
+      (firstVariant && ((firstVariant as any).id ?? (firstVariant as any).variantId)) ??
+      `${currentProduct.id}-default`;
+
     return {
-      image: currentProduct.variants?.[1]?.image ?? currentProduct.image,
-      price: currentProduct.variants?.[0]?.price ?? currentProduct.price,
-      discount: currentProduct.variants?.[0]?.discount ?? currentProduct.discount,
-    } as Variant;
+      ...(firstVariant ? (firstVariant as Variant) : {}),
+      image: (firstVariant && (firstVariant as any).image) ?? currentProduct.image,
+      price: (firstVariant && (firstVariant as any).price) ?? currentProduct.price,
+      discount: (firstVariant && (firstVariant as any).discount) ?? currentProduct.discount,
+      id: String(derivedId),
+    } as LocalVariant;
   }, [currentProduct]);
 
-  const [currentVariant, setCurrentVariant] = useState<Variant | null>(selectedVariant);
+  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariant);
 
   useEffect(() => {
     setCurrentVariant(selectedVariant);
     setQuantity(1);
     setBackendRating(0);
     setBackendReviewsCount(0);
-    
     setImgLoaded(false);
   }, [selectedVariant]);
 
+  // Fetch backend reviews
+  const fetchReviews = async () => {
+  if (!currentProduct || !currentVariant) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+    );
+
+    if (!res.ok) throw new Error("Reviews fetch failed");
+    const data: { averageRating?: number; reviewCount?: number } = await res.json();
+    setBackendRating(data.averageRating ?? 0);
+    setBackendReviewsCount(data.reviewCount ?? 0);
+  } catch (err) {
+    console.error(err);
+    setBackendRating(0);
+    setBackendReviewsCount(0);
+  }
+};
+
+
+
+  const finalRating = backendRating || currentProduct?.rating || 0;
+  const finalReviewsCount = backendReviewsCount || currentProduct?.reviews || 0;
+
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
-
     addToCart({
       id: currentProduct.id,
       name: currentProduct.name,
@@ -123,7 +113,6 @@ export default function BirthdayHamperDetails() {
       quantity,
       image: currentVariant.image,
     });
-
     if (isAuthenticated) {
       setToast(`${currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -131,7 +120,7 @@ export default function BirthdayHamperDetails() {
     }
   };
 
-  // cleanup toast timer on unmount
+  // Correct cleanup effect
   useEffect(() => {
     return () => {
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -151,15 +140,14 @@ export default function BirthdayHamperDetails() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Image */}
+        {/* LEFT IMAGE */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
               <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
             </div>
           )}
-
-          {currentVariant && (
+          {currentVariant?.image && (
             <motion.img
               src={currentVariant.image}
               alt={currentProduct.name}
@@ -171,94 +159,69 @@ export default function BirthdayHamperDetails() {
               transition={{ duration: 0.5 }}
             />
           )}
-
           {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
             </span>
           )}
-
-          {/* Thumbnails */}
-          {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-              {currentProduct.variants.map((v, i) => (
-                <motion.div
-                  key={i}
-                  onClick={() => setCurrentVariant(v)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                    currentVariant?.image === v.image ? "border-[#b46029] ring-2 ring-[#b46029]" : "border-gray-300"
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
-                  {v.discount && (
-                    <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
-                      {v.discount}% OFF
-                    </span>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Right: Product Info */}
+        {/* RIGHT INFO */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
-          {/* Rating & Price */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(finalRating) }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-yellow-400" />
-              ))}
-
-              <span className="ml-1 text-gray-600 text-sm">({finalRating.toFixed(1)} | {finalReviewsCount} reviews)</span>
-            </div>
-
-            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">₹{currentVariant?.price}</span>
-
+          {/* Price */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
+              ₹{currentVariant?.price}
+            </span>
             {currentVariant?.discount && (
               <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
             )}
           </div>
 
           {/* Description */}
-          <p className="text-gray-600 leading-relaxed">{currentProduct.description}</p>
+          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
 
-          {/* Info Tags */}
-          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base">
-            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            {currentProduct.seller && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.seller}</span>}
+          {/* Structured info */}
+          <div className="mt-2 space-y-2 text-gray-700">
+            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
+            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
+            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
+            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
+          </div>
+
+          {/* Tags / Stock / Warranty */}
+          <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
+            {currentProduct.tags?.map((tag, idx) => <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>)}
             <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
             {currentProduct.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>}
-            {currentProduct.returnPolicy && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.returnPolicy}</span>}
           </div>
 
-          {/* Add to Cart */}
+          {/* ADD TO CART */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
               className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                currentProduct.inStock
+                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
               }`}
             >
-              <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
+              <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
 
-          {/* Extra Sections */}
+          {/* Extra sections */}
           <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
+                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
                 </ul>
               </div>
             )}
@@ -275,7 +238,7 @@ export default function BirthdayHamperDetails() {
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
                   {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
-                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
+                    <li key={idx}><span className="font-medium">{key}:</span> {String(value)}</li>
                   ))}
                 </ul>
               </div>
@@ -284,7 +247,21 @@ export default function BirthdayHamperDetails() {
         </div>
       </div>
 
-      {/* Toast */}
+      {/* REVIEWS */}
+      <CustomerReview
+  productId={currentProduct.id}
+  variantId={currentVariant?.id}
+  setBackendRating={setBackendRating}
+  setBackendReviewsCount={setBackendReviewsCount}
+/>
+
+<FloatingCustomerReview
+  productId={currentProduct.id}
+  variantId={currentVariant?.id}
+  onReviewSubmitted={fetchReviews}
+/>
+
+      {/* TOAST */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -298,16 +275,6 @@ export default function BirthdayHamperDetails() {
           </motion.div>
         )}
       </AnimatePresence>
-      {currentProduct && (
-        <>
-          <CustomerReview
-            productId={currentProduct.id}
-            setBackendRating={setBackendRating as any}
-            setBackendReviewsCount={setBackendReviewsCount as any}
-          />
-          <FloatingReviewChat productId={currentProduct.id} />
-        </>
-      )}
     </div>
   );
 }

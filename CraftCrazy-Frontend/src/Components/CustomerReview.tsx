@@ -1,8 +1,9 @@
 // src/Components/CustomerReview.tsx
-import React, { useRef, useEffect, useState } from "react";
-import { Star, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Star } from "lucide-react";
 
 export interface Review {
+  _id?: string;
   name: string;
   email?: string;
   title?: string;
@@ -10,173 +11,103 @@ export interface Review {
   rating: number;
   image?: string;
   date: string;
-  productId?: string;
 }
 
 interface CustomerReviewProps {
   productId: string;
-
-  // ⭐ Added for backend ratings like Birthday/Bracelet system
+  variantId?: string;
   setBackendRating?: (rating: number) => void;
   setBackendReviewsCount?: (count: number) => void;
 }
 
-const CustomerReview: React.FC<CustomerReviewProps> = ({
+export default function CustomerReview({
   productId,
+  variantId,
   setBackendRating,
   setBackendReviewsCount,
-}) => {
+}: CustomerReviewProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ⭐ Load reviews from localStorage + update backend rating
-  const loadReviews = () => {
-    const stored = localStorage.getItem(`reviews_${productId}`);
-    const parsed = stored ? JSON.parse(stored) : [];
-    setReviews(parsed);
+  const fetchReviews = async () => {
+    if (!productId) return;
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/reviews/product/${productId}?limit=8`
+      );
+      if (!res.ok) throw new Error("Reviews fetch failed");
+      const data = await res.json();
 
-    // ⭐ Update backend rating & review count
-    if (setBackendRating && setBackendReviewsCount) {
-      if (parsed.length > 0) {
-        const avg =
-          parsed.reduce((acc: number, r: Review) => acc + r.rating, 0) /
-          parsed.length;
+      const reviewsArray: Review[] = Array.isArray(data.reviews) ? data.reviews : [];
+      setReviews(reviewsArray);
 
-        setBackendRating(avg);
-        setBackendReviewsCount(parsed.length);
-      } else {
-        setBackendRating(0);
-        setBackendReviewsCount(0);
-      }
+      if (setBackendRating) setBackendRating(data.averageRating ?? 0);
+      if (setBackendReviewsCount) setBackendReviewsCount(data.reviewCount ?? 0);
+    } catch (err) {
+      console.error(err);
+      setReviews([]);
+      if (setBackendRating) setBackendRating(0);
+      if (setBackendReviewsCount) setBackendReviewsCount(0);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadReviews();
+    fetchReviews();
+  }, [productId, variantId]);
 
-    const handleNewReview = (e: any) => {
-      if (e.detail === productId) loadReviews();
-    };
+  if (loading)
+    return <p className="text-gray-500 mt-4 text-center">Loading reviews...</p>;
 
-    window.addEventListener("new-review", handleNewReview);
-    return () => window.removeEventListener("new-review", handleNewReview);
-  }, [productId]);
-
-  // ⭐ Delete review
-  const deleteReview = (index: number) => {
-    const updated = [...reviews];
-    updated.splice(index, 1);
-    setReviews(updated);
-
-    localStorage.setItem(`reviews_${productId}`, JSON.stringify(updated));
-
-    window.dispatchEvent(new CustomEvent("new-review", { detail: productId }));
-  };
-
-  // ⭐ Scroll controls
-  const scrollLeft = () =>
-    scrollRef.current?.scrollBy({ left: -250, behavior: "smooth" });
-
-  const scrollRight = () =>
-    scrollRef.current?.scrollBy({ left: 250, behavior: "smooth" });
+  if (!reviews.length)
+    return <p className="text-gray-500 mt-4 text-center">No reviews yet.</p>;
 
   return (
-    <div className="py-12 sm:py-16 border-t mt-6">
-      {/* Header */}
-      <div className="text-center mb-8 px-4">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#1b1b1b]">
-          Customer Feedback
-        </h2>
-        <p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-[#6B3F28] max-w-xl sm:max-w-2xl mx-auto italic leading-relaxed">
-          Real stories from those who chose handcrafted perfection.
-        </p>
-      </div>
-
-      {reviews.length === 0 ? (
-        <p className="text-center text-gray-500 text-sm sm:text-base">
-          No reviews yet. Be the first to review!
-        </p>
-      ) : (
-        <div className="relative max-w-full sm:max-w-5xl mx-auto px-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={scrollLeft}
-              className="bg-white/90 hover:bg-white shadow p-2 rounded-full transition"
-            >
-              <ChevronLeft className="text-[#603808]" size={20} />
-            </button>
-
-            <div
-              ref={scrollRef}
-              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide scroll-smooth py-2"
-            >
-              {reviews.map((review, i) => (
-                <div
-                  key={i}
-                  className="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-lg transition-all flex-shrink-0 w-64 sm:w-72 md:w-80 relative"
-                >
-                  {review.image && (
-                    <div className="relative">
-                      <img
-                        src={review.image}
-                        alt={review.name}
-                        className="w-full h-48 sm:h-56 object-cover"
-                      />
-
-                      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#f8e6db] rounded-md px-2 py-1 flex gap-1 shadow-md text-xs sm:text-sm">
-                        {Array.from({ length: review.rating }).map((_, j) => (
-                          <Star
-                            key={j}
-                            size={14}
-                            className="text-yellow-500 fill-yellow-500"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="pt-6 pb-5 px-4 sm:px-5 flex flex-col text-center">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">
-                      {review.name}
-                    </h3>
-
-                    {review.title && (
-                      <p className="text-gray-500 text-xs sm:text-sm mb-1">
-                        {review.title}
-                      </p>
-                    )}
-
-                    <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                      {review.comment}
-                    </p>
-
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(review.date).toLocaleDateString()}
-                    </p>
-
-                    {/* Delete Button */}
-                    <button
-                      onClick={() => deleteReview(i)}
-                      className="absolute top-2 right-2 p-1 text-gray-500 hover:text-red-600 transition"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+    <div className="mt-8 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">Customer Reviews</h2>
+      <div className="flex flex-col gap-6">
+        {reviews.map((review) => (
+          <div
+            key={review._id || review.name}
+            className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {review.image ? (
+                  <img
+                    src={review.image}
+                    alt={review.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
+                    {review.name.charAt(0)}
                   </div>
+                )}
+                <div>
+                  <p className="font-semibold text-gray-800">{review.name}</p>
+                  <p className="text-gray-400 text-xs">{new Date(review.date).toLocaleDateString()}</p>
                 </div>
-              ))}
+              </div>
+              <div className="flex items-center">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    size={18}
+                    className={i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                  />
+                ))}
+              </div>
             </div>
 
-            <button
-              onClick={scrollRight}
-              className="bg-white/90 hover:bg-white shadow p-2 rounded-full transition"
-            >
-              <ChevronRight className="text-[#603808]" size={20} />
-            </button>
+            {review.title && (
+              <p className="font-semibold text-gray-900 mt-3 text-lg">{review.title}</p>
+            )}
+            <p className="text-gray-700 mt-2 leading-relaxed">{review.comment}</p>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
-};
-
-export default CustomerReview;
+}

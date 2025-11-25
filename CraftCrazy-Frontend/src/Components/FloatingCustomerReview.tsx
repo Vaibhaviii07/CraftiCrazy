@@ -1,16 +1,39 @@
-// src/Components/FloatingReviewChat.tsx
+// src/Components/FloatingCustomerReview.tsx
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Image as ImageIcon } from "lucide-react";
-import { Review } from "./CustomerReview";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../AuthContext/AuthContext";
 
-interface FloatingReviewChatProps {
-  productId: string;
+// ✅ Review type
+export interface Review {
+  _id?: string;
+  name: string;
+  email?: string;
+  title?: string;
+  comment: string;
+  rating: number;
+  image?: string;
+  date: string;
 }
 
-const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) => {
-  const { isAuthenticated } = useAuth();
+// ✅ LocalReview = Review + productId + optional variantId
+interface LocalReview extends Review {
+  productId: string;
+  variantId?: string;
+}
+
+interface FloatingCustomerReviewProps {
+  productId: string;
+  variantId?: string;
+  onReviewSubmitted?: () => void; // callback after submission
+}
+
+const FloatingCustomerReview: React.FC<FloatingCustomerReviewProps> = ({
+  productId,
+  variantId,
+  onReviewSubmitted,
+}) => {
+  const { isAuthenticated, user } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(0);
@@ -20,21 +43,20 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
     { sender: "bot", text: "Would you like to share your experience? (yes/no)" },
   ]);
 
-  const [review, setReview] = useState<Review>({
-    name: "",
-    email: "",
+  const [review, setReview] = useState<LocalReview>({
+    productId,
+    variantId,
+    name: user?.name || "",
+    email: user?.email || "",
     title: "",
     comment: "",
     rating: 0,
     image: "",
     date: new Date().toISOString(),
-    productId,
   });
 
   const [input, setInput] = useState("");
   const chatRef = useRef<HTMLDivElement>(null);
-
-  // CUSTOM TOAST
   const [customToast, setCustomToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -42,13 +64,38 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
     setTimeout(() => setCustomToast(null), 2000);
   };
 
-  // Auto scroll to bottom
+  // Scroll chat to bottom
   useEffect(() => {
-    chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+    chatRef.current?.scrollTo({
+      top: chatRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
+  // Submit review
+  const submitReviewToBackend = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/review/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(review),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to submit review.");
+
+      showToast("🎉 Thank you! Your review is submitted.");
+
+      if (onReviewSubmitted) onReviewSubmitted();
+
+      setStep(7);
+    } catch (error) {
+      console.error(error);
+      showToast("❌ Something went wrong.");
+    }
+  };
+
   const handleSend = () => {
-    // Authentication check
     if (!isAuthenticated) {
       showToast("Please login to submit a review.");
       setIsOpen(false);
@@ -61,50 +108,50 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
     setMessages((prev) => [...prev, { sender: "user", text: userText }]);
     setInput("");
 
-    setTimeout(() => handleBotFlow(userText.toLowerCase()), 400);
+    setTimeout(() => handleBotFlow(userText.toLowerCase()), 300);
   };
 
-  const handleBotFlow = (userText: string) => {
+  const handleBotFlow = async (text: string) => {
     switch (step) {
       case 0:
-        if (userText === "yes") {
-          setMessages((prev) => [...prev, { sender: "bot", text: "Awesome! What’s your name?" }]);
+        if (text === "yes") {
+          setMessages((p) => [...p, { sender: "bot", text: "Great! What's your name?" }]);
           setStep(1);
-        } else if (userText === "no") {
-          setMessages((prev) => [...prev, { sender: "bot", text: "No worries! Have a nice day 💛" }]);
+        } else if (text === "no") {
+          setMessages((p) => [...p, { sender: "bot", text: "No problem! Have a great day 💛" }]);
           setTimeout(() => setIsOpen(false), 1000);
         } else {
-          setMessages((prev) => [...prev, { sender: "bot", text: "Please type 'yes' or 'no'." }]);
+          setMessages((p) => [...p, { sender: "bot", text: "Please type 'yes' or 'no'." }]);
         }
         break;
 
       case 1:
-        setReview((r) => ({ ...r, name: userText }));
-        setMessages((p) => [...p, { sender: "bot", text: `Nice to meet you, ${userText}! What’s your email?` }]);
+        setReview((r) => ({ ...r, name: text }));
+        setMessages((p) => [...p, { sender: "bot", text: "Nice! What's your email?" }]);
         setStep(2);
         break;
 
       case 2:
-        setReview((r) => ({ ...r, email: userText }));
+        setReview((r) => ({ ...r, email: text }));
         setMessages((p) => [...p, { sender: "bot", text: "Give your review a short title:" }]);
         setStep(3);
         break;
 
       case 3:
-        setReview((r) => ({ ...r, title: userText }));
-        setMessages((p) => [...p, { sender: "bot", text: "Now, write your review:" }]);
+        setReview((r) => ({ ...r, title: text }));
+        setMessages((p) => [...p, { sender: "bot", text: "Now type your full review:" }]);
         setStep(4);
         break;
 
       case 4:
-        setReview((r) => ({ ...r, comment: userText }));
-        setMessages((p) => [...p, { sender: "bot", text: "How would you rate it? (1–5)" }]);
+        setReview((r) => ({ ...r, comment: text }));
+        setMessages((p) => [...p, { sender: "bot", text: "Rate your experience (1–5):" }]);
         setStep(5);
         break;
 
       case 5:
-        const rating = parseInt(userText);
-        if (isNaN(rating) || rating < 1 || rating > 5) {
+        const rating = Number(text);
+        if (rating < 1 || rating > 5 || isNaN(rating)) {
           setMessages((p) => [...p, { sender: "bot", text: "Please enter a number between 1 and 5." }]);
           return;
         }
@@ -112,33 +159,18 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
         setReview((r) => ({ ...r, rating }));
         setMessages((p) => [
           ...p,
-          { sender: "bot", text: `You rated: ${"⭐".repeat(rating)} (${rating}/5)` },
-          { sender: "bot", text: "Optionally upload an image and type 'submit' when ready." },
+          { sender: "bot", text: `You rated: ${"⭐".repeat(rating)}` },
+          { sender: "bot", text: "You can upload an image now or type 'submit'." },
         ]);
         setStep(6);
         break;
 
       case 6:
-        if (userText === "submit") {
-          const stored = localStorage.getItem(`reviews_${productId}`);
-          const existing = stored ? JSON.parse(stored) : [];
-          const updated = [...existing, review];
-
-          localStorage.setItem(`reviews_${productId}`, JSON.stringify(updated));
-          window.dispatchEvent(new CustomEvent("new-review", { detail: productId }));
-
-          setMessages((p) => [
-            ...p,
-            { sender: "bot", text: "✅ Thank you! Your review has been submitted." },
-          ]);
-
-          setStep(7);
+        if (text === "submit") {
+          await submitReviewToBackend();
         } else {
-          setMessages((p) => [...p, { sender: "bot", text: "Type 'submit' when you're ready." }]);
+          setMessages((p) => [...p, { sender: "bot", text: "Type 'submit' when ready." }]);
         }
-        break;
-
-      default:
         break;
     }
   };
@@ -150,14 +182,13 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
     const reader = new FileReader();
     reader.onloadend = () => {
       setReview((r) => ({ ...r, image: reader.result as string }));
-      setMessages((p) => [...p, { sender: "user", text: "📸 Image uploaded successfully!" }]);
+      setMessages((p) => [...p, { sender: "user", text: "📸 Image uploaded!" }]);
     };
     reader.readAsDataURL(file);
   };
 
   return (
     <>
-      {/* Floating Button */}
       <motion.button
         onClick={() => {
           if (!isAuthenticated) {
@@ -166,75 +197,59 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
           }
           setIsOpen(!isOpen);
         }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 cursor-pointer bg-gradient-to-br from-[#b46029] to-[#e8b77b] text-white rounded-full p-4 shadow-lg z-50"
+        className="fixed bottom-6 right-6 bg-[#b46029] text-white p-4 rounded-full shadow-lg z-50"
+        whileHover={{ scale: isAuthenticated ? 1.1 : 1 }}
+        whileTap={{ scale: isAuthenticated ? 0.9 : 1 }}
       >
         {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
       </motion.button>
 
-      {/* Chat Box */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-20 right-6 w-80 bg-white border border-gray-200 shadow-xl rounded-2xl flex flex-col overflow-hidden z-50"
+            className="fixed bottom-20 right-6 w-80 bg-white border shadow-xl rounded-2xl overflow-hidden z-50"
           >
-            <div className="bg-gray-100 text-gray-800 p-3 font-semibold text-center rounded-t-2xl">
-              🧡 Review Assistant
-            </div>
+            <div className="bg-gray-100 p-3 text-center font-semibold">🧡 Review Assistant</div>
 
-            <div
-              ref={chatRef}
-              className="flex-1 overflow-y-auto p-3 space-y-2 max-h-96 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-            >
+            <div ref={chatRef} className="p-3 max-h-96 overflow-y-auto space-y-2 scrollbar-thin">
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`p-2 rounded-xl max-w-[80%] break-words ${
+                  className={`p-2 rounded-lg max-w-[80%] ${
                     msg.sender === "bot"
-                      ? "bg-gray-100 text-gray-800 self-start"
-                      : "bg-[#b46029] text-white self-end ml-auto"
+                      ? "bg-gray-200 text-black"
+                      : "bg-[#b46029] text-white ml-auto"
                   }`}
                 >
                   {msg.text}
                 </div>
               ))}
 
-              {review.image && (
-                <img
-                  src={review.image}
-                  alt="Uploaded"
-                  className="w-28 h-28 object-cover rounded-xl mt-2 border self-end"
-                />
-              )}
+              {review.image && <img src={review.image} className="w-24 h-24 rounded-lg ml-auto" />}
             </div>
 
-            <div className="flex items-center gap-2 border-t p-2">
-              <label className="cursor-pointer">
-                <ImageIcon className="text-gray-400 hover:text-gray-600 transition-colors" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
+            <div className="flex items-center gap-2 p-2 border-t">
+              <label>
+                <ImageIcon className="text-gray-500 cursor-pointer" />
+                <input type="file" className="hidden" onChange={handleImageUpload} />
               </label>
 
               <input
-                type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-[#b46029] focus:border-[#b46029]"
+                placeholder="Type..."
+                className="flex-1 border rounded-lg px-2 py-1 text-sm"
+                disabled={!isAuthenticated}
               />
 
               <button
                 onClick={handleSend}
-                className="bg-[#b46029] hover:bg-[#e8b77b] text-white p-2 rounded-lg transition-colors"
+                className="bg-[#b46029] text-white px-3 py-2 rounded-lg"
+                disabled={!isAuthenticated}
               >
                 <Send size={16} />
               </button>
@@ -243,14 +258,13 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
         )}
       </AnimatePresence>
 
-      {/* Custom Toast */}
       <AnimatePresence>
         {customToast && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg z-[9999]"
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#E8D4B7] px-6 py-3 rounded-lg shadow-lg"
           >
             {customToast}
           </motion.div>
@@ -260,4 +274,4 @@ const FloatingReviewChat: React.FC<FloatingReviewChatProps> = ({ productId }) =>
   );
 };
 
-export default FloatingReviewChat;
+export default FloatingCustomerReview;

@@ -1,5 +1,6 @@
 // src/Data/ResinClockData.ts
 export type Variant = {
+  
   image: string;
   price: number;
   discount?: number;

@@ -46,18 +46,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     }));
   };
 
+  // ✅ FIX: precise active path check
   const isActive = (path: string) => location.pathname === path;
 
   const menuItemClass = (path: string) =>
-    `relative flex items-center gap-3 px-4 py-2 text-sm rounded-xl transition-all duration-300 ${
-      isActive(path)
-        ? "bg-gradient-to-r from-[#845EF7] to-[#B197FC] text-white shadow-[0_0_15px_#845EF760]"
-        : "text-gray-300 hover:text-white hover:bg-white/10"
+    `relative flex items-center gap-3 px-4 py-2 text-sm rounded-xl transition-all duration-300 ${isActive(path)
+      ? "bg-gradient-to-r from-[#845EF7] to-[#B197FC] text-white shadow-[0_0_15px_#845EF760]"
+      : "text-gray-300 hover:text-white hover:bg-white/10"
     }`;
 
   const sectionButtonClass =
     "w-full flex justify-between items-center px-5 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300";
 
+  // Auto open sidebar on large screens
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768 && !isSidebarOpen) toggleSidebar();
@@ -68,6 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
+      {/* Mobile Toggle Button */}
       <button
         className="fixed top-4 left-4 z-50 p-2 text-white bg-[#7b2ff7] rounded-md shadow-md md:hidden"
         onClick={toggleSidebar}
@@ -75,6 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Menu size={20} />
       </button>
 
+      {/* Mobile Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -87,6 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </AnimatePresence>
 
+      {/* Sidebar */}
       <AnimatePresence>
         {(isSidebarOpen || window.innerWidth >= 768) && (
           <motion.aside
@@ -94,12 +98,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             animate={{ x: 0 }}
             exit={{ x: -250 }}
             transition={{ duration: 0.3 }}
-            className={`${
-              isCollapsed ? "w-20" : "w-64"
-            } h-screen fixed left-0 top-0 z-50 flex flex-col
+            className={`${isCollapsed ? "w-20" : "w-64"
+              } h-screen fixed left-0 top-0 z-50 flex flex-col
             bg-gradient-to-b from-[#10002b]/90 to-[#240046]/90
             backdrop-blur-xl border-r border-r-white/10 text-gray-200 transition-all duration-300`}
           >
+            {/* Header */}
             <div className="p-5 flex justify-between items-center border-b border-white/10">
               {!isCollapsed && (
                 <h1 className="text-xl font-semibold bg-gradient-to-r from-[#B197FC] to-[#845EF7] bg-clip-text text-transparent tracking-wide">
@@ -118,19 +122,18 @@ const Sidebar: React.FC<SidebarProps> = ({
               </button>
             </div>
 
+            {/* Navigation */}
             <nav className="flex-1 overflow-y-auto mt-4 px-2 space-y-2 custom-scroll pb-20">
               {/* Dashboard */}
               <div>
                 <button
                   onClick={() => toggleMenu("dashboard")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <Home size={18} />
                     {!isCollapsed && <span>Dashboard</span>}
@@ -165,14 +168,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("products")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <Package size={18} />
                     {!isCollapsed && <span>Products</span>}
@@ -198,17 +199,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/allproducts" className={menuItemClass("/allproducts")}>
                         All Products
                       </Link>
-
                       <Link to="/addproducts" className={menuItemClass("/addproducts")}>
                         Add Product
                       </Link>
-                      <Link
-                        to="/product/details"
-                        className={menuItemClass("/products/detail")}
-                      >
-                        Product Detail
-                      </Link>
-
                       <Link to="/catogaries" className={menuItemClass("/catogaries")}>
                         Categories
                       </Link>
@@ -221,14 +214,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("orders")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <ClipboardList size={18} />
                     {!isCollapsed && <span>Orders</span>}
@@ -254,10 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/orders" className={menuItemClass("/orders")}>
                         All Orders
                       </Link>
-                      <Link
-                        to="/orders/details"
-                        className={menuItemClass("/orders/details")}
-                      >
+                      <Link to="/orders/details" className={menuItemClass("/orders/details")}>
                         Order Details
                       </Link>
                     </motion.div>
@@ -265,18 +253,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </AnimatePresence>
               </div>
 
-              {/* Invoices */}
+              {/* ✅ Invoices Section with toggle */}
               <div>
                 <button
                   onClick={() => toggleMenu("invoices")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <FileText size={18} />
                     {!isCollapsed && <span>Invoices</span>}
@@ -302,10 +288,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/ListInvoice" className={menuItemClass("/ListInvoice")}>
                         All Invoices
                       </Link>
-                      <Link
-                        to="/CreateInvoice"
-                        className={menuItemClass("/CreateInvoice")}
-                      >
+                      <Link to="/CreateInvoice" className={menuItemClass("/CreateInvoice")}>
                         Create Invoice
                       </Link>
                     </motion.div>
@@ -317,14 +300,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div>
                 <button
                   onClick={() => toggleMenu("customers")}
-                  className={`${sectionButtonClass} ${
-                    isCollapsed ? "justify-center px-0" : ""
-                  }`}
+                  className={`${sectionButtonClass} ${isCollapsed ? "justify-center px-0" : ""
+                    }`}
                 >
                   <div
-                    className={`flex items-center ${
-                      isCollapsed ? "justify-center" : "gap-3"
-                    }`}
+                    className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"
+                      }`}
                   >
                     <Users size={18} />
                     {!isCollapsed && <span>Customers</span>}
@@ -356,12 +337,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/contact" className={menuItemClass("/contact")}>
                         Customer Contact
                       </Link>
+
+
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             </nav>
 
+            {/* Footer */}
             {!isCollapsed && (
               <div className="p-4 border-t border-white/10 text-xs text-gray-400 text-center mt-auto">
                 © 2025 CraftiCrazy Admin
