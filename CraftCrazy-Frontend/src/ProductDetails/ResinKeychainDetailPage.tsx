@@ -1,276 +1,346 @@
-// src/ProductDetails/ResinKeychainDetailPage.tsx
+// src/Pages/ResinKeychainDetailPage.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
-import { resinKeychains, ResinKeychain, Variant } from "../Data/ResinKeychainData";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
+import { resinKeychains } from "../Data/ResinKeychainData";
 
+// ---------- TYPES ----------
 type Params = { id: string };
 
-function Loader() {
-  return (
-    <div className="flex justify-center items-center h-96">
-      <div className="w-12 h-12 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
-    </div>
-  );
-}
+export type ResinKeychainVariant = {
+  id: string;
+  name: string;
+  price: number;
+  discount?: number;
+  inStock: boolean;
+  image: string;
+  description?: string;
+  material?: string;
+  dimensions?: string;
+  weight?: string;
+  careInstructions?: string;
+  tags?: string[];
+  warranty?: string;
+  contents?: string[];
+  customization?: {
+    available: boolean;
+    options?: string[];
+  };
+  specifications?: Record<string, string>;
+};
 
-type LocalVariant = Variant & { id: string };
+export type ResinKeychain = {
+   id: string;
+    name: string;
+    description?: string;
+    price: number;
+    discount?: number;
+    rating?: number;
+    reviews?: number;
+    inStock: boolean;
+    image: string;
+    contents?: string[];
+    customization?: {
+      available: boolean;
+      options?: string[];
+    };
+    material?: string;
+    dimensions?: string;
+    weight?: string;
+    careInstructions?: string;
+    specifications?: Record<string, string>;
+  variants?: ResinKeychainVariant[];
+};
 
+// ---------- COMPONENT ----------
 export default function ResinKeychainDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
+  const [currentProduct, setCurrentProduct] = useState<ResinKeychain | null>(null);
+  const [currentVariant, setCurrentVariant] = useState<ResinKeychainVariant | null>(null);
+
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const [backendRating, setBackendRating] = useState<number>(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
-  // Fallback product from static data
-  const productFromParams: ResinKeychain | undefined = resinKeychains.find(p => String(p.id) === id);
-  const [currentProduct, setCurrentProduct] = useState<ResinKeychain | null>(productFromParams ?? null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Default variant
-   type LocalVariant = Variant & { id: string };
-     const selectedVariantDefault = useMemo<LocalVariant | null>(() => {
-        if (!currentProduct) return null;
-        const firstVariant = currentProduct.variants?.[0];
-        const derivedId = (firstVariant && ((firstVariant as any).id ?? `${currentProduct.id}-default`)) || `${currentProduct.id}-default`;
-        return {
-          ...(firstVariant || {}),
-          image: firstVariant?.image ?? currentProduct.image,
-          price: firstVariant?.price ?? currentProduct.price,
-          discount: firstVariant?.discount ?? currentProduct.discount,
-          id: derivedId,
-        } as LocalVariant;
-      }, [currentProduct]);
-
-  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariantDefault);
-
-  useEffect(() => {
-    setCurrentVariant(selectedVariantDefault);
-    setQuantity(1);
-    setImgLoaded(false);
-    setBackendRating(0);
-    setBackendReviewsCount(0);
-  }, [selectedVariantDefault]);
-
-  // Loading effect
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Fetch product from backend
+  // ---------- FETCH PRODUCT ----------
   useEffect(() => {
     if (!id) return;
+
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/products/${id}`);
-        if (!res.ok) throw new Error("Product fetch failed");
-        const data = await res.json();
-        if (data?.product) setCurrentProduct(data.product);
-      } catch {
-        setCurrentProduct(productFromParams ?? null);
+        const res = await axios.get(`http://localhost:8000/api/products/${id}`);
+        const data: ResinKeychain = res.data?.product;
+
+        setCurrentProduct(data);
+
+        // Default variant = first variant or main product
+        setCurrentVariant(
+          data.variants?.[0] || {
+            id: data.id,
+            name: data.name,
+            price: data.price,
+            discount: data.discount,
+            image: data.image,
+            inStock: data.inStock,
+            description: data.description,
+            material: undefined,
+            dimensions: undefined,
+            weight: undefined,
+            careInstructions: undefined,
+          }
+        );
+      } catch (err) {
+        console.error("Product fetch error:", err);
+        setCurrentProduct(null);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchProduct();
   }, [id]);
 
-  // Fetch reviews from backend
- // Fetch reviews from backend
-  useEffect(() => {
-    if (!currentProduct) return;
+  // ---------- FETCH REVIEWS ----------
+  const fetchReviews = async () => {
+    if (!currentProduct || !currentVariant) return;
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+      );
+      setBackendRating(res.data.averageRating ?? 0);
+      setBackendReviewsCount(res.data.reviewCount ?? 0);
+    } catch (err) {
+      console.error("Review fetch error:", err);
+      setBackendRating(0);
+      setBackendReviewsCount(0);
+    }
+  };
 
-    const fetchReviews = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:8000/api/reviews/product/${currentProduct.id}?limit=8`
-        );
-        if (!res.ok) throw new Error("Failed to fetch reviews");
-        const data = await res.json();
-        setBackendRating(data.averageRating ?? 0);
-        setBackendReviewsCount(data.reviewCount ?? 0);
-      } catch (err) {
-        console.error("Reviews fetch failed", err);
-        setBackendRating(0);
-        setBackendReviewsCount(0);
-      }
-    };
-
-    fetchReviews();
-  }, [currentProduct]);
-
-  // Add to cart
+  // ---------- ADD TO CART ----------
   const handleAddToCart = () => {
-    if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
+    if (!currentProduct || !currentVariant) return;
 
     addToCart({
-      id: currentProduct.id,
-      name: currentProduct.name,
+      id: currentVariant.id,
+      name: currentVariant.name || currentProduct.name,
       price: currentVariant.price,
       quantity,
       image: currentVariant.image,
     });
 
     if (isAuthenticated) {
-      setToast(`${currentProduct.name} added to cart`);
+      setToast(`${currentVariant.name || currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
   };
 
+  // ---------- CLEANUP ----------
   useEffect(() => {
     return () => {
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
   }, []);
 
-  if (loading) return <Loader />;
-  if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Keychain not found</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="w-12 h-12 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    );
 
-  const finalRating = backendRating > 0 ? backendRating : currentProduct.rating ?? 0;
-  const finalReviewsCount = backendReviewsCount > 0 ? backendReviewsCount : currentProduct.reviews ?? 0;
+  if (!currentProduct)
+    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+
+  const finalRating = backendRating || currentProduct.rating || 0;
+  const finalReviewsCount = backendReviewsCount || currentProduct.reviews || 0;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Image + Thumbnails */}
+        {/* LEFT IMAGE */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
-              <div className="w-10 h-10 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
+              <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
             </div>
           )}
-          {currentVariant && (
+
+          {currentVariant?.image && (
             <motion.img
               src={currentVariant.image}
-              alt={currentProduct.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              alt={currentVariant.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
             />
           )}
+
           {currentVariant?.discount && (
-            <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
+            <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
             </span>
           )}
-
-          {/* Thumbnails */}
-          {currentProduct.variants && currentProduct.variants.length > 1 && (
-                    <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
-                      {currentProduct.variants.map((v, i) => {
-                        const localVariant: LocalVariant = {
-                          ...v,
-                          id: (v as any).id ?? `${currentProduct.id}-variant-${i}`,
-                          image: v.image ?? currentProduct.image,
-                          price: v.price ?? currentProduct.price,
-                          discount: v.discount ?? currentProduct.discount,
-                        };
-                        return (
-                          <motion.div
-                            key={localVariant.id}
-                            onClick={() => setCurrentVariant(localVariant)}
-                            className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
-                              currentVariant?.id === localVariant.id
-                                ? "border-[#b46029] ring-2 ring-[#b46029]"
-                                : "border-gray-300"
-                            }`}
-                            whileHover={{ scale: 1.05 }}
-                          >
-                            <img
-                              src={localVariant.image}
-                              alt={`thumb-${i}`}
-                              className="h-20 w-20 object-cover rounded-lg"
-                            />
-                            {localVariant.discount && (
-                              <span className="absolute top-1 left-1 bg-[#b46029] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
-                                {localVariant.discount}% OFF
-                              </span>
-                            )}
-                          </motion.div>
-                        );
-                      })}
-            </div>
-          )}
         </div>
 
-        {/* Right: Product Info */}
+        {/* RIGHT INFO */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">
+            {currentVariant?.name || currentProduct.name}
+          </h1>
 
-          {/* Rating & Price */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{currentVariant?.price}</span>
-            {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
+          {/* Price */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="text-2xl sm:text-3xl font-semibold text-[#b46029]">
+              ₹{currentVariant?.price}
+            </span>
+
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg ml-2">
+                ₹{currentProduct.price}
+              </span>
+            )}
           </div>
+
+          {/* Variant Selector */}
+          {currentProduct.variants && currentProduct.variants.length > 1 && (
+            <select
+              value={currentVariant?.id}
+              onChange={(e) => {
+                const selected = currentProduct.variants?.find(
+                  (v) => v.id === e.target.value
+                );
+                if (selected) setCurrentVariant(selected);
+                setQuantity(1);
+              }}
+              className="border px-2 py-1 rounded w-44 mt-2"
+            >
+              {currentProduct.variants.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name} - ₹{v.price}
+                </option>
+              ))}
+            </select>
+          )}
 
           {/* Description */}
-          {currentProduct.description && <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>}
+          {currentVariant?.description && (
+            <p className="text-gray-700 leading-relaxed">{currentVariant.description}</p>
+          )}
 
-          {/* Tags / Stock / Brand */}
+          {/* Structured Info */}
+          <div className="mt-2 space-y-2 text-gray-700">
+            {currentVariant?.material && (
+              <p>
+                <span className="font-semibold">Material:</span>{" "}
+                {currentVariant.material}
+              </p>
+            )}
+            {currentVariant?.dimensions && (
+              <p>
+                <span className="font-semibold">Dimensions:</span>{" "}
+                {currentVariant.dimensions}
+              </p>
+            )}
+            {currentVariant?.weight && (
+              <p>
+                <span className="font-semibold">Weight:</span> {currentVariant.weight}
+              </p>
+            )}
+            {currentVariant?.careInstructions && (
+              <p>
+                <span className="font-semibold">Care Instructions:</span>{" "}
+                {currentVariant.careInstructions}
+              </p>
+            )}
+          </div>
+
+          {/* Tags + Stock + Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.brand && <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.brand}</span>}
-            <span className={`px-2 py-1 rounded ${currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
+            {currentVariant?.tags?.map((tag, idx) => (
+              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
+                {tag}
+              </span>
+            ))}
+
+            <span
+              className={`px-2 py-1 rounded ${
+                currentVariant?.inStock
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {currentVariant?.inStock ? "In Stock" : "Out of Stock"}
             </span>
+
+            {currentVariant?.warranty && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentVariant.warranty}</span>
+            )}
           </div>
 
-          {/* Additional Details */}
-          <div className="mt-4 space-y-2 text-gray-700">
-            {currentProduct.material && <p><span className="font-semibold">Material:</span> {currentProduct.material}</p>}
-            {currentProduct.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}</p>}
-            {currentProduct.weight && <p><span className="font-semibold">Weight:</span> {currentProduct.weight}</p>}
-            {currentProduct.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}</p>}
-            {currentProduct.delivery && <p><span className="font-semibold">Delivery:</span> {currentProduct.delivery.type}, {currentProduct.delivery.availability}, Estimated {currentProduct.delivery.estimated}</p>}
-          </div>
-
-          {/* Add to Cart */}
+          {/* ADD TO CART */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
-              disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              disabled={!currentVariant?.inStock}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
+                currentVariant?.inStock
+                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
-              <ShoppingCart className="w-5 h-5 cursor-pointer" /> Add to Cart
+              <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
 
-          {/* Extra Sections */}
+          {/* Contents / customization / specs */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.contents && (
+            {currentVariant?.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => <li key={idx}>{item}</li>)}
+                  {currentVariant.contents.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
                 </ul>
               </div>
             )}
 
-            {currentProduct.customization?.available && (
+            {currentVariant?.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
+                <p className="text-gray-600">
+                  {currentVariant.customization.options?.join(", ")}
+                </p>
               </div>
             )}
 
-            {currentProduct.specifications && (
+            {currentVariant?.specifications && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
-                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
+                  {Object.entries(currentVariant.specifications).map(([key, value], idx) => (
+                    <li key={idx}>
+                      <span className="font-medium">{key}:</span> {value}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -278,7 +348,22 @@ export default function ResinKeychainDetailPage() {
           </div>
         </div>
       </div>
-      {/* Toast */}
+
+      {/* REVIEWS */}
+      <CustomerReview
+        productId={currentProduct.id}
+        variantId={currentVariant?.id}
+        setBackendRating={setBackendRating}
+        setBackendReviewsCount={setBackendReviewsCount}
+      />
+
+      <FloatingCustomerReview
+        productId={currentProduct.id}
+        variantId={currentVariant?.id}
+        onReviewSubmitted={fetchReviews}
+      />
+
+      {/* TOAST */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -292,19 +377,6 @@ export default function ResinKeychainDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Reviews */}
-      {currentProduct && currentVariant && (
-        <>
-          <CustomerReview
-            productId={currentProduct.id}
-            variantId={currentVariant.id}
-            setBackendRating={setBackendRating}
-            setBackendReviewsCount={setBackendReviewsCount}
-          />
-          <FloatingCustomerReview productId={currentProduct.id} variantId={currentVariant.id} />
-        </>
-      )}
     </div>
   );
 }

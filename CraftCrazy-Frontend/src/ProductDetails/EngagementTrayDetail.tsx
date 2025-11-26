@@ -1,7 +1,7 @@
 // src/ProductDetails/EngagementTrayDetail.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
-import { engagementTrays, EngagementTray, Variant } from "../Data/EngagementTrayData";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { useCart } from "../AuthContext/CartContext";
 import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,15 +9,70 @@ import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
 
+// ---------- TYPES ----------
 type Params = { id: string };
-type LocalVariant = Variant & { id: string }; // Add id to Variant
 
+export type EngagementTrayVariant = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  discount?: number;
+  rating?: number;
+  reviews?: number;
+  inStock: boolean;
+  image: string;
+  contents?: string[];
+  customization?: {
+    available: boolean;
+    options?: string[];
+    userInput?: string;
+  };
+  material?: string;
+  dimensions?: string;
+  weight?: string;
+  careInstructions?: string;
+  specifications?: Record<string, string>;
+  tags?: string[];
+  warranty?: string;
+};
+
+export type EngagementTray = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  discount?: number;
+  rating?: number;
+  reviews?: number;
+  inStock: boolean;
+  image: string;
+  variants?: EngagementTrayVariant[];
+  contents?: string[];
+  customization?: {
+    available: boolean;
+    options?: string[];
+    userInput?: string;
+  };
+  material?: string;
+  dimensions?: string;
+  weight?: string;
+  careInstructions?: string;
+  specifications?: Record<string, string>;
+  tags?: string[];
+  warranty?: string;
+};
+
+// ---------- COMPONENT ----------
 export default function EngagementTrayDetail() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const [quantity, setQuantity] = useState<number>(1);
+  const [currentProduct, setCurrentProduct] = useState<EngagementTray | null>(null);
+  const [currentVariant, setCurrentVariant] = useState<EngagementTrayVariant | null>(null);
+
+  const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -27,102 +82,86 @@ export default function EngagementTrayDetail() {
 
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const productFromParams: EngagementTray | undefined = engagementTrays.find(p => p.id === id);
-
-  const [currentProduct, setCurrentProduct] = useState<EngagementTray | null>(productFromParams ?? null);
-
-  // Build selected variant with guaranteed id
-  const selectedVariant = useMemo<LocalVariant | null>(() => {
-    if (!currentProduct) return null;
-
-    const firstVariant = currentProduct.variants?.[0];
-    const derivedId =
-      (firstVariant && ((firstVariant as any).id ?? (firstVariant as any).variantId)) ??
-      `${currentProduct.id}-default`;
-
-    return {
-      ...(firstVariant ? firstVariant : {}),
-      image: firstVariant?.image ?? currentProduct.image,
-      price: firstVariant?.price ?? currentProduct.price,
-      discount: firstVariant?.discount ?? currentProduct.discount,
-      id: String(derivedId),
-    } as LocalVariant;
-  }, [currentProduct]);
-
-  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariant);
-
-  useEffect(() => {
-    setCurrentVariant(selectedVariant);
-    setQuantity(1);
-    setBackendRating(0);
-    setBackendReviewsCount(0);
-    setImgLoaded(false);
-  }, [selectedVariant]);
-
-  // Loader simulation
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Fetch product from backend
+  // ---------- FETCH PRODUCT ----------
   useEffect(() => {
     if (!id) return;
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/products/${id}`);
-        if (!res.ok) throw new Error("Product fetch failed");
-        const data = await res.json();
-        setCurrentProduct(data?.product ?? productFromParams ?? null);
-      } catch {
-        setCurrentProduct(productFromParams ?? null);
+        const res = await axios.get(`http://localhost:8000/api/products/${id}`);
+        const data: EngagementTray = res.data?.product;
+        if (!data) throw new Error("No product found");
+
+        setCurrentProduct(data);
+
+        // Default variant = first variant or main product
+        setCurrentVariant(
+          data.variants?.[0] || {
+            id: data.id,
+            name: data.name,
+            price: data.price,
+            discount: data.discount,
+            image: data.image,
+            inStock: data.inStock,
+            description: data.description,
+            contents: data.contents,
+            customization: data.customization,
+            specifications: data.specifications,
+            material: data.material,
+            dimensions: data.dimensions,
+            weight: data.weight,
+            careInstructions: data.careInstructions,
+            tags: data.tags,
+            warranty: data.warranty,
+          }
+        );
+      } catch (err) {
+        console.error("Product fetch error:", err);
+        setCurrentProduct(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProduct();
-  }, [id, productFromParams]);
+  }, [id]);
 
-  // Fetch reviews
+  // ---------- FETCH REVIEWS ----------
   const fetchReviews = async () => {
-    if (!currentProduct) return;
+    if (!currentProduct || !currentVariant) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/reviews/product/${currentProduct.id}?limit=8`);
-      if (!res.ok) throw new Error("Reviews fetch failed");
-      const data = await res.json();
-      setBackendRating(data.averageRating ?? 0);
-      setBackendReviewsCount(data.reviewCount ?? 0);
-    } catch {
+      const res = await axios.get(
+        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+      );
+      setBackendRating(res.data.averageRating ?? 0);
+      setBackendReviewsCount(res.data.reviewCount ?? 0);
+    } catch (err) {
+      console.error("Review fetch error:", err);
       setBackendRating(0);
       setBackendReviewsCount(0);
     }
   };
 
-  useEffect(() => {
-    fetchReviews();
-  }, [currentVariant, currentProduct]);
-
-  const finalRating = backendRating || currentProduct?.rating || 0;
-  const finalReviewsCount = backendReviewsCount || currentProduct?.reviews || 0;
-
+  // ---------- ADD TO CART ----------
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
     addToCart({
-      id: currentProduct.id,
-      name: currentProduct.name,
+      id: currentVariant.id,
+      name: currentVariant.name || currentProduct.name,
       price: currentVariant.price,
       quantity,
       image: currentVariant.image,
     });
 
     if (isAuthenticated) {
-      setToast(`${currentProduct.name} added to cart`);
+      setToast(`${currentVariant.name || currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
   };
 
+  // ---------- CLEANUP ----------
   useEffect(() => {
     return () => {
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -139,26 +178,33 @@ export default function EngagementTrayDetail() {
   if (!currentProduct)
     return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
+  const finalRating = backendRating || currentProduct.rating || 0;
+  const finalReviewsCount = backendReviewsCount || currentProduct.reviews || 0;
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left Image */}
+        {/* LEFT IMAGE */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
               <div className="w-10 h-10 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
             </div>
           )}
+
           {currentVariant?.image && (
             <motion.img
               src={currentVariant.image}
-              alt={currentProduct.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              alt={currentVariant.name}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
             />
           )}
+
           {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
@@ -166,104 +212,147 @@ export default function EngagementTrayDetail() {
           )}
         </div>
 
-        {/* Right Info */}
+        {/* RIGHT INFO */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
-          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">
+            {currentVariant?.name || currentProduct.name}
+          </h1>
 
           {/* Price */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{currentVariant?.price}</span>
+            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">
+              ₹{currentVariant?.price}
+            </span>
+
             {currentVariant?.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
+              <span className="line-through text-gray-400 text-lg ml-2">
+                ₹{currentProduct.price}
+              </span>
             )}
           </div>
 
-          {/* Description */}
-          {currentProduct.description && (
-            <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
+          {/* Variant Selector */}
+          {currentProduct.variants && currentProduct.variants.length > 1 && (
+            <select
+              value={currentVariant?.id}
+              onChange={(e) => {
+                const selected = currentProduct.variants?.find(
+                  (v) => v.id === e.target.value
+                );
+                if (selected) setCurrentVariant(selected);
+                setQuantity(1);
+              }}
+              className="border px-2 py-1 rounded w-44 mt-2"
+            >
+              {currentProduct.variants.map((v: EngagementTrayVariant) => (
+                <option key={v.id} value={v.id}>
+                  {v.name} - ₹{v.price}
+                </option>
+              ))}
+            </select>
           )}
 
-          {/* Structured info */}
+          {/* Description */}
+          {currentVariant?.description && (
+            <p className="text-gray-700 leading-relaxed">{currentVariant.description}</p>
+          )}
+
+          {/* Structured Info */}
           <div className="mt-2 space-y-2 text-gray-700">
-            {currentProduct.material && (
+            {currentVariant?.material && (
               <p>
-                <span className="font-semibold">Material:</span> {currentProduct.material}
+                <span className="font-semibold">Material:</span> {currentVariant.material}
               </p>
             )}
-            {currentProduct.dimensions && (
+            {currentVariant?.dimensions && (
               <p>
-                <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}
+                <span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}
               </p>
             )}
-            {currentProduct.weight && (
+            {currentVariant?.weight && (
               <p>
-                <span className="font-semibold">Weight:</span> {currentProduct.weight}
+                <span className="font-semibold">Weight:</span> {currentVariant.weight}
               </p>
             )}
-            {currentProduct.careInstructions && (
+            {currentVariant?.careInstructions && (
               <p>
-                <span className="font-semibold">Care Instructions:</span> {currentProduct.careInstructions}
+                <span className="font-semibold">Care Instructions:</span>{" "}
+                {currentVariant.careInstructions}
               </p>
             )}
           </div>
 
-          {/* Tags / Stock / Warranty */}
+          {/* Tags + Stock + Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {currentProduct.tags?.map((tag, idx) => (
+            {currentVariant?.tags?.map((tag: string, idx: number) => (
               <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
                 {tag}
               </span>
             ))}
+
             <span
               className={`px-2 py-1 rounded ${
-                currentProduct.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                currentVariant?.inStock
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
               }`}
             >
-              {currentProduct.inStock ? "In Stock" : "Out of Stock"}
+              {currentVariant?.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
+
+            {currentVariant?.warranty && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{currentVariant.warranty}</span>
             )}
           </div>
 
-          {/* Add to Cart */}
+          {/* ADD TO CART */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
-              disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              disabled={!currentVariant?.inStock}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
+                currentVariant?.inStock
+                  ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
-       <div className="mt-6 flex flex-col gap-4">
-            {currentProduct.contents && (
+
+          {/* Contents / customization / specs */}
+          <div className="mt-6 flex flex-col gap-4">
+            {currentVariant?.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentProduct.contents.map((item, idx) => (
+                  {currentVariant.contents.map((item: string, idx: number) => (
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {currentProduct.customization?.available && (
+            {currentVariant?.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
+                <p className="text-gray-600">
+                  {currentVariant.customization.options?.join(", ")}
+                </p>
               </div>
             )}
 
-            {currentProduct.specifications && (
+            {currentVariant?.specifications && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
-                    <li key={idx}>
-                      <span className="font-medium">{key}:</span> {String(value)}
-                    </li>
-                  ))}
+                  {Object.entries(currentVariant.specifications).map(
+                    ([key, value], idx: number) => (
+                      <li key={idx}>
+                        <span className="font-medium">{key}:</span> {value}
+                      </li>
+                    )
+                  )}
                 </ul>
               </div>
             )}
@@ -271,24 +360,21 @@ export default function EngagementTrayDetail() {
         </div>
       </div>
 
-      {/* Reviews Section */}
-      {currentProduct && (
-        <>
-          <CustomerReview
-            productId={currentProduct.id}
-            variantId={currentVariant?.id}
-            setBackendRating={setBackendRating}
-            setBackendReviewsCount={setBackendReviewsCount}
-          />
-          <FloatingCustomerReview
-            productId={currentProduct.id}
-            variantId={currentVariant?.id}
-            onReviewSubmitted={fetchReviews}
-          />
-        </>
-      )}
+      {/* REVIEWS */}
+      <CustomerReview
+        productId={currentProduct.id}
+        variantId={currentVariant?.id}
+        setBackendRating={setBackendRating}
+        setBackendReviewsCount={setBackendReviewsCount}
+      />
 
-      {/* Toast */}
+      <FloatingCustomerReview
+        productId={currentProduct.id}
+        variantId={currentVariant?.id}
+        onReviewSubmitted={fetchReviews}
+      />
+
+      {/* TOAST */}
       <AnimatePresence>
         {toast && (
           <motion.div

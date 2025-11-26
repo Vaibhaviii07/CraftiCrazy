@@ -1,16 +1,56 @@
 // src/ProductDetails/KeyChainDetailPage.tsx
 import { useParams } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
-import { keyChains, KeyChain, Variant } from "../Data/KeyChainData";
-import { useCart } from "../AuthContext/CartContext";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../AuthContext/CartContext";
+import { useAuth } from "../AuthContext/AuthContext";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingReviewChat from "../Components/FloatingCustomerReview";
-import { useAuth } from "../AuthContext/AuthContext";
+
+/* ---------------------- TYPES (same as BirthdayHamper) ---------------------- */
 
 type Params = { id: string };
-type LocalVariant = Variant & { id: string };
+
+export type KeyChainVariant = {
+  id: string;
+  name: string;
+  price: number;
+  discount?: number;
+  image: string;
+  description?: string;
+  inStock: boolean;
+  contents?: string[];
+  customization?: { available: boolean; options?: string[] };
+  specifications?: Record<string, string>;
+  material?: string;
+  dimensions?: string;
+  weight?: string;
+  careInstructions?: string;
+};
+
+export type KeyChainProduct = {
+  id: string;
+  name: string;
+  price: number;
+  discount?: number;
+  description?: string;
+  image: string;
+  inStock: boolean;
+  warranty?: string;
+  tags?: string[];
+  variants?: KeyChainVariant[];
+  contents?: string[];
+  customization?: { available: boolean; options?: string[] };
+  specifications?: Record<string, string>;
+  material?: string;
+  dimensions?: string;
+  weight?: string;
+  careInstructions?: string;
+};
+
+/* --------------------------- Loader Component --------------------------- */
 
 function Loader() {
   return (
@@ -20,7 +60,8 @@ function Loader() {
   );
 }
 
-// Hook for reviews
+/* --------------------------- Reviews Hook --------------------------- */
+
 function useProductReviews(productId?: string) {
   const [backendRating, setBackendRating] = useState(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState(0);
@@ -30,15 +71,14 @@ function useProductReviews(productId?: string) {
 
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/reviews/product/${productId}?limit=8`);
-        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const res = await fetch(
+          `http://localhost:8000/api/reviews/product/${productId}?limit=8`
+        );
         const data = await res.json();
         setBackendRating(data.averageRating ?? 0);
         setBackendReviewsCount(data.reviewCount ?? 0);
       } catch (err) {
-        console.error("Reviews fetch failed", err);
-        setBackendRating(0);
-        setBackendReviewsCount(0);
+        console.error("Review Fetch Error", err);
       }
     };
 
@@ -48,67 +88,73 @@ function useProductReviews(productId?: string) {
   return { backendRating, backendReviewsCount, setBackendRating, setBackendReviewsCount };
 }
 
+/* ----------------------------- MAIN PAGE ----------------------------- */
+
 export default function KeyChainDetailPage() {
   const { id } = useParams<Params>();
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [currentProduct, setCurrentProduct] = useState<KeyChainProduct | null>(null);
+  const [currentVariant, setCurrentVariant] = useState<KeyChainVariant | null>(null);
 
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  const staticProduct = keyChains.find(p => p.id === id);
-  const [currentProduct, setCurrentProduct] = useState<KeyChain | null>(staticProduct ?? null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Loader simulation
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  /* --------------------- FETCH PRODUCT FROM BACKEND --------------------- */
 
-  // Default variant selection with guaranteed id
-  const selectedVariant = useMemo<LocalVariant | null>(() => {
-    if (!currentProduct) return null;
-    const firstVariant = currentProduct.variants?.[0];
-    const derivedId = (firstVariant && ((firstVariant as any).id ?? `${currentProduct.id}-default`)) || `${currentProduct.id}-default`;
-
-    return {
-      ...(firstVariant || {}),
-      image: firstVariant?.image ?? currentProduct.image,
-      price: firstVariant?.price ?? currentProduct.price,
-      discount: firstVariant?.discount ?? currentProduct.discount,
-      id: derivedId,
-    } as LocalVariant;
-  }, [currentProduct]);
-
-  const [currentVariant, setCurrentVariant] = useState<LocalVariant | null>(selectedVariant);
-
-  useEffect(() => {
-    setCurrentVariant(selectedVariant);
-    setQuantity(1);
-    setImgLoaded(false);
-  }, [selectedVariant]);
-
-  // Fetch product from backend if exists
   useEffect(() => {
     if (!id) return;
+
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/products/${id}`);
-        if (!res.ok) throw new Error("Product fetch failed");
-        const data = await res.json();
-        setCurrentProduct(data?.product ?? staticProduct ?? null);
-      } catch {
-        setCurrentProduct(staticProduct ?? null);
+        const res = await axios.get(`http://localhost:8000/api/products/${id}`);
+        const data: KeyChainProduct = res.data?.product;
+
+        if (!data) throw new Error("No product found");
+
+        setCurrentProduct(data);
+
+        // default variant = first or parent product
+        setCurrentVariant(
+          data.variants?.[0] || {
+            id: data.id,
+            name: data.name,
+            price: data.price,
+            discount: data.discount,
+            image: data.image,
+            inStock: data.inStock,
+            description: data.description,
+            contents: data.contents,
+            customization: data.customization,
+            specifications: data.specifications,
+            material: data.material,
+            dimensions: data.dimensions,
+            weight: data.weight,
+            careInstructions: data.careInstructions,
+          }
+        );
+      } catch (err) {
+        console.error("Product fetch error:", err);
+        setCurrentProduct(null);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchProduct();
-  }, [id, staticProduct]);
+  }, [id]);
+
+  /* -------------------- FETCH REVIEWS -------------------- */
 
   const { backendRating, backendReviewsCount, setBackendRating, setBackendReviewsCount } =
     useProductReviews(currentProduct?.id);
+
+  /* ------------------------ ADD TO CART ------------------------ */
 
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
@@ -134,29 +180,36 @@ export default function KeyChainDetailPage() {
     };
   }, []);
 
+  /* --------------------------- RENDER --------------------------- */
+
   if (loading) return <Loader />;
   if (!currentProduct) return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Image */}
+        {/* ---------------------- LEFT SIDE IMAGE ---------------------- */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
               <div className="w-10 h-10 border-4 border-t-[#C45A36] border-gray-200 rounded-full animate-spin"></div>
             </div>
           )}
+
           {currentVariant?.image && (
             <motion.img
               src={currentVariant.image}
               alt={currentProduct.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
             />
           )}
+
+          {/* Discount Tag */}
           {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#C45A36] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
               {currentVariant.discount}% OFF
@@ -168,12 +221,17 @@ export default function KeyChainDetailPage() {
             <div className="mt-4 flex gap-3 overflow-x-auto py-1 snap-x snap-mandatory">
               {currentProduct.variants.map((v, i) => (
                 <motion.div
-                  key={(v as any).id ?? i}
-                  onClick={() => setCurrentVariant(v as LocalVariant)}
-                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${currentVariant?.image === v.image ? "border-[#C45A36] ring-2 ring-[#C45A36]" : "border-gray-300"}`}
+                  key={v.id || i}
+                  onClick={() => setCurrentVariant(v)}
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden flex-shrink-0 snap-start ${
+                    currentVariant?.image === v.image
+                      ? "border-[#C45A36] ring-2 ring-[#C45A36]"
+                      : "border-gray-300"
+                  }`}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <img src={v.image} alt={`thumb-${i}`} className="h-20 w-20 object-cover rounded-lg" />
+                  <img src={v.image} className="h-20 w-20 object-cover rounded-lg" />
+
                   {v.discount && (
                     <span className="absolute top-1 left-1 bg-[#C45A36] text-white text-xs font-semibold px-1 py-0.5 rounded-md">
                       {v.discount}% OFF
@@ -185,22 +243,26 @@ export default function KeyChainDetailPage() {
           )}
         </div>
 
-        {/* Right: Product Info */}
+        {/* ---------------------- RIGHT SIDE INFO ---------------------- */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{currentProduct.name}</h1>
 
           {/* Price */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">₹{currentVariant?.price}</span>
-            {currentVariant?.discount && <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>}
+          <div className="flex items-center gap-3">
+            <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">
+              ₹{currentVariant?.price}
+            </span>
+            {currentVariant?.discount && (
+              <span className="line-through text-gray-400 text-lg">₹{currentProduct.price}</span>
+            )}
           </div>
 
-         {/* Description */}
+          {/* Description */}
           {currentProduct.description && (
             <p className="text-gray-700 leading-relaxed">{currentProduct.description}</p>
           )}
 
-          {/* Structured info */}
+          {/* Structured Fields */}
           <div className="mt-2 space-y-2 text-gray-700">
             {currentProduct.material && (
               <p>
@@ -224,7 +286,7 @@ export default function KeyChainDetailPage() {
             )}
           </div>
 
-          {/* Tags / Stock / Warranty */}
+          {/* Tags + Stock */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentProduct.tags?.map((tag, idx) => (
               <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
@@ -238,22 +300,25 @@ export default function KeyChainDetailPage() {
             >
               {currentProduct.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentProduct.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentProduct.warranty}</span>
-            )}
           </div>
 
           {/* Add to Cart */}
-          <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
+          <div className="flex gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
               disabled={!currentProduct.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentProduct.inStock ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
+                currentProduct.inStock
+                  ? "bg-[#C45A36] hover:bg-[#8c4a20] text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
-       <div className="mt-6 flex flex-col gap-4">
+
+          {/* Contents */}
+          <div className="mt-6 flex flex-col gap-4">
             {currentProduct.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
@@ -268,7 +333,9 @@ export default function KeyChainDetailPage() {
             {currentProduct.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">{currentProduct.customization.options?.join(", ")}</p>
+                <p className="text-gray-600">
+                  {currentProduct.customization.options?.join(", ")}
+                </p>
               </div>
             )}
 
@@ -276,9 +343,9 @@ export default function KeyChainDetailPage() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {Object.entries(currentProduct.specifications).map(([key, value], idx) => (
+                  {Object.entries(currentProduct.specifications).map(([k, v], idx) => (
                     <li key={idx}>
-                      <span className="font-medium">{key}:</span> {String(value)}
+                      <span className="font-medium">{k}:</span> {String(v)}
                     </li>
                   ))}
                 </ul>

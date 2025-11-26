@@ -1,31 +1,90 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 import { Link } from "react-router-dom";
-import { holiKits } from "../../Data/HoliKitData";
+
+// LazyImage Component
+const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className={`w-full h-full ${!loaded ? "bg-gray-200 animate-pulse" : ""}`}>
+      <motion.img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: loaded ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+        onLoad={() => setLoaded(true)}
+        className={className}
+      />
+    </div>
+  );
+};
+
+// Type
+interface HoliKit {
+  id: string;
+  name: string;
+  price: number;
+  discount?: number;
+  category?: string;
+  image: string;
+  description?: string;
+  rating?: number;
+  highlight?: string;
+}
 
 export default function HoliKitPage() {
+  const [items, setItems] = useState<HoliKit[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
 
+  const highlightOptions = ["All", "Best Seller", "Discounted", "Luxury Edition"];
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/products/holi"); // Your Holi API endpoint
+        const apiData = Array.isArray(res.data) ? res.data : res.data?.allProducts || [];
+        setItems(
+          apiData.map((item: any) => ({
+            id: String(item._id || item.id || ""),
+            name: item.name || "Holi Kit",
+            price: item.price || 0,
+            discount: item.discount,
+            category: item.category || "Others",
+            image: item.imageUrl || "/placeholder.png",
+            description: item.description,
+            rating: item.rating,
+            highlight: item.highlight,
+          }))
+        );
+      } catch (err) {
+        console.error("API ERROR:", err);
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItems();
+  }, []);
+
   const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    setSelectedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
     );
   };
 
-  const highlightOptions = ["All", "Best Seller", "Discounted", "Luxury Edition"];
-  const categories = [...new Set(holiKits.map((i) => i.category))];
+  const categories = useMemo(() => [...new Set(items.map(i => i.category || "Others"))], [items]);
 
-  // ---------------------------
-  //  FILTERING
-  // ---------------------------
+  // FILTER
   const filteredItems = useMemo(() => {
-    return holiKits.filter((item) => {
-      const categoryMatch =
-        selectedCategories.length === 0 ||
-        selectedCategories.includes(item.category);
-
+    return items.filter(item => {
+      const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(item.category || "Others");
       let highlightMatch = true;
 
       switch (highlight) {
@@ -44,14 +103,11 @@ export default function HoliKitPage() {
 
       return categoryMatch && highlightMatch;
     });
-  }, [selectedCategories, highlight]);
+  }, [items, selectedCategories, highlight]);
 
-  // ---------------------------
-  //  SORTING
-  // ---------------------------
+  // SORT
   const sortedItems = useMemo(() => {
     const sorted = [...filteredItems];
-
     switch (sortOption) {
       case "Price: Low to High":
         sorted.sort((a, b) => a.price - b.price);
@@ -65,42 +121,8 @@ export default function HoliKitPage() {
       default:
         break;
     }
-
     return sorted;
   }, [filteredItems, sortOption]);
-
-  // ---------------------------
-  //  LAZY LOADING IMAGE COMPONENT
-  // ---------------------------
-  const LazyImage = ({
-    src,
-    alt,
-    className,
-  }: {
-    src: string;
-    alt: string;
-    className?: string;
-  }) => {
-    const [loaded, setLoaded] = useState(false);
-    return (
-      <div
-        className={`w-full h-full ${
-          !loaded ? "bg-gray-200 animate-pulse" : ""
-        }`}
-      >
-        <motion.img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: loaded ? 1 : 0 }}
-          transition={{ duration: 0.5 }}
-          onLoad={() => setLoaded(true)}
-          className={className}
-        />
-      </div>
-    );
-  };
 
   return (
     <section className="min-h-screen bg-[#fffdfc]">
@@ -115,17 +137,13 @@ export default function HoliKitPage() {
         </p>
       </div>
 
-      {/* LAYOUT */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6">
-        {/* SIDEBAR */}
+        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          {/* Categories */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Categories
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
             <ul className="space-y-2">
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <li key={cat} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -134,32 +152,20 @@ export default function HoliKitPage() {
                     onChange={() => toggleCategory(cat)}
                     className="h-4 w-4 text-[#C45A36] border-gray-300 rounded"
                   />
-                  <label
-                    htmlFor={cat}
-                    className="text-gray-700 text-sm cursor-pointer"
-                  >
-                    {cat}
-                  </label>
+                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Highlight */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
-              Highlight
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
-              {highlightOptions.map((opt) => (
+              {highlightOptions.map(opt => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${
-                    highlight === opt
-                      ? "text-[#C45A36] font-semibold"
-                      : "text-gray-700"
-                  }`}
+                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#C45A36] font-semibold" : "text-gray-700"}`}
                 >
                   {opt}
                 </li>
@@ -168,16 +174,13 @@ export default function HoliKitPage() {
           </div>
         </aside>
 
-        {/* PRODUCT GRID */}
+        {/* Products Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Sort */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results
-            </p>
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-sm text-gray-600">{loading ? "Loading..." : `Showing ${sortedItems.length} results`}</p>
             <select
               value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
+              onChange={e => setSortOption(e.target.value)}
               className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36] focus:border-[#C45A36]"
             >
               <option>Default sorting</option>
@@ -187,76 +190,52 @@ export default function HoliKitPage() {
             </select>
           </div>
 
-          {/* Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             <AnimatePresence>
-              {sortedItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/HoliDetail/${item.id}`}
-                    className="w-full max-w-[320px] flex flex-col"
-                  >
-                    {/* IMAGE */}
-                    <div className="relative w-full h-[280px] sm:h-[320px] md:h-[350px] lg:h-[380px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
-                      <LazyImage
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                      />
+              {loading
+                ? Array(6).fill(0).map((_, i) => <div key={i} className="bg-gray-200 rounded-3xl h-[380px] animate-pulse"></div>)
+                : sortedItems.map(item => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.4 }}
+                      className="flex justify-center"
+                    >
+                      <Link to={`/HoliDetail/${item.id}`} className="w-full max-w-[320px] flex flex-col">
+                        <div className="relative w-full h-[280px] sm:h-[320px] md:h-[350px] lg:h-[380px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1">
+                          <LazyImage src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                          {item.discount && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                            >
+                              {item.discount}% OFF
+                            </motion.span>
+                          )}
+                        </div>
 
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                          }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
-
-                    {/* DETAILS */}
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
-
-                      {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
-                          ₹{item.price}
-                        </span>
-
-                        {item.discount && (
-                          <span className="line-through text-gray-400 text-sm sm:text-lg ml-1">
-                            ₹
-                            {Math.round(
-                              item.price / (1 - item.discount / 100)
+                        <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                          <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
+                          {item.description && (
+                            <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>
+                          )}
+                          <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                            <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">₹{item.price}</span>
+                            {item.discount && (
+                              <span className="line-through text-gray-400 text-sm sm:text-lg ml-1">
+                                ₹{Math.round(item.price / (1 - item.discount / 100))}
+                              </span>
                             )}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))
+              }
             </AnimatePresence>
           </div>
         </div>

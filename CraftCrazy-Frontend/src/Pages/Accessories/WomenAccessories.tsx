@@ -1,7 +1,19 @@
-import { useState } from "react";
+// src/Pages/Accessories/WomenAccessoriesPage.tsx
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { womenAccessories } from "../../Data/WomenAccessoriesData";
 import { Link } from "react-router-dom";
+import axios from "axios";
+
+interface Accessory {
+  id: string;
+  name: string;
+  price: number;
+  discount?: number;
+  category?: string;
+  image: string;
+  description?: string;
+  rating?: number;
+}
 
 const LazyImage = ({ src, alt }: { src: string; alt: string }) => (
   <img
@@ -13,9 +25,41 @@ const LazyImage = ({ src, alt }: { src: string; alt: string }) => (
 );
 
 export default function WomenAccessoriesPage() {
+  const [accessories, setAccessories] = useState<Accessory[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState("All");
   const [sortOption, setSortOption] = useState("Default sorting");
+
+  // Fetch accessories from API
+  useEffect(() => {
+    const fetchAccessories = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:8000/api/products/womenaccessories"
+        );
+        const apiData = res.data?.allProducts || [];
+        setAccessories(
+          apiData.map((item: any) => ({
+            id: String(item._id || item.id || ""),
+            name: item.name || "Accessory",
+            price: item.price || 0,
+            discount: item.discount,
+            category: item.category,
+            image: item.imageUrl || "/placeholder.png",
+            description: item.description,
+            rating: item.rating,
+          }))
+        );
+      } catch (err) {
+        console.error("API ERROR:", err);
+        setAccessories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAccessories();
+  }, []);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -24,39 +68,44 @@ export default function WomenAccessoriesPage() {
   };
 
   const highlightOptions = ["All", "Best Seller", "Discounted"];
-  const categories = [...new Set(womenAccessories.map((i) => i.category))];
+  const categories = [...new Set(accessories.map((i) => i.category || "Others"))];
 
-  const filteredItems = womenAccessories.filter((item) => {
-    const categoryMatch =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(item.category);
+  // Filtered items
+  const filteredItems = useMemo(() => {
+    return accessories.filter((item) => {
+      const categoryMatch =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(item.category || "Others");
 
-    let highlightMatch = true;
-    switch (highlight) {
-      case "Best Seller":
-        highlightMatch = (item.rating ?? 0) >= 4.5;
-        break;
-      case "Discounted":
-        highlightMatch = (item.discount ?? 0) > 0;
-        break;
-      default:
-        highlightMatch = true;
-    }
-    return categoryMatch && highlightMatch;
-  });
+      let highlightMatch = true;
+      switch (highlight) {
+        case "Best Seller":
+          highlightMatch = (item.rating ?? 0) >= 4.5;
+          break;
+        case "Discounted":
+          highlightMatch = (item.discount ?? 0) > 0;
+          break;
+      }
+      return categoryMatch && highlightMatch;
+    });
+  }, [accessories, selectedCategories, highlight]);
 
-  const sortedItems = [...filteredItems].sort((a, b) => {
+  // Sorted items
+  const sortedItems = useMemo(() => {
+    const sorted = [...filteredItems];
     switch (sortOption) {
       case "Price: Low to High":
-        return a.price - b.price;
+        sorted.sort((a, b) => a.price - b.price);
+        break;
       case "Price: High to Low":
-        return b.price - a.price;
+        sorted.sort((a, b) => b.price - a.price);
+        break;
       case "Rating":
-        return (b.rating || 0) - (a.rating || 0);
-      default:
-        return 0;
+        sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
     }
-  });
+    return sorted;
+  }, [filteredItems, sortOption]);
 
   return (
     <section className="min-h-screen">
@@ -71,7 +120,7 @@ export default function WomenAccessoriesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-        
+        {/* Sidebar */}
         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">
@@ -120,10 +169,11 @@ export default function WomenAccessoriesPage() {
           </div>
         </aside>
 
+        {/* Product Grid */}
         <div className="md:col-span-4 flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <p className="text-sm text-gray-600">
-              Showing {sortedItems.length} results
+              Showing {loading ? "..." : sortedItems.length} results
             </p>
             <select
               value={sortOption}
@@ -139,57 +189,72 @@ export default function WomenAccessoriesPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
             <AnimatePresence>
-              {sortedItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex justify-center"
-                >
-                  <Link
-                    to={`/accessorydetail/${item.id}`}
-                    className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col group"
-                  >
-                    <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                      
-                      <LazyImage src={item.image} alt={item.name} />
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex justify-center"
+                    >
+                      <div className="w-full max-w-[320px] bg-gray-200 animate-pulse rounded-2xl h-[300px] sm:h-[340px]"></div>
+                    </motion.div>
+                  ))
+                : sortedItems.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.4 }}
+                      className="flex justify-center"
+                    >
+                      <Link
+                        to={`/accessorydetail/${item.id}`}
+                        className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col group"
+                      >
+                        <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
+                          <LazyImage src={item.image} alt={item.name} />
+                          {item.discount && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20,
+                              }}
+                              className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
+                            >
+                              {item.discount}% OFF
+                            </motion.span>
+                          )}
+                        </div>
 
-                      {item.discount && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                          }}
-                          className="absolute top-2 right-2 bg-[#C45A36] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                        >
-                          {item.discount}% OFF
-                        </motion.span>
-                      )}
-                    </div>
-
-                    <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                      <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
-                        {item.name}
-                      </p>
-                      {item.description && (
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                      <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                        <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
-                          ₹{item.price}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                        <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
+                          <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">
+                            {item.name}
+                          </p>
+                          {item.description && (
+                            <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">
+                              {item.description}
+                            </p>
+                          )}
+                          <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
+                            <span className="text-lg sm:text-2xl text-[#C45A36] font-cinzel">
+                              ₹{item.price}
+                            </span>
+                            {item.discount && (
+                              <span className="line-through text-gray-400 text-xs sm:text-sm">
+                                ₹{Math.round(item.price / (1 - item.discount! / 100))}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
             </AnimatePresence>
           </div>
         </div>
