@@ -21,7 +21,8 @@ export type EngagementTrayVariant = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
+
   contents?: string[];
   customization?: {
     available: boolean;
@@ -46,7 +47,8 @@ export type EngagementTray = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
+
   variants?: EngagementTrayVariant[];
   contents?: string[];
   customization?: {
@@ -147,12 +149,12 @@ export default function EngagementTrayDetail() {
     if (!currentProduct || !currentVariant) return;
 
     addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

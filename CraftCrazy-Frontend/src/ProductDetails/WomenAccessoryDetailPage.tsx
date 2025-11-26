@@ -29,7 +29,7 @@ export type SubProduct = {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image: string;
+  image: string | null
   contents?: string[];
   occasion?: string[];
   delivery?: {
@@ -67,7 +67,7 @@ export type WomenAccessory = {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image: string;
+  image: string | null
   variants?: SubProduct[];
   contents?: string[];
   occasion?: string[];
@@ -175,13 +175,13 @@ export default function WomenAccessoryDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant || !currentVariant.inStock) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

@@ -18,7 +18,7 @@ export type VarmalaVariant = {
   price: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
   description?: string;
   contents?: string[];
   customization?: {
@@ -39,7 +39,7 @@ export type VarmalaPreservation = {
   rating?: number;
   reviews?: number;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   variants?: VarmalaVariant[];
   description?: string;
@@ -137,14 +137,13 @@ export default function VarmalaDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
-
+      addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);

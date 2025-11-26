@@ -18,7 +18,7 @@ export type SubProduct = {
   price: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+ image: string | null
   description?: string;
   contents?: string[];
   customization?: {
@@ -39,7 +39,7 @@ export type ResinPujaThale = {
   price: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
   rating?: number;
   reviews?: number;
   description?: string;
@@ -144,13 +144,13 @@ export default function ResinPujaThaleDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+      addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

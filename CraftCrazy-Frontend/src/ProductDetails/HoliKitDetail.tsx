@@ -29,7 +29,8 @@ export type HoliKitVariant = {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image: string;
+ image: string | null
+
   contents?: string[];
   occasion?: string[];
   delivery?: {
@@ -67,7 +68,8 @@ export type HoliKit = {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image: string;
+  image: string | null
+
   variants?: HoliKitVariant[];
   contents?: string[];
   occasion?: string[];
@@ -170,12 +172,12 @@ export default function HoliKitDetail() {
     if (!currentProduct || !currentVariant) return;
 
     addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

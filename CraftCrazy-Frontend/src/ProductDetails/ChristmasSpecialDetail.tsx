@@ -179,18 +179,23 @@ export default function ChristmasSpecialDetailPage() {
             </div>
           )}
 
-          {currentVariant?.image && (
-            <motion.img
-              src={currentVariant.image}
-              alt={currentVariant.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              onLoad={() => setImgLoaded(true)}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.5 }}
-            />
-          )}
+        {currentVariant?.image ? (
+          <motion.img
+            src={currentVariant.image}
+            alt={currentVariant.name || "Product image"}
+            className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
+              imgLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            onLoad={() => setImgLoaded(true)}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.5 }}
+          />
+        ) : (
+          <div className="w-full h-80 bg-gray-100 rounded-3xl flex items-center justify-center text-gray-400">
+            No image available
+          </div>
+        )}
+
 
           {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">

@@ -22,7 +22,7 @@ export type SubBracelet = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null;
   contents?: string[];
   customization?: { available: boolean; options?: string[]; userInput?: string };
   specifications?: Record<string, string>;
@@ -30,8 +30,8 @@ export type SubBracelet = {
   dimensions?: string;
   weight?: string;
   careInstructions?: string;
-  tags?: string[];       // <-- ADD THIS
-  warranty?: string;     // <-- ADD THIS
+  tags?: string[];
+  warranty?: string;
 };
 
 export type Bracelet = {
@@ -42,7 +42,7 @@ export type Bracelet = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null;
   variants?: SubBracelet[];
   description?: string;
   contents?: string[];
@@ -87,13 +87,14 @@ export default function BraceletDetails() {
 
         setCurrentProduct(data);
 
+        // Set first variant or fallback
         setCurrentVariant(
           data.variants?.[0] || {
             id: data.id,
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.image || null,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,
@@ -103,6 +104,8 @@ export default function BraceletDetails() {
             dimensions: data.dimensions,
             weight: data.weight,
             careInstructions: data.careInstructions,
+            tags: data.tags,
+            warranty: data.warranty,
           }
         );
       } catch (err) {
@@ -120,7 +123,9 @@ export default function BraceletDetails() {
   const fetchReviews = async () => {
     if (!currentProduct) return;
     try {
-      const res = await axios.get(`http://localhost:8000/api/review/${currentProduct.id}?limit=8`);
+      const res = await axios.get(
+        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+      );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
     } catch (err) {
@@ -135,12 +140,12 @@ export default function BraceletDetails() {
     if (!currentProduct || !currentVariant) return;
 
     addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);
@@ -164,7 +169,9 @@ export default function BraceletDetails() {
     );
 
   if (!currentProduct)
-    return <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>;
+    return (
+      <p className="text-center mt-20 text-lg text-gray-400">Product not found</p>
+    );
 
   const finalRating = backendRating || currentProduct.rating || 0;
   const finalReviewsCount = backendReviewsCount || currentProduct.reviews || 0;
@@ -179,10 +186,10 @@ export default function BraceletDetails() {
               <div className="w-10 h-10 border-4 border-t-[#b46029] border-gray-200 rounded-full animate-spin"></div>
             </div>
           )}
-          {currentVariant?.image && (
+          {currentVariant?.image ? (
             <motion.img
               src={currentVariant.image}
-              alt={currentVariant.name}
+              alt={currentVariant.name || "Product image"}
               className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
                 imgLoaded ? "opacity-100" : "opacity-0"
               }`}
@@ -190,6 +197,10 @@ export default function BraceletDetails() {
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
             />
+          ) : (
+            <div className="w-full h-80 bg-gray-100 rounded-3xl flex items-center justify-center text-gray-400">
+              No image available
+            </div>
           )}
           {currentVariant?.discount && (
             <span className="absolute top-3 right-3 bg-[#b46029] text-white font-semibold px-2 py-1 rounded-md text-sm shadow-md">
@@ -210,7 +221,9 @@ export default function BraceletDetails() {
               ₹{currentVariant?.price}
             </span>
             {currentVariant?.discount && (
-              <span className="line-through text-gray-400 text-lg ml-2">₹{currentProduct.price}</span>
+              <span className="line-through text-gray-400 text-lg ml-2">
+                ₹{currentProduct.price}
+              </span>
             )}
           </div>
 
@@ -219,7 +232,9 @@ export default function BraceletDetails() {
             <select
               value={currentVariant?.id}
               onChange={(e) => {
-                const selected = currentProduct.variants?.find((v) => v.id === e.target.value);
+                const selected = currentProduct.variants?.find(
+                  (v) => v.id === e.target.value
+                );
                 if (selected) setCurrentVariant(selected);
                 setQuantity(1);
               }}
@@ -235,26 +250,60 @@ export default function BraceletDetails() {
 
           {/* Description */}
           {currentVariant?.description && (
-            <p className="text-gray-700 leading-relaxed">{currentVariant.description}</p>
+            <p className="text-gray-700 leading-relaxed">
+              {currentVariant.description}
+            </p>
           )}
 
           {/* Structured Info */}
           <div className="mt-2 space-y-2 text-gray-700">
-            {currentVariant?.material && <p><span className="font-semibold">Material:</span> {currentVariant.material}</p>}
-            {currentVariant?.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}</p>}
-            {currentVariant?.weight && <p><span className="font-semibold">Weight:</span> {currentVariant.weight}</p>}
-            {currentVariant?.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentVariant.careInstructions}</p>}
+            {currentVariant?.material && (
+              <p>
+                <span className="font-semibold">Material:</span>{" "}
+                {currentVariant.material}
+              </p>
+            )}
+            {currentVariant?.dimensions && (
+              <p>
+                <span className="font-semibold">Dimensions:</span>{" "}
+                {currentVariant.dimensions}
+              </p>
+            )}
+            {currentVariant?.weight && (
+              <p>
+                <span className="font-semibold">Weight:</span>{" "}
+                {currentVariant.weight}
+              </p>
+            )}
+            {currentVariant?.careInstructions && (
+              <p>
+                <span className="font-semibold">Care Instructions:</span>{" "}
+                {currentVariant.careInstructions}
+              </p>
+            )}
           </div>
 
           {/* Tags + Stock + Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentVariant?.tags?.map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>
+              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
+                {tag}
+              </span>
             ))}
-            <span className={`px-2 py-1 rounded ${currentVariant?.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+            <span
+              className={`px-2 py-1 rounded ${
+                currentVariant?.inStock
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
               {currentVariant?.inStock ? "In Stock" : "Out of Stock"}
             </span>
-            {currentVariant?.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentVariant.warranty}</span>}
+            {currentVariant?.warranty && (
+              <span className="bg-gray-100 px-2 py-1 rounded">
+                {currentVariant.warranty}
+              </span>
+            )}
           </div>
 
           {/* ADD TO CART */}
@@ -262,7 +311,11 @@ export default function BraceletDetails() {
             <button
               onClick={handleAddToCart}
               disabled={!currentVariant?.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentVariant?.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
+                currentVariant?.inStock
+                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
@@ -274,15 +327,21 @@ export default function BraceletDetails() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Contents</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentVariant.contents.map((item, idx) => <li key={idx}>{item}</li>)}
+                  {currentVariant.contents.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
                 </ul>
               </div>
             )}
 
             {currentVariant?.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">{currentVariant.customization.options?.join(", ")}</p>
+                <h3 className="font-semibold text-gray-800">
+                  Customization Options
+                </h3>
+                <p className="text-gray-600">
+                  {currentVariant.customization.options?.join(", ")}
+                </p>
               </div>
             )}
 
@@ -290,9 +349,13 @@ export default function BraceletDetails() {
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {Object.entries(currentVariant.specifications).map(([key, value], idx) => (
-                    <li key={idx}><span className="font-medium">{key}:</span> {value}</li>
-                  ))}
+                  {Object.entries(currentVariant.specifications).map(
+                    ([key, value], idx) => (
+                      <li key={idx}>
+                        <span className="font-medium">{key}:</span> {value}
+                      </li>
+                    )
+                  )}
                 </ul>
               </div>
             )}

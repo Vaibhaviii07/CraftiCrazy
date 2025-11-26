@@ -19,7 +19,8 @@ export type Variant = {
   discount?: number;
   description?: string;
   inStock: boolean;
-  image: string;
+  image: string | null
+
   contents?: string[];
   customization?: {
     available: boolean;
@@ -43,7 +44,8 @@ export type HaldiPlatter = {
   rating?: number;
   reviews?: number;
   description?: string;
-  image: string;
+  image: string | null
+
   inStock: boolean;
   variants?: Variant[];
   contents?: string[];
@@ -143,12 +145,12 @@ export default function HaldiPlatterDetailPage() {
     if (!currentProduct || !currentVariant) return;
 
     addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name} added to cart`);

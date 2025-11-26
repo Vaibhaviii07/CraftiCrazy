@@ -17,7 +17,7 @@ export type ResinClockVariant = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   description?: string;
   material?: string;
@@ -32,7 +32,7 @@ export type ResinClock = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+  image: string | null
   inStock: boolean;
   description?: string;
   material?: string;
@@ -125,13 +125,13 @@ export default function ResinClockDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+      addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

@@ -21,7 +21,7 @@ export type ResinKeychainVariant = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
   contents?: string[];
   customization?: {
     available: boolean;
@@ -45,7 +45,7 @@ export type ResinKeychain = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
   variants?: ResinKeychainVariant[];
   contents?: string[];
   customization?: {
@@ -139,14 +139,13 @@ export default function ResinKeychainDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
-
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);

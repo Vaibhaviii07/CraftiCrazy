@@ -12,7 +12,7 @@ export interface Review {
   title?: string;
   comment: string;
   rating: number;
-  image?: string;
+  image?: string | null; // ✅ allow null
   date: string;
 }
 
@@ -51,7 +51,7 @@ const FloatingCustomerReview: React.FC<FloatingCustomerReviewProps> = ({
     title: "",
     comment: "",
     rating: 0,
-    image: "",
+    image: null, // ✅ initialize as null
     date: new Date().toISOString(),
   });
 
@@ -228,7 +228,10 @@ const FloatingCustomerReview: React.FC<FloatingCustomerReviewProps> = ({
                 </div>
               ))}
 
-              {review.image && <img src={review.image} className="w-24 h-24 rounded-lg ml-auto" />}
+              {/* ✅ Render image only if it's not null */}
+              {review.image && (
+                <img src={review.image} className="w-24 h-24 rounded-lg ml-auto" alt="Review" />
+              )}
             </div>
 
             <div className="flex items-center gap-2 p-2 border-t">

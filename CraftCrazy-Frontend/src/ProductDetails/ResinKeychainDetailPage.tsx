@@ -19,7 +19,7 @@ export type ResinKeychainVariant = {
   price: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
   description?: string;
   material?: string;
   dimensions?: string;
@@ -44,7 +44,7 @@ export type ResinKeychain = {
     rating?: number;
     reviews?: number;
     inStock: boolean;
-    image: string;
+    image: string | null
     contents?: string[];
     customization?: {
       available: boolean;
@@ -135,13 +135,13 @@ export default function ResinKeychainDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

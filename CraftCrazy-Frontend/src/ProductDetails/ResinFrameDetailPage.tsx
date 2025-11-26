@@ -20,7 +20,7 @@ export type SubProduct = Variant & {
   price: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
   contents?: string[];
   customization?: {
     available: boolean;
@@ -122,13 +122,13 @@ export default function ResinFrameDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name} added to cart`);

@@ -32,16 +32,8 @@ export type SubProduct = {
   image: string;
   contents?: string[];
   occasion?: string[];
-  delivery?: {
-    type: string;
-    availability: string;
-    estimated: string;
-  };
-  customization?: {
-    available: boolean;
-    options?: string[];
-    userInput?: string;
-  };
+  delivery?: { type: string; availability: string; estimated: string };
+  customization?: { available: boolean; options?: string[]; userInput?: string };
   material?: string;
   dimensions?: string;
   weight?: string;
@@ -71,16 +63,8 @@ export type BirthdayHamper = {
   variants?: SubProduct[];
   contents?: string[];
   occasion?: string[];
-  delivery?: {
-    type: string;
-    availability: string;
-    estimated: string;
-  };
-  customization?: {
-    available: boolean;
-    options?: string[];
-    userInput?: string;
-  };
+  delivery?: { type: string; availability: string; estimated: string };
+  customization?: { available: boolean; options?: string[]; userInput?: string };
   material?: string;
   dimensions?: string;
   weight?: string;
@@ -119,7 +103,6 @@ export default function BirthdayHamperDetails() {
 
         setCurrentProduct(data);
 
-        // Default variant = first variant or main product
         setCurrentVariant(
           data.variants?.[0] || {
             id: data.id,
@@ -215,13 +198,11 @@ export default function BirthdayHamperDetails() {
             </div>
           )}
 
-          {currentVariant?.image && (
+          {currentVariant?.image && currentVariant.image !== "" && (
             <motion.img
               src={currentVariant.image}
-              alt={currentVariant.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              alt={currentVariant.name || "Product Image"}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
@@ -259,9 +240,7 @@ export default function BirthdayHamperDetails() {
             <select
               value={currentVariant?.id}
               onChange={(e) => {
-                const selected = currentProduct.variants?.find(
-                  (v) => v.id === e.target.value
-                );
+                const selected = currentProduct.variants?.find((v) => v.id === e.target.value);
                 if (selected) setCurrentVariant(selected);
                 setQuantity(1);
               }}
@@ -282,52 +261,21 @@ export default function BirthdayHamperDetails() {
 
           {/* Structured Info */}
           <div className="mt-2 space-y-2 text-gray-700">
-            {currentVariant?.material && (
-              <p>
-                <span className="font-semibold">Material:</span>{" "}
-                {currentVariant.material}
-              </p>
-            )}
-            {currentVariant?.dimensions && (
-              <p>
-                <span className="font-semibold">Dimensions:</span>{" "}
-                {currentVariant.dimensions}
-              </p>
-            )}
-            {currentVariant?.weight && (
-              <p>
-                <span className="font-semibold">Weight:</span> {currentVariant.weight}
-              </p>
-            )}
-            {currentVariant?.careInstructions && (
-              <p>
-                <span className="font-semibold">Care Instructions:</span>{" "}
-                {currentVariant.careInstructions}
-              </p>
-            )}
+            {currentVariant?.material && <p><span className="font-semibold">Material:</span> {currentVariant.material}</p>}
+            {currentVariant?.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}</p>}
+            {currentVariant?.weight && <p><span className="font-semibold">Weight:</span> {currentVariant.weight}</p>}
+            {currentVariant?.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentVariant.careInstructions}</p>}
           </div>
 
           {/* Tags + Stock + Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentVariant?.tags?.map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">
-                {tag}
-              </span>
+              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>
             ))}
-
-            <span
-              className={`px-2 py-1 rounded ${
-                currentVariant?.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
+            <span className={`px-2 py-1 rounded ${currentVariant?.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {currentVariant?.inStock ? "In Stock" : "Out of Stock"}
             </span>
-
-            {currentVariant?.warranty && (
-              <span className="bg-gray-100 px-2 py-1 rounded">{currentVariant.warranty}</span>
-            )}
+            {currentVariant?.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{currentVariant.warranty}</span>}
           </div>
 
           {/* ADD TO CART */}
@@ -335,17 +283,12 @@ export default function BirthdayHamperDetails() {
             <button
               onClick={handleAddToCart}
               disabled={!currentVariant?.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentVariant?.inStock
-                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
-                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentVariant?.inStock ? "bg-[#b46029] hover:bg-[#8c4a20] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
-
-          {/* Contents / customization / specs */}
+       {/* Contents / customization / specs */}
           <div className="mt-6 flex flex-col gap-4">
             {currentVariant?.contents && (
               <div className="bg-gray-50 p-3 rounded-md">
@@ -361,9 +304,7 @@ export default function BirthdayHamperDetails() {
             {currentVariant?.customization?.available && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">
-                  {currentVariant.customization.options?.join(", ")}
-                </p>
+                <p className="text-gray-600">{currentVariant.customization.options?.join(", ")}</p>
               </div>
             )}
 

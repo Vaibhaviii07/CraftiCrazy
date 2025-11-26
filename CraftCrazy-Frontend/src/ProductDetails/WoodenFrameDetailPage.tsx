@@ -18,7 +18,7 @@ export type Variant = {
   description?: string;
   price: number;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   material?: string;
   dimensions?: string;
@@ -40,7 +40,7 @@ export type WoodenFrame = {
   price: number;
   description?: string;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   rating?: number;
   reviews?: number;
@@ -143,13 +143,13 @@ export default function WoodenFrameDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

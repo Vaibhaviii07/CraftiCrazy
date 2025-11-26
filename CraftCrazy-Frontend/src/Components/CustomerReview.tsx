@@ -9,7 +9,7 @@ export interface Review {
   title?: string;
   comment: string;
   rating: number;
-  image?: string;
+  image?: string | null; // nullable
   date: string;
 }
 
@@ -58,7 +58,13 @@ export default function CustomerReview({
   }, [productId, variantId]);
 
   if (loading)
-    return <p className="text-gray-500 mt-4 text-center">Loading reviews...</p>;
+    return (
+      <div className="mt-8 max-w-4xl mx-auto flex flex-col gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-gray-100 h-24 rounded-2xl animate-pulse"></div>
+        ))}
+      </div>
+    );
 
   if (!reviews.length)
     return <p className="text-gray-500 mt-4 text-center">No reviews yet.</p>;
@@ -77,7 +83,7 @@ export default function CustomerReview({
                 {review.image ? (
                   <img
                     src={review.image}
-                    alt={review.name}
+                    alt={review.name || "User avatar"}
                     className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                   />
                 ) : (
@@ -87,7 +93,9 @@ export default function CustomerReview({
                 )}
                 <div>
                   <p className="font-semibold text-gray-800">{review.name}</p>
-                  <p className="text-gray-400 text-xs">{new Date(review.date).toLocaleDateString()}</p>
+                  <p className="text-gray-400 text-xs">
+                    {new Date(review.date).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -104,7 +112,11 @@ export default function CustomerReview({
             {review.title && (
               <p className="font-semibold text-gray-900 mt-3 text-lg">{review.title}</p>
             )}
-            <p className="text-gray-700 mt-2 leading-relaxed">{review.comment}</p>
+            <p className="text-gray-700 mt-2 leading-relaxed">
+              {review.comment.length > 200
+                ? review.comment.slice(0, 200) + "..."
+                : review.comment}
+            </p>
           </div>
         ))}
       </div>

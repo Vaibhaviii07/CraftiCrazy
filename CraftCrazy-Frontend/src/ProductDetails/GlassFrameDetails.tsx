@@ -22,7 +22,8 @@ export type SubProduct = {
   rating?: number;
   reviews?: number;
   inStock: boolean;
-  image: string;
+  image: string | null
+
   contents?: string[];
   customization?: {
     available: boolean;
@@ -46,7 +47,8 @@ export type GlassFrame = {
   reviews?: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+ image: string | null
+
   variants?: SubProduct[];
   contents?: string[];
   customization?: {
@@ -140,13 +142,13 @@ export default function GlassFrameDetails() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

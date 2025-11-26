@@ -17,7 +17,7 @@ export type WalletVariant = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   description?: string;
   contents?: string[];
@@ -40,7 +40,7 @@ export type Wallet = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   rating?: number;
   reviews?: number;
@@ -154,13 +154,13 @@ export default function WalletDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+      addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);

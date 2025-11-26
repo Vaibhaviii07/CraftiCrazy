@@ -17,7 +17,7 @@ export type ResinSubVariant = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+  image: string | null
   inStock: boolean;
   description?: string;
   contents?: string[];
@@ -40,7 +40,7 @@ export type ResinPhotoFrame = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+ image: string | null
   inStock: boolean;
   description?: string;
   variants?: ResinSubVariant[];
@@ -141,13 +141,13 @@ export default function ResinPhotoFrameDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-    addToCart({
-      id: currentVariant.id,
-      name: currentVariant.name || currentProduct.name,
-      price: currentVariant.price,
-      quantity,
-      image: currentVariant.image,
-    });
+     addToCart({
+  id: currentVariant?.id || currentProduct!.id,
+  name: currentVariant?.name || currentProduct!.name,
+  price: currentVariant?.price || currentProduct!.price,
+  quantity,
+  image: currentVariant?.image || "/placeholder.png",
+});
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);
