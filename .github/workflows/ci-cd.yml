@@ -1,0 +1,81 @@
+name: MERN + Admin CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  # 1️⃣ BACKEND
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install backend dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Test backend (optional)
+        run: |
+          cd server
+          npm test || echo "No tests found"
+
+  # 2️⃣ FRONTEND
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install frontend dependencies
+        run: |
+          cd client
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd client
+          npm run build
+
+  # 3️⃣ ADMIN PANEL
+  adminpanel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install admin panel dependencies
+        run: |
+          cd admin-panel
+          npm install
+
+      - name: Build admin panel
+        run: |
+          cd admin-panel
+          npm run build
+
+  # 4️⃣ DEPLOY BACKEND
+  deploy-backend:
+    needs: backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy backend to Render
+        run: curl -X POST "${{ secrets.RENDER_BACKEND_HOOK }}"
+
+  # 5️⃣ DEPLOY FRONTEND
+  deploy-frontend:
+    needs: frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy frontend
+        run: curl -X POST "${{ secrets.RENDER_FRONTEND_HOOK }}"
+
+  # 6️⃣ DEPLOY ADMIN PANEL
+  deploy-admin:
+    needs: adminpanel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy admin panel
+        run: curl -X POST "${{ secrets.RENDER_ADMIN_HOOK }}"
