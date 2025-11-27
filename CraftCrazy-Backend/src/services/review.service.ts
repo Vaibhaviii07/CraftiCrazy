@@ -17,3 +17,8 @@ export const getReviewsByProductService = async (productId: string, limit = 8) =
 export const deleteReviewService = async (reviewId: string) => {
   return await Review.findByIdAndDelete(reviewId);
 };
+
+export const getAllReviewsService = async () => {
+  return await Review.find().sort({ date: -1 });
+};
+

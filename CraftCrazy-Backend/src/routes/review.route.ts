@@ -4,8 +4,9 @@ import * as reviewCtrl from "../controllers/review.controller";
 
 const router = express.Router();
 
+router.get("/", reviewCtrl.getAllReviewsController);
 router.post("/add",reviewCtrl.addReviewController);
-router.get("/product/:id", reviewCtrl.getReviewsByProductController); // fix
-router.delete("/:reviewId", reviewCtrl.deleteReviewController);
+router.get("/product/:id", reviewCtrl.getReviewsByProductController);
+router.delete("/:id", reviewCtrl.deleteReviewController);
 
 export default router;

@@ -35,7 +35,7 @@ export type Variant = {
 };
 
 export type WoodenFrame = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   description?: string;
@@ -94,7 +94,7 @@ export default function WoodenFrameDetailPage() {
         // Default variant = first variant or main product
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -128,7 +128,7 @@ export default function WoodenFrameDetailPage() {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -315,8 +315,8 @@ export default function WoodenFrameDetailPage() {
       </div>
 
       {/* REVIEWS */}
-      <CustomerReview productId={currentProduct.id} variantId={currentVariant?.id} setBackendRating={setBackendRating} setBackendReviewsCount={setBackendReviewsCount} />
-      <FloatingCustomerReview productId={currentProduct.id} variantId={currentVariant?.id} onReviewSubmitted={fetchReviews} />
+      <CustomerReview productId={currentProduct._id} variantId={currentVariant?.id} setBackendRating={setBackendRating} setBackendReviewsCount={setBackendReviewsCount} />
+      {isAuthenticated && <FloatingCustomerReview productId={currentProduct._id} variantId={currentVariant?.id} onReviewSubmitted={fetchReviews} />}
 
       {/* TOAST */}
       <AnimatePresence>

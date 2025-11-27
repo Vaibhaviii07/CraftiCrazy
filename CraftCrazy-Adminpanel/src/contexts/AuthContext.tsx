@@ -25,18 +25,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem("adminAuth", isAuthenticated ? "true" : "false");
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "adminAuth") {
-        setIsAuthenticated(e.newValue === "true");
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
   const login = () => setIsAuthenticated(true);
 
   const logout = () => {

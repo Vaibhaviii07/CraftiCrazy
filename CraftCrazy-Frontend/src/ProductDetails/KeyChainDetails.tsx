@@ -31,7 +31,7 @@ export type KeyChainVariant = {
 };
 
 export type KeyChainProduct = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   discount?: number;
@@ -122,7 +122,7 @@ export default function KeyChainDetailPage() {
         // default variant = first or parent product
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -152,7 +152,7 @@ export default function KeyChainDetailPage() {
   /* -------------------- FETCH REVIEWS -------------------- */
 
   const { backendRating, backendReviewsCount, setBackendRating, setBackendReviewsCount } =
-    useProductReviews(currentProduct?.id);
+    useProductReviews(currentProduct?._id);
 
   /* ------------------------ ADD TO CART ------------------------ */
 
@@ -160,7 +160,7 @@ export default function KeyChainDetailPage() {
     if (!currentProduct || !currentVariant || !currentProduct.inStock) return;
 
     addToCart({
-      id: currentProduct.id,
+      id: currentProduct._id,
       name: currentProduct.name,
       price: currentVariant.price,
       quantity,
@@ -359,12 +359,14 @@ export default function KeyChainDetailPage() {
       {currentProduct && currentVariant && (
         <>
           <CustomerReview
-            productId={currentProduct.id}
+            productId={currentProduct._id}
             variantId={currentVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingReviewChat productId={currentProduct.id} variantId={currentVariant.id} />
+
+
+          {isAuthenticated && <FloatingReviewChat productId={currentProduct._id} variantId={currentVariant.id} />}
         </>
       )}
 

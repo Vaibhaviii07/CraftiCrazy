@@ -37,7 +37,7 @@ export type SubProduct = {
 };
 
 export type GlassFrame = {
-  id: string;
+  _id: string;
   sku: string;
   name: string;
   description?: string;
@@ -93,7 +93,7 @@ export default function GlassFrameDetails() {
 
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -125,7 +125,7 @@ export default function GlassFrameDetails() {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -190,9 +190,8 @@ export default function GlassFrameDetails() {
             <motion.img
               src={currentVariant.image}
               alt={currentVariant.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"
+                }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
@@ -317,11 +316,10 @@ export default function GlassFrameDetails() {
             <button
               onClick={handleAddToCart}
               disabled={!currentVariant?.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentVariant?.inStock
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentVariant?.inStock
                   ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
                   : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
+                }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
@@ -365,17 +363,19 @@ export default function GlassFrameDetails() {
 
       {/* REVIEWS */}
       <CustomerReview
-        productId={currentProduct.id}
+        productId={currentProduct._id}
         variantId={currentVariant?.id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
 
-      <FloatingCustomerReview
-        productId={currentProduct.id}
-        variantId={currentVariant?.id}
-        onReviewSubmitted={fetchReviews}
-      />
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
 
       {/* TOAST */}
       <AnimatePresence>

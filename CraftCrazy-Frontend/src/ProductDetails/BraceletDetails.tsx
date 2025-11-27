@@ -35,7 +35,7 @@ export type SubBracelet = {
 };
 
 export type Bracelet = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   discount?: number;
@@ -89,7 +89,7 @@ export default function BraceletDetails() {
 
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -120,7 +120,7 @@ export default function BraceletDetails() {
   const fetchReviews = async () => {
     if (!currentProduct) return;
     try {
-      const res = await axios.get(`http://localhost:8000/api/review/${currentProduct.id}?limit=8`);
+      const res = await axios.get(`http://localhost:8000/api/review/${currentProduct._id}?limit=8`);
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
     } catch (err) {
@@ -183,9 +183,8 @@ export default function BraceletDetails() {
             <motion.img
               src={currentVariant.image}
               alt={currentVariant.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"
+                }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
@@ -301,17 +300,21 @@ export default function BraceletDetails() {
       </div>
 
       {/* REVIEWS */}
+
       <CustomerReview
-        productId={currentProduct.id}
+        productId={currentProduct._id}
         variantId={currentVariant?.id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
-      <FloatingCustomerReview
-        productId={currentProduct.id}
-        variantId={currentVariant?.id}
-        onReviewSubmitted={fetchReviews}
-      />
+
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
 
       {/* TOAST */}
       <AnimatePresence>

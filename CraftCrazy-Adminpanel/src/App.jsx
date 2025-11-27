@@ -9,7 +9,6 @@ import AddProduct from "./pages/Addproducts";
 import AllProducts from "./pages/Allproducts";
 import ProductDetail from "./pages/ProductDetails";
 import Customers from "./pages/Customers";
-import CustomerReviewsPage from "./pages/Review";
 import Notifications from "./pages/Notifications";
 import SettingsPage from "./pages/SettingsPage";
 import InvoiceList from "./pages/InvoiceList";
@@ -17,6 +16,7 @@ import InvoiceDetails from "./pages/InvoiceDetails";
 import CustomerContact from "./pages/CustomerContact";
 import AdminLogin from "./components/AdminLogin";
 import ProtectedRoute from "./middleware/protectedRoute";
+import CustomerReviewsPage from "./pages/Review";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function AppRoutes() {

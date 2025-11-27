@@ -51,7 +51,7 @@ export type SubProduct = {
 };
 
 export type BirthdayHamper = {
-  id: string;
+  _id: string;
   sku: string;
   name: string;
   description?: string;
@@ -116,13 +116,14 @@ export default function BirthdayHamperDetails() {
         const res = await axios.get(`http://localhost:8000/api/products/${id}`);
         const data: BirthdayHamper = res.data?.product;
         if (!data) throw new Error("No product found");
+        console.log(data._id);
 
         setCurrentProduct(data);
 
         // Default variant = first variant or main product
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -154,7 +155,7 @@ export default function BirthdayHamperDetails() {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -219,9 +220,8 @@ export default function BirthdayHamperDetails() {
             <motion.img
               src={currentVariant.image}
               alt={currentVariant.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"
+                }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
@@ -316,11 +316,10 @@ export default function BirthdayHamperDetails() {
             ))}
 
             <span
-              className={`px-2 py-1 rounded ${
-                currentVariant?.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
+              className={`px-2 py-1 rounded ${currentVariant?.inStock
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+                }`}
             >
               {currentVariant?.inStock ? "In Stock" : "Out of Stock"}
             </span>
@@ -335,11 +334,10 @@ export default function BirthdayHamperDetails() {
             <button
               onClick={handleAddToCart}
               disabled={!currentVariant?.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentVariant?.inStock
-                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
-                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentVariant?.inStock
+                ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
@@ -384,18 +382,21 @@ export default function BirthdayHamperDetails() {
       </div>
 
       {/* REVIEWS */}
+
       <CustomerReview
-        productId={currentProduct.id}
+        productId={currentProduct._id}
         variantId={currentVariant?.id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
 
-      <FloatingCustomerReview
-        productId={currentProduct.id}
-        variantId={currentVariant?.id}
-        onReviewSubmitted={fetchReviews}
-      />
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
 
       {/* TOAST */}
       <AnimatePresence>

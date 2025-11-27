@@ -1,19 +1,17 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Review from "../models/Review.model";
+import * as reviewServices from "../services/review.service"
 
-
-// Add a review
 export const addReviewController = async (req: Request, res: Response) => {
   try {
-    console.log("review api is running...");
-    const { productId, variantId, name, email, title, comment, rating} = req.body;
+    console.log("📥 Incoming review:", req.body);
+
+    const { productId, variantId, name, email, title, comment, rating } = req.body;
 
     if (!productId || !name || !comment || !rating) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
-    console.log("review api 2 is running fastly...");
 
     const review = new Review({
       productId,
@@ -22,18 +20,17 @@ export const addReviewController = async (req: Request, res: Response) => {
       email,
       title,
       comment,
-      rating,
+      rating: Number(rating),
       date: new Date(),
     });
 
     await review.save();
-    console.log(review);
     res.status(201).json({ message: "Review added successfully", review });
-  } catch (error: unknown) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to add review", error: (error as Error).message });
+  } catch (error: any) {
+    res.status(500).json({ message: "Failed to add review", error: error.message });
   }
 };
+
 export const getReviewsByProductController = async (req: Request, res: Response) => {
   try {
     const productId = req.params.id;
@@ -71,7 +68,7 @@ export const getReviewsByProductController = async (req: Request, res: Response)
 // Delete review by ID
 export const deleteReviewController = async (req: Request, res: Response) => {
   try {
-    const reviewId = req.params.reviewId;
+    const reviewId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(reviewId)) {
       return res.status(400).json({ message: "Invalid review ID" });
@@ -82,5 +79,14 @@ export const deleteReviewController = async (req: Request, res: Response) => {
   } catch (error: unknown) {
     console.error(error);
     res.status(500).json({ message: "Failed to delete review", error: (error as Error).message });
+  }
+};
+
+export const getAllReviewsController = async (req: Request, res: Response) => {
+  try {
+    const reviews = await reviewServices.getAllReviewsService();
+    res.status(200).json({ success: true, reviews });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

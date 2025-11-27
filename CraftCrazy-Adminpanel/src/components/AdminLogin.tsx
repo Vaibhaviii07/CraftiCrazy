@@ -6,14 +6,16 @@ import { useAuth } from "../contexts/AuthContext";
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const storedHash = "$2a$12$ITgJgABE20Kq6WO/017eK.JYAwKiTytbcNBICCuOZeSW/yA8BlvJ2";
+  const storedHash = "$2a$12$hwHG2/7Y8bd/UShQYwni0e9QLfLb1q95fFTVedgDe6qiTAdk79OMq";
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const isMatch = await bcrypt.compare(password, storedHash);
+
+    const isMatch = bcrypt.compareSync(password, storedHash);
 
     if (isMatch) {
       login();
@@ -26,14 +28,10 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-50 flex items-center justify-center">
       <div className="backdrop-blur-lg bg-white/40 shadow-2xl rounded-3xl p-10 w-[380px] border border-white/30">
-        
-        {/* Brand */}
         <h1 className="text-3xl font-semibold text-gray-900 tracking-wide mb-2 text-center">
           Crafti<span className="text-[#6b1bf3] font-bold">Crazy</span>
         </h1>
-        <p className="text-gray-600 text-sm text-center mb-6">
-          Secure Admin Access
-        </p>
+        <p className="text-gray-600 text-sm text-center mb-6">Secure Admin Access</p>
 
         <form onSubmit={handleLogin} className="space-y-5">
           <input

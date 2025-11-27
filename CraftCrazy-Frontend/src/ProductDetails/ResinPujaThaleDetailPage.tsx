@@ -34,7 +34,7 @@ export type SubProduct = {
 };
 
 export type ResinPujaThale = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   discount?: number;
@@ -93,7 +93,7 @@ export default function ResinPujaThaleDetailPage() {
 
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -125,7 +125,7 @@ export default function ResinPujaThaleDetailPage() {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -352,16 +352,19 @@ export default function ResinPujaThaleDetailPage() {
       {currentProduct && currentVariant && (
         <>
           <CustomerReview
-            productId={currentProduct.id}
+            productId={currentProduct._id}
             variantId={currentVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingCustomerReview
-            productId={currentProduct.id}
-            variantId={currentVariant.id}
-            onReviewSubmitted={fetchReviews}
-          />
+         
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
         </>
       )}
 

@@ -10,7 +10,7 @@ import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   description?: string;
   price: string;
@@ -81,7 +81,7 @@ export default function ProductDetailPage() {
     if (!product || !product.inStock) return;
 
     addToCart({
-      id: product.id,
+      id: product._id,
       name: product.name,
       price: Number(product.price),
       quantity,
@@ -195,11 +195,11 @@ export default function ProductDetailPage() {
       </div>
 
       <CustomerReview
-        productId={product.id}
+        productId={product._id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
-      <FloatingCustomerReview productId={product.id} />
+      <FloatingCustomerReview productId={product._id} />
 
       <AnimatePresence>
         {toast && (

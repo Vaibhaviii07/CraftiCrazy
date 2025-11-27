@@ -9,9 +9,9 @@ import {
   Clock,
   CalendarDays,
   CheckCircle,
-  XCircle,
   TrendingUp,
 } from "lucide-react";
+
 import {
   LineChart,
   Line,
@@ -363,6 +363,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+       <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="p-6"
+    >
+      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    </motion.div>
     </div>
   );
 };

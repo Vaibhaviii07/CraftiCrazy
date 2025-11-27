@@ -51,7 +51,7 @@ export type SubProduct = {
 };
 
 export type WomenAccessory = {
-  id: string;
+  _id: string;
   sku: string;
   name: string;
   description?: string;
@@ -130,7 +130,7 @@ export default function WomenAccessoryDetailPage() {
         // Default variant = first variant or main product
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -161,7 +161,7 @@ export default function WomenAccessoryDetailPage() {
   const fetchReviews = async () => {
     if (!currentProduct || !currentVariant) return;
     try {
-      const res = await axios.get(`http://localhost:8000/api/review/${currentProduct.id}?limit=8`);
+      const res = await axios.get(`http://localhost:8000/api/review/${currentProduct._id}?limit=8`);
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
     } catch (err) {
@@ -308,8 +308,8 @@ export default function WomenAccessoryDetailPage() {
       </div>
 
       {/* REVIEWS */}
-      <CustomerReview productId={currentProduct.id} variantId={currentVariant?.id} setBackendRating={setBackendRating} setBackendReviewsCount={setBackendReviewsCount} />
-      <FloatingCustomerReview productId={currentProduct.id} variantId={currentVariant?.id} onReviewSubmitted={fetchReviews} />
+      <CustomerReview productId={currentProduct._id} variantId={currentVariant?.id} setBackendRating={setBackendRating} setBackendReviewsCount={setBackendReviewsCount} />
+      {isAuthenticated && <FloatingCustomerReview productId={currentProduct._id} variantId={currentVariant?.id} onReviewSubmitted={fetchReviews} />}
 
       {/* TOAST */}
       <AnimatePresence>
