@@ -6,20 +6,20 @@ import { ShoppingCart } from "lucide-react";
 import { useAuth } from "../AuthContext/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-import CustomerReview, { Review } from "../Components/CustomerReview";
+import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   description?: string;
   price: string;
   oldPrice?: string;
-  imageUrl?: string;
+  imageUrl?: string | string[];
   inStock: boolean;
   rating?: string;
   reviews?: string;
-  tags?: string;
+  tags?: string[];
   warranty?: string;
   material?: string;
   dimensions?: string;
@@ -55,11 +55,9 @@ export default function ProductDetailPage() {
   const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [quantity, setQuantity] = useState(1);
 
-  // Backend reviews state
   const [backendRating, setBackendRating] = useState<number>(0);
   const [backendReviewsCount, setBackendReviewsCount] = useState<number>(0);
 
-  // Fetch product
   useEffect(() => {
     if (!id) return;
 
@@ -83,11 +81,13 @@ export default function ProductDetailPage() {
     if (!product || !product.inStock) return;
 
     addToCart({
-      id: product.id,
+      id: product._id,
       name: product.name,
       price: Number(product.price),
       quantity,
-      image: product.imageUrl ?? "",
+      image: Array.isArray(product.imageUrl)
+        ? product.imageUrl[0] || ""
+        : product.imageUrl || "",
     });
 
     if (isAuthenticated) {
@@ -111,16 +111,15 @@ export default function ProductDetailPage() {
       </p>
     );
 
-  const imageSrc = product.imageUrl
-    ? product.imageUrl.startsWith("http")
+  const imageSrc = Array.isArray(product.imageUrl)
+    ? product.imageUrl[0] || "https://via.placeholder.com/400"
+    : product.imageUrl && product.imageUrl.startsWith("http")
       ? product.imageUrl
-      : `http://localhost:8000/${product.imageUrl}`
-    : "https://via.placeholder.com/400";
+      : `http://localhost:8000/${product.imageUrl ?? "placeholder.png"}`;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left: Image */}
         <div className="flex-1 relative">
           {!imgLoaded && (
             <div className="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl">
@@ -137,11 +136,9 @@ export default function ProductDetailPage() {
           />
         </div>
 
-        {/* Right: Info */}
         <div className="flex-1 flex flex-col gap-4 sm:gap-5">
           <h1 className="text-3xl sm:text-4xl font-serif text-gray-900">{product.name}</h1>
 
-          {/* Price */}
           <div className="flex items-center gap-3 sm:gap-4 mt-2">
             <span className="text-2xl sm:text-3xl font-semibold text-[#C45A36]">
               ₹{product.price}
@@ -157,7 +154,6 @@ export default function ProductDetailPage() {
             <p className="text-gray-700 leading-relaxed">{product.description}</p>
           )}
 
-          {/* Structured Info */}
           <div className="mt-4 space-y-2 text-gray-700">
             {product.material && <p><span className="font-semibold">Material:</span> {product.material}</p>}
             {product.dimensions && <p><span className="font-semibold">Dimensions:</span> {product.dimensions}</p>}
@@ -168,18 +164,17 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* Tags / Stock / Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
-            {product.tags && product.tags.split(",").map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag.trim()}</span>
+            {product.tags && product.tags.map((tag, idx) => (
+              <span key={idx} className="bg-gray-100 px-2 py-1 rounded">{tag}</span>
             ))}
+
             <span className={`px-2 py-1 rounded ${product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
               {product.inStock ? "In Stock" : "Out of Stock"}
             </span>
             {product.warranty && <span className="bg-gray-100 px-2 py-1 rounded">{product.warranty}</span>}
           </div>
 
-          {/* Add to cart */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}
@@ -190,7 +185,6 @@ export default function ProductDetailPage() {
             </button>
           </div>
 
-          {/* Customization */}
           {product.customizationAvailable && product.customizationOptions && (
             <div className="bg-gray-50 p-3 rounded-md mt-6">
               <h3 className="font-semibold text-gray-800">Customization Options</h3>
@@ -200,17 +194,13 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Customer Reviews */}
       <CustomerReview
-        productId={product.id}
+        productId={product._id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
+      <FloatingCustomerReview productId={product._id} />
 
-      {/* Floating review chat */}
-      <FloatingCustomerReview productId={product.id} />
-
-      {/* Toast */}
       <AnimatePresence>
         {toast && (
           <motion.div

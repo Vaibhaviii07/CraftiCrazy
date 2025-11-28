@@ -222,16 +222,6 @@ export default function GiftCollections() {
                           <p className="text-base sm:text-lg text-gray-900 font-serif font-semibold leading-snug">
                             {variant.name}
                           </p>
-                          <div className="mt-1 flex justify-center gap-2 items-baseline">
-                            {variant.oldPrice && (
-                              <span className="text-gray-400 italic text-xs sm:text-sm line-through">
-                                ₹{variant.oldPrice}
-                              </span>
-                            )}
-                            <span className="text-lg sm:text-xl text-[#8C5E3C] font-[Cinzel]">
-                              ₹{variant.price}
-                            </span>
-                          </div>
                         </div>
                       </Link>
                     </motion.div>

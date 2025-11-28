@@ -52,24 +52,24 @@ const NewArrivals: React.FC = () => {
 
   const routeMap: Record<string, string> = {
     keychain: "/keydetail/:id",
-    bracelet: "/braceletdetail/:id",
+    bracelets: "/braceletdetail/:id",
     totebag: "/totebagdetail/:id",
     wallet: "/walletdetail/:id",
     accessory: "/accessorydetail/:id",
+    bracelet:"/braceletdetail/:id",
     birthday: "/birthdaydetail/:id",
     corporate: "/corporatedetail/:id",
     wedding: "/weddingDetail/:id",
     glass: "/Glassdetail/:id",
-    frame: "/Framedetail/:id",
     wooden: "/woodendetail/:id",
     clock: "/clockdetail/:id",
     coaster: "/caosterdetail/:id",
     jewelry: "/jewelarydetail/:id",
     resinkeychain: "/keychaindetail/:id",
-    nameplate: "/Nameplatedetail/:id",
+    resinnameplate: "/Nameplatedetail/:id",
     photoframe: "/photoframedetail/:id",
     pujathale: "/pujathale/:id",
-    tray: "/Tray/:id",
+    engagementtray: "/Tray/:id",
     varmala: "/varmaladetail/:id",
     haldi: "/HaldiDetail/:id",
     diwali: "/DiwaliDetail/:id",
@@ -84,6 +84,7 @@ const NewArrivals: React.FC = () => {
       try {
         const res = await axios.get("http://localhost:8000/api/products/newarrivals");
         const apiData = res.data?.allProudcts || [];
+        console.log(apiData)
         const mapped: Product[] = apiData.map((item: any) => ({
           id: item.id || item._id,
           name: item.name,
@@ -234,7 +235,7 @@ const NewArrivals: React.FC = () => {
               price: 399,
               link: "/diwali",
             },
-            { id: 5, type: "image", image: "/Coaster.jpeg" },
+            { id: 5, type: "image", image: "/coaster2.jpg" },
             {
               id: 6,
               type: "text",

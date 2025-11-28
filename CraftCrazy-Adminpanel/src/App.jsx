@@ -5,76 +5,79 @@ import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Order";
-import OrderDetails from "./pages/OrderDetails";
 import AddProduct from "./pages/Addproducts";
 import AllProducts from "./pages/Allproducts";
 import ProductDetail from "./pages/ProductDetails";
-import CategoryList from "./pages/CategoryList";
 import Customers from "./pages/Customers";
-import CustomerReviewsPage from "./pages/Review";
 import Notifications from "./pages/Notifications";
 import SettingsPage from "./pages/SettingsPage";
-import CreateInvoice from "./pages/CreateInvoice";
 import InvoiceList from "./pages/InvoiceList";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import CustomerContact from "./pages/CustomerContact";
+import AdminLogin from "./components/AdminLogin";
+import ProtectedRoute from "./middleware/protectedRoute";
+import CustomerReviewsPage from "./pages/Review";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
-function App() {
+function AppRoutes() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
-    <Router>
-      <div className="flex bg-gray-50 min-h-screen overflow-hidden">
-        {/* Sidebar (Fixed and non-dimming) */}
+    <div className="flex min-h-screen bg-gray-50">
+
+      {/* Sidebar only when logged in */}
+      {isAuthenticated && (
         <div className="fixed top-0 left-0 h-full z-40">
           <Sidebar
             isSidebarOpen={true}
             isCollapsed={isCollapsed}
             toggleSidebar={() => {}}
-            toggleCollapse={() => setIsCollapsed((prev) => !prev)}
+            toggleCollapse={() => setIsCollapsed(prev => !prev)}
           />
         </div>
+      )}
 
-        {/* Main content area */}
-        <div
-          className={`flex flex-col flex-1 min-h-screen transition-all duration-300 ${
-            isCollapsed ? "ml-20" : "ml-64"
-          }`}
-        >
-          {/* Navbar (fixed top, not dimming, not overlapping sidebar) */}
+      {/* Main Layout */}
+      <div className={`flex flex-col flex-1 transition-all duration-300 ${isAuthenticated ? (isCollapsed ? "ml-20" : "ml-64") : "ml-0"}`}>
+        {/* Navbar only when logged in */}
+        {isAuthenticated && (
           <div className="fixed top-0 right-0 left-0 z-30 bg-white shadow-sm">
-            <Navbar toggleSidebar={() => {}} />
+            <Navbar />
           </div>
+        )}
 
-          {/* Main Page Content */}
-          <main className="mt-16 p-6 overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/orders/details" element={<OrderDetails />} />
-              <Route path="/addproducts" element={<AddProduct />} />
-              <Route path="/allproducts" element={<AllProducts />} />
-              <Route path="/products/:id" element={<ProductDetail/>} />
-              <Route path="/catogaries" element={<CategoryList/>} />
-              <Route path="/AllCustomer" element={<Customers />}/>
-              <Route path="/review" element={<CustomerReviewsPage />}/>
-              <Route path="/notification" element={<Notifications />}/>
-              <Route path="/setting" element={<SettingsPage />}/>
-              <Route path="/CreateInvoice" element={<CreateInvoice />}/>
-              <Route path="/ListInvoice" element={<InvoiceList />}/>
-              <Route path="/InvoiceDetail/:id" element={<InvoiceDetails />}/>
-              <Route path="/contact" element={<CustomerContact />} />
-              {/* <Route path="/InvoiceDetail/:id" element={<InvoiceDetail />} /> */}
+        <main className={`${isAuthenticated ? "mt-16 p-6 overflow-y-auto" : "p-6"}`}>
+          <Routes>
+            <Route path="/admin-login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AdminLogin />} />
+            <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/admin-login" replace />} />
 
-
-
-            </Routes>
-          </main>
-        </div>
+            {/* Protected routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="/addproducts" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
+            <Route path="/allproducts" element={<ProtectedRoute><AllProducts /></ProtectedRoute>} />
+            <Route path="/products/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+            <Route path="/AllCustomer" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+            <Route path="/review" element={<ProtectedRoute><CustomerReviewsPage /></ProtectedRoute>} />
+            <Route path="/notification" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/setting" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/ListInvoice" element={<ProtectedRoute><InvoiceList /></ProtectedRoute>} />
+            <Route path="/InvoiceDetail/:id" element={<ProtectedRoute><InvoiceDetails /></ProtectedRoute>} />
+            <Route path="/contact" element={<ProtectedRoute><CustomerContact /></ProtectedRoute>} />
+          </Routes>
+        </main>
       </div>
-    </Router>
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  );
+}

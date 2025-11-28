@@ -9,9 +9,9 @@ import {
   Clock,
   CalendarDays,
   CheckCircle,
-  XCircle,
   TrendingUp,
 } from "lucide-react";
+
 import {
   LineChart,
   Line,
@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+  const [shippedOrders, setShippedOrders] = useState<Order[]>([]);
   const [successOrders, setSuccessOrders] = useState<Order[]>([]);
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [processingOrders, setProcessingOrders] = useState<Order[]>([]);
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
         axios.get("http://localhost:8000/api/order/products"),
         axios.get("http://localhost:8000/api/order/customers"),
         axios.get("http://localhost:8000/api/order/getOrder"),
-        axios.get("http://localhost:8000/api/order/status/Pending"),
+        axios.get("http://localhost:8000/api/order/status/Shipped"),
         axios.get("http://localhost:8000/api/order/status/Delivered"),
         axios.get("http://localhost:8000/api/order/active"),
         axios.get("http://localhost:8000/api/order/status/Processing"),
@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
       const allProducts = productRes.data.data || [];
       const allCustomers = customerRes.data.data || [];
       const allOrders = orderRes.data.data || [];
-      const pending = pendingRes.data.data || [];
+      const shipped = pendingRes.data.data || [];
       const success = successRes.data.data || [];
       const active = activeRes.data.data || [];
       const processing = processingRes.data.data || [];
@@ -96,7 +96,7 @@ const Dashboard: React.FC = () => {
       setProducts(allProducts);
       setCustomers(allCustomers);
       setOrders(allOrders);
-      setPendingOrders(pending);
+      setShippedOrders(shipped);
       setSuccessOrders(success);
       setActiveOrders(active);
       setProcessingOrders(processing);
@@ -139,6 +139,7 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     fetchDashboardData();
 
     socket.on("order-updated", () => {
@@ -201,9 +202,9 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total Customers", value: kpis.customers, icon: <Users />, link: "/customers" },
-          { label: "Total Revenue", value: `₹${kpis.revenue.toLocaleString("en-IN")}`, icon: <DollarSign />, link: "/revenue" },
-          { label: "Total Sales", value: kpis.sales, icon: <ShoppingBag />, link: "/sales" },
+          { label: "Total Customers", value: kpis.customers, icon: <Users />, link: "/AllCustomer" },
+          { label: "Total Revenue", value: `₹${kpis.revenue.toLocaleString("en-IN")}`, icon: <DollarSign />, link: "/dashboard" },
+          { label: "Total Sales", value: kpis.sales, icon: <ShoppingBag />, link: "/orders" },
           { label: "Active Orders", value: activeOrders.length, icon: <Activity />, link: "/orders" },
         ].map((kpi, idx) => (
           <Link key={idx} to={kpi.link}>
@@ -255,16 +256,38 @@ const Dashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((p, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="py-3 px-4">{idx + 1}</td>
-                      <td className="py-3 px-4 font-medium">{p.name}</td>
-                      <td className="py-3 px-4">₹{p.price}</td>
-                      <td className="py-3 px-4">{p.quantity}</td>
-                      <td className="py-3 px-4">{p.customization || "-"}</td>
-                    </tr>
-                  ))}
+                  {orders.flatMap((order, orderIndex) =>
+                    order.items.map((item, itemIndex) => {
+                      const hasCustomization = item.customization && item.customization.trim() !== "";
+
+                      return (
+                        <tr key={`${orderIndex}-${itemIndex}`} className="hover:bg-gray-50">
+                          <td className="py-3 px-4">{orderIndex + 1}</td>
+                          <td className="py-3 px-4 font-medium">{item.name}</td>
+                          <td className="py-3 px-4">₹{item.price}</td>
+                          <td className="py-3 px-4">{item.quantity}</td>
+
+                          {/* 🔥 If customization exists, show message professionally */}
+                          <td className="py-3 px-4">
+                            {hasCustomization ? (
+                              <div className="flex flex-col text-sm text-gray-600">
+                                <span className="font-semibold text-indigo-600">
+                                  "{item.customization}"
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  — Requested by: <strong>{order.customer?.name || "Unknown"}</strong>
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
+
               </table>
             </div>
           </div>
@@ -296,8 +319,8 @@ const Dashboard: React.FC = () => {
               {
                 icon: <Clock className="text-yellow-600 w-6 h-6" />,
                 color: "yellow",
-                label: "Pending Orders",
-                count: pendingOrders.length,
+                label: "Shipped Orders",
+                count: shippedOrders.length,
               },
               {
                 icon: <Activity className="text-blue-600 w-6 h-6" />,
@@ -329,17 +352,25 @@ const Dashboard: React.FC = () => {
 
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Customers</h3>
-           <ul className="space-y-2 text-sm text-gray-600">
-  {customers.map((cust, i) => (
-    <li key={cust._id || i} className="border-b pb-2">
-      {i + 1}. {cust.name || "Unknown User"}
-    </li>
-  ))}
-</ul>
+            <ul className="space-y-2 text-sm text-gray-600">
+              {customers.map((cust, i) => (
+                <li key={cust._id || i} className="border-b pb-2">
+                  {i + 1}. {cust.name || "Unknown User"}
+                </li>
+              ))}
+            </ul>
 
           </div>
         </div>
       </div>
+       <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="p-6"
+    >
+      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    </motion.div>
     </div>
   );
 };

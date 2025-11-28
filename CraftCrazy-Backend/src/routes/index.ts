@@ -15,6 +15,6 @@ router.use("/contact", contactRoutes);
 router.use("/demand", demandRoutes);
 router.use("/products", productRoutes); 
 router.use("/invoice",invoiceRoute);
-router.use("/review", reviewRoute);
+router.use("/reviews", reviewRoute);
 
 export default router;

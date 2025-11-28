@@ -1,247 +1,274 @@
-import React, { useState, useEffect, useMemo } from "react";
+// src/Components/NewArrival.tsx
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-interface ResinKeychain {
-  id: string;
-  name: string;
+// Full Product type definition
+interface Product {
+  id: number | string;
+  name?: string;
+  heading?: string;
   price: number;
+  oldPrice?: number;
   discount?: number;
+  type?: string;
   category?: string;
   image: string;
-  description?: string;
   rating?: number;
-  highlight?: string;
+  popularity?: number;
+  date?: string;
+  description?: string;
+  link?: string;
+  tags?: string[];
+  brand?: string;
+  seller?: string;
+  inStock?: boolean;
+  warranty?: string;
+  returnPolicy?: string;
+  contents?: string[];
+  variants?: { id: number | string; name: string; price?: number; image?: string }[];
 }
 
-// Lazy Image Component
-const LazyImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+const NewArrivals: React.FC = () => {
   const [loaded, setLoaded] = useState(false);
-  return (
-    <div className={`w-full h-full ${!loaded ? "bg-gray-200 animate-pulse" : ""}`}>
-      <motion.img
-        src={src}
-        alt={alt}
-        loading="lazy"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: loaded ? 1 : 0 }}
-        transition={{ duration: 0.5 }}
-        onLoad={() => setLoaded(true)}
-        className={className}
-      />
-    </div>
-  );
-};
-
-export default function ResinKeychainPage() {
-  const [items, setItems] = useState<ResinKeychain[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [highlight, setHighlight] = useState("All");
+  const [toast, setToast] = useState<string | null>(null);
+  const [highlight, setHighlight] = useState("All Products");
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
-  const highlightOptions = ["All", "Best Seller", "Discounted"];
-
-  // Fetch API data
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const res = await axios.get("http://localhost:8000/api/products/resin-keychains");
-        const apiData = Array.isArray(res.data) ? res.data : res.data?.allProducts || [];
-        setItems(
-          apiData.map((item: any) => ({
-            id: String(item._id || item.id || ""),
-            name: item.name || "Resin Keychain",
-            price: item.price || 0,
-            discount: item.discount,
-            category: item.category || "Others",
-            image: item.imageUrl || "/placeholder.png",
-            description: item.description,
-            rating: item.rating,
-            highlight: item.highlight,
-          }))
-        );
-      } catch (err) {
-        console.error("API ERROR:", err);
-        setItems([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItems();
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    setTimeout(() => setLoaded(true), 800);
   }, []);
 
-  const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
+  const routeMap: Record<string, string> = {
+    "resinkeychain": "/keychaindetail/:id",
   };
 
-  const categories = useMemo(() => [...new Set(items.map(i => i.category || "Others"))], [items]);
-
-  // Filtered Items
-  const filteredItems = useMemo(() => {
-    return items.filter(item => {
-      const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(item.category || "Others");
-      let highlightMatch = true;
-
-      switch (highlight) {
-        case "Best Seller":
-          highlightMatch = item.highlight === "Best Seller";
-          break;
-        case "Discounted":
-          highlightMatch = (item.discount ?? 0) > 0;
-          break;
-        default:
-          highlightMatch = true;
-      }
-
-      return categoryMatch && highlightMatch;
-    });
-  }, [items, selectedCategories, highlight]);
-
-  // Sorted Items
-  const sortedItems = useMemo(() => {
-    const sorted = [...filteredItems];
-    switch (sortOption) {
-      case "Price: Low to High":
-        sorted.sort((a, b) => a.price - b.price);
-        break;
-      case "Price: High to Low":
-        sorted.sort((a, b) => b.price - a.price);
-        break;
-      case "Rating":
-        sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-        break;
-      default:
-        break;
-    }
-    return sorted;
-  }, [filteredItems, sortOption]);
-
-  // Scroll to top on mount
+  // Fetch products from API only
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const fetchNewArrivals = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/products/newarrivals");
+        const apiData = res.data?.allProudcts || [];
+        console.log(apiData);
+        const mapped: Product[] = apiData.map((item: any) => ({
+          id: item.id || item._id,
+          name: item.name,
+          heading: item.heading,
+          price: item.price,
+          oldPrice: item.oldPrice,
+          discount: item.discount,
+          type: item.type,
+          category: item.category,
+          image: item.imageUrl,
+          rating: item.rating,
+          popularity: item.popularity,
+          date: item.date,
+          description: item.description,
+          link: item.link,
+          tags: item.tags,
+          brand: item.brand,
+          seller: item.seller,
+          inStock: item.inStock,
+          warranty: item.warranty,
+          returnPolicy: item.returnPolicy,
+          contents: item.contents,
+          variants: item.variants,
+        }));
+        setProducts(mapped);
+      } catch (err) {
+        console.error("API ERROR:", err);
+        setProducts([]);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchNewArrivals();
   }, []);
 
-  return (
-    <section className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="text-center mt-10 mb-8">
-        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
-          Resin Keychains
-          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 
-            bg-gradient-to-r from-[#b46029] via-[#F7B77A] to-[#b46029] rounded-full animate-pulse">
-          </span>
-        </h2>
-        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
-          Stylish resin keychains to accessorize and add a touch of elegance.
-        </p>
-      </div>
+  const filteredProducts = products.filter((item) => {
+    const isBracelet = (item.category || "").toLowerCase() === "resinkeychain";
 
-      {/* Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-8 sm:mt-16 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-        {/* Sidebar */}
-        <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Categories</h3>
-            <ul className="space-y-2">
-              {categories.map(cat => (
-                <li key={cat} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id={cat}
-                    checked={selectedCategories.includes(cat)}
-                    onChange={() => toggleCategory(cat)}
-                    className="h-4 w-4 text-[#b46029] border-gray-300 rounded"
-                  />
-                  <label htmlFor={cat} className="text-gray-700 text-sm cursor-pointer">{cat}</label>
-                </li>
-              ))}
-            </ul>
-          </div>
+    let highlightMatch = true;
+    switch (highlight) {
+      case "Sale":
+        highlightMatch = (item.discount || 0) > 15;
+        break;
+      case "Best Seller":
+        highlightMatch = (item.price || 0) > 800;
+        break;
+      case "Hot Items":
+        highlightMatch = (item.price || 0) < 500;
+        break;
+      default:
+        highlightMatch = true;
+    }
+    return isBracelet && highlightMatch;
+  });
 
-          <div>
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortOption) {
+      case "Sort by popularity":
+        return (b.popularity || 0) - (a.popularity || 0);
+      case "Sort by average rating":
+        return (b.rating || 0) - (a.rating || 0);
+      case "Sort by latest":
+        return new Date(b.date || "").getTime() - new Date(a.date || "").getTime();
+      case "Sort by price: low to high":
+        return (a.price || 0) - (b.price || 0);
+      case "Sort by price: high to low":
+        return (b.price || 0) - (a.price || 0);
+      default:
+        return 0;
+    }
+  });
+
+    const SidebarContent = () => {
+    const highlightOptions = ["All Products", "Best Seller", "Sale", "Hot Items"];
+
+     return (
+         <div>
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-3">Highlight</h3>
             <ul className="space-y-2">
               {highlightOptions.map(opt => (
                 <li
                   key={opt}
                   onClick={() => setHighlight(opt)}
-                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700 hover:text-[#b46029]"}`}
+                  className={`text-sm cursor-pointer ${highlight === opt ? "text-[#b46029] font-semibold" : "text-gray-700"}`}
                 >
                   {opt}
                 </li>
               ))}
             </ul>
-          </div>
+            </div>
+          );
+        };
+
+  return (
+    <section className="mt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+       <div className="text-center mt-10 mb-8">
+        <h2 className="text-3xl md:text-4xl font-[Playfair_Display] font-bold text-gray-900 relative inline-block">
+         Resin Keychains
+          <span className="absolute left-1/2 transform -translate-x-1/2 -bottom-2 w-28 h-1 bg-gradient-to-r from-[#C45A36] via-[#F7B77A] to-[#C45A36] rounded-full animate-pulse"></span>
+        </h2>
+        <p className="mt-3 text-gray-600 text-base italic max-w-sm mx-auto">
+         Stylish resin keychains to accessorize and add a touch of elegance.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+         <aside className="md:col-span-1 bg-white p-4 rounded-lg h-fit shadow mb-6 md:mb-0">
+          <SidebarContent />
         </aside>
 
-        {/* Products */}
-        <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <p className="text-sm text-gray-600">{loading ? "Loading..." : `Showing ${sortedItems.length} results`}</p>
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#b46029] focus:border-[#b46029]"
-            >
-              <option>Default sorting</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-              <option>Rating</option>
-            </select>
+        <div className="md:col-span-3">
+          <div className="flex justify-between items-center mb-6 ml-4">
+            <p className="text-sm text-gray-600">Showing {sortedProducts.length} results</p>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-700">Sort:</label>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="border border-gray-300 rounded-md text-sm px-3 py-2 focus:ring-[#C45A36]"
+              >
+                <option>Default sorting</option>
+                <option>Sort by popularity</option>
+                <option>Sort by average rating</option>
+                <option>Sort by latest</option>
+                <option>Sort by price: low to high</option>
+                <option>Sort by price: high to low</option>
+              </select>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6 ml-5 mb-8">
             <AnimatePresence>
-              {loading
-                ? Array(6).fill(0).map((_, i) => <div key={i} className="bg-gray-200 rounded-3xl h-[380px] animate-pulse"></div>)
-                : sortedItems.map(item => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ duration: 0.4 }}
-                      className="flex justify-center"
-                    >
-                      <Link to={`/keychaindetail/${item.id}`} className="w-full max-w-[280px] sm:max-w-[320px] flex flex-col">
-                        <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-2 sm:hover:-translate-y-3">
-                          <LazyImage src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
-                          {item.discount && (
-                            <motion.span
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                              className="absolute top-2 right-2 bg-[#b46029] text-white text-xs sm:text-sm font-semibold px-2 py-1 rounded-md shadow"
-                            >
-                              {item.discount}% OFF
-                            </motion.span>
-                          )}
-                        </div>
-                        <div className="mt-2 sm:mt-3 text-center px-1 sm:px-0">
-                          <p className="text-sm sm:text-lg text-gray-900 font-playfair leading-snug">{item.name}</p>
-                          {item.description && <p className="text-gray-500 text-xs sm:text-sm mt-1 line-clamp-2">{item.description}</p>}
-                          <div className="mt-1 sm:mt-2 flex justify-center gap-1 sm:gap-2 items-baseline">
-                            <span className="text-lg sm:text-2xl text-[#b46029] font-cinzel">₹{item.price}</span>
+              {loaded && !loadingProducts
+                ? sortedProducts.map((item) => {
+                    const rawCat = item.category || item.type || "others";
+                    const normalizedCategory = rawCat.toLowerCase().replace(/[^a-z0-9]/g, "");
+                    const routePath = routeMap[normalizedCategory] || "/product/:id";
+
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.4 }}
+                        className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md overflow-hidden cursor-pointer"
+                      >
+                        <Link to={routePath.replace(":id", String(item.id))}>
+                          <div className="relative w-full aspect-[1/1.2] bg-gray-100 overflow-hidden group">
                             {item.discount && (
-                              <span className="line-through text-gray-400 text-sm sm:text-lg ml-2">
-                                ₹{Math.round(item.price / (1 - item.discount / 100))}
+                              <span className="absolute top-2 left-2 text-black bg-white text-xs px-2 py-1 rounded-xl">
+                                SALE
+                              </span>
+                            )}
+                            <img
+                              src={item.image}
+                              alt={item.name || item.heading}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          </div>
+                          <h3 className="mt-3 text-sm md:text-base text-gray-800 font-semibold px-2 line-clamp-2">
+                            {item.name || item.heading}
+                          </h3>
+                          {item.description && (
+                            <p className="mt-1 text-xs md:text-sm text-gray-600 px-2 line-clamp-3 italic">
+                              {item.description}
+                            </p>
+                          )}
+                          <div className="mt-1 flex items-center gap-2 px-2">
+                            <span className="text-lg font-semibold text-black">₹{item.price}</span>
+                            {item.oldPrice && item.oldPrice > item.price && (
+                              <span className="text-sm text-gray-500 line-through italic">
+                                ₹{item.oldPrice}
                               </span>
                             )}
                           </div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })
+                : Array(6)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="relative w-full aspect-[1/1.2] bg-gray-200">
+                          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer"></div>
                         </div>
-                      </Link>
-                    </motion.div>
-                  ))
-              }
+                        <div className="p-4">
+                          <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                          <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse w-5/6"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                        </div>
+                      </div>
+                    ))}
             </AnimatePresence>
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#E8D4B7] text-black px-6 py-3 rounded-lg shadow-lg text-sm"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
-}
+};
+
+export default NewArrivals;

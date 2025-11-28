@@ -15,7 +15,7 @@ export interface IProduct extends Document {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  imageUrl: string;
+  imageUrl: string[];
   occasion?: string;
   material?: string;
   dimensions?: string;
@@ -39,13 +39,16 @@ const productSchema = new Schema<IProduct>(
     discount: String,
     highlight: String,
     category: { type: String, required: true },
-    tags: String,
+    tags: { type: [String], default: [] },
     brand: String,
     seller: String,
     inStock: { type: Boolean, default: true },
     warranty: String,
     returnPolicy: String,
-    imageUrl: { type: String, required: true },
+    imageUrl: {
+      type: [{ type: String }],
+      required: true
+    },
     occasion: String,
     material: String,
     dimensions: String,

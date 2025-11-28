@@ -5,7 +5,7 @@ export const giftCategories = [
       tagline: "Preserve Memories | Glossy Finish",
       variants: [
         { id: 101, name: "Resin Frame", image: "ResinFrame.jpeg", oldPrice: 899, price: 699, discount: "20%", link: "/resin" },
-        { id: 102, name: "Wooden Frame", image: "Wooden_Frame.jpeg", oldPrice: 1099, price: 899, discount: "18%", link: "/wooden" },
+        { id: 102, name: "Wooden Frame", image: "frame5i-2.jpeg", oldPrice: 1099, price: 899, discount: "18%", link: "/wooden" },
         { id: 103, name: "Glass Frame", image: "PhotoFrame.jpeg", oldPrice: 999, price: 799, discount: "20%", link: "/glass" },
       ],
     },
@@ -36,7 +36,7 @@ export const giftCategories = [
       variants: [
         { id: 401, name: "Diwali Special Hamper", image: "DiwaliHamper.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/diwali" },
         { id: 402, name: "Christmas Joy Pack", image: "ChristmasHamper.jpeg", oldPrice: 2299, price: 1899, discount: "17%", link: "/christmas" },
-        { id: 403, name: "Holi Special", image: "HoliHamper.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/Holi" },
+        { id: 403, name: "Holi Special", image: "holi1-4.jpg", oldPrice: 1799, price: 1499, discount: "17%", link: "/Holi" },
         { id: 404, name: "Raksha Bandhan", image: "RakhiHamper.jpeg", oldPrice: 1599, price: 1299, discount: "19%", link: "/rakhi" },
       ],
     },
@@ -45,7 +45,7 @@ export const giftCategories = [
       name: "Resin Art",
       tagline: "Elegant | Handcrafted Resin Creations",
       variants: [
-        { id: 501, name: "Resin Coasters Set", image: "Coaster.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/resincoasters" },
+        { id: 501, name: "Resin Coasters Set", image: "coaster2-6.jpg", oldPrice: 1299, price: 999, discount: "23%", link: "/resincoasters" },
         { id: 502, name: "Resin Wall Clock", image: "Clock.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/resinclock" },
         { id: 503, name: "Resin Jewelry Box", image: "ResinBox.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/customerdemand" },
       ],
@@ -65,7 +65,7 @@ export const giftCategories = [
       tagline: "Trendy | Everyday Essentials",
       variants: [
         { id: 701, name: "Leather Wallet", image: "Wallet.jpeg", oldPrice: 1199, price: 899, discount: "25%", link: "/wallet" },
-        { id: 702, name: "Handmade Bracelet", image: "Bracelet.jpg", oldPrice: 799, price: 599, discount: "25%", link: "/bracelet" },
+        { id: 702, name: "Handmade Bracelet", image: "bracelet4-3.jpg", oldPrice: 799, price: 599, discount: "25%", link: "/bracelet" },
         { id: 703, name: "Stylish Tote Bag", image: "ToteBag.jpeg", oldPrice: 1499, price: 1199, discount: "20%", link: "/tote" },
       ],
     },
@@ -75,8 +75,8 @@ export const giftCategories = [
       tagline: "Professional | Classy & Useful",
       variants: [
         { id: 801, name: "Premium Pen Set", image: "PenSet.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/customerdemand" },
-        { id: 802, name: "Office Desk Organizer", image: "DeskOrganizer.jpeg", oldPrice: 1699, price: 1399, discount: "18%", link: "/corporate" },
-        { id: 803, name: "Business Gift Hamper", image: "CorporateHamper.jpeg", oldPrice: 2499, price: 2099, discount: "16%", link: "/corporate" },
+        { id: 802, name: "Office Desk Organizer", image: "corporateDeskOrganizer-1.jpg", oldPrice: 1699, price: 1399, discount: "18%", link: "/corporate" },
+        { id: 803, name: "Business Gift Hamper", image: "corporate1.jpg", oldPrice: 2499, price: 2099, discount: "16%", link: "/corporate" },
       ],
     },
   ];

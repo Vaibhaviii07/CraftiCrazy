@@ -1,9 +1,12 @@
 import { Parallax } from "react-parallax";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Newsletter = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -12,9 +15,20 @@ const Newsletter = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:8000/api/newsletter", { email });
+      setMessage(res.data.message);
+      setEmail(""); // Clear input after success
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || "Something went wrong!");
+    }
+  };
+
   const Content = (
     <div className="relative min-h-[300px] sm:min-h-[400px] flex flex-col items-center justify-center text-center px-4 sm:px-6">
-      {/* Overlay for readability */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/30"></div>
 
       {/* Actual Content */}
@@ -43,6 +57,7 @@ const Newsletter = () => {
 
         {/* Newsletter Form */}
         <motion.form
+          onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.8 }}
@@ -51,6 +66,8 @@ const Newsletter = () => {
           <input
             type="email"
             placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="px-4 py-2 sm:py-3 rounded-xl w-full sm:w-72 md:w-96 outline-none text-gray-900 text-sm sm:text-base"
             required
           />
@@ -63,6 +80,11 @@ const Newsletter = () => {
             Subscribe
           </button>
         </motion.form>
+
+        {/* Message */}
+        {message && (
+          <p className="mt-3 text-sm sm:text-base text-white/90">{message}</p>
+        )}
       </div>
     </div>
   );
@@ -70,7 +92,6 @@ const Newsletter = () => {
   return (
     <>
       {isMobile ? (
-        // Static background for mobile (better performance)
         <div
           className="bg-cover bg-center relative"
           style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -78,7 +99,6 @@ const Newsletter = () => {
           {Content}
         </div>
       ) : (
-        // Parallax for desktop/tablet
         <Parallax blur={0} bgImage="/bg.jpg" strength={300}>
           {Content}
         </Parallax>

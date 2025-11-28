@@ -123,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto mt-4 px-2 space-y-2 custom-scroll pb-20">
+            <nav className="flex-1 mt-4 px-2 space-y-2 pb-20 overflow-y-visible">
               {/* Dashboard */}
               <div>
                 <button
@@ -202,9 +202,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/addproducts" className={menuItemClass("/addproducts")}>
                         Add Product
                       </Link>
-                      <Link to="/catogaries" className={menuItemClass("/catogaries")}>
-                        Categories
-                      </Link>
+
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -245,9 +243,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/orders" className={menuItemClass("/orders")}>
                         All Orders
                       </Link>
-                      <Link to="/orders/details" className={menuItemClass("/orders/details")}>
-                        Order Details
-                      </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -287,9 +282,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <Link to="/ListInvoice" className={menuItemClass("/ListInvoice")}>
                         All Invoices
-                      </Link>
-                      <Link to="/CreateInvoice" className={menuItemClass("/CreateInvoice")}>
-                        Create Invoice
                       </Link>
                     </motion.div>
                   )}

@@ -14,49 +14,69 @@ type Params = { id: string };
 
 export type ResinSubVariant = {
   id: string;
+  sku?: string;
   name: string;
+  description?: string;
   price: number;
   discount?: number;
-  image: string | null
+  rating?: number;
+  reviews?: number;
+  highlight?: string;
+  category?: string;
+  tags?: string[];
+  brand?: string;
+  seller?: string;
   inStock: boolean;
-  description?: string;
+  warranty?: string;
+  returnPolicy?: string;
+  image: string;
   contents?: string[];
-  customization?: {
-    available: boolean;
-    options?: string[];
-    userInput?: string;
-  };
-  specifications?: Record<string, string>;
+  occasion?: string[];
+ deliveryType?: string;
+  deliveryAvailability?: string;
+  deliveryEstimated?: string;
+  customizationAvailable: boolean;
+  customizationOptions?: string;
+  maxOrderQuantity?: string;
   material?: string;
   dimensions?: string;
   weight?: string;
   careInstructions?: string;
-  tags?: string[];
-  warranty?: string;
+  specifications?: Record<string, string>;
 };
 
 export type ResinPhotoFrame = {
-  id: string;
+ _id: string;
+  sku: string;
   name: string;
-  price: number;
-  discount?: number;
- image: string | null
-  inStock: boolean;
   description?: string;
+  price: number;
+  rating?: number;
+  reviews?: number;
+  discount?: number;
+  highlight?: string;
+  category: string;
+  tags?: string[];
+  brand?: string;
+  seller?: string;
+  inStock: boolean;
+  warranty?: string;
+  returnPolicy?: string;
+  imageUrl: string;
   variants?: ResinSubVariant[];
   contents?: string[];
-  customization?: {
-    available: boolean;
-    options?: string[];
-    userInput?: string;
-  };
-  specifications?: Record<string, string>;
+  occasion?: string[];
+  deliveryType?: string; 
+  deliveryAvailability?: string;
+  deliveryEstimated?: string;
+  customizationAvailable: boolean;
+  customizationOptions?: string;
+  maxOrderQuantity?: string;
   material?: string;
   dimensions?: string;
   weight?: string;
   careInstructions?: string;
-  tags?: string[];
-  warranty?: string;
+  specifications?: Record<string, string>;
 };
 
 export default function ResinPhotoFrameDetailPage() {
@@ -92,22 +112,31 @@ export default function ResinPhotoFrameDetailPage() {
         // Default variant = first variant or main product
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+           id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
+            tags:data.tags,
             description: data.description,
-            contents: data.contents,
-            customization: data.customization,
-            specifications: data.specifications,
+            brand:data.brand,
+            seller:data.seller,
+            customizationAvailable: data.customizationAvailable,
+            customizationOptions: data.customizationOptions,
             material: data.material,
             dimensions: data.dimensions,
             weight: data.weight,
             careInstructions: data.careInstructions,
-            tags: data.tags,
-            warranty: data.warranty,
+            deliveryType: data.deliveryType,
+            deliveryAvailability: data.deliveryAvailability,
+            deliveryEstimated: data.deliveryEstimated,
+            maxOrderQuantity: data.maxOrderQuantity,
+            returnPolicy:data.returnPolicy,
+            occasion:data.occasion,
+            warranty :data.warranty,
+            reviews :data.reviews,
+            rating :data.rating
           }
         );
       } catch (err) {
@@ -126,7 +155,7 @@ export default function ResinPhotoFrameDetailPage() {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -141,13 +170,13 @@ export default function ResinPhotoFrameDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-     addToCart({
-  id: currentVariant?.id || currentProduct!.id,
-  name: currentVariant?.name || currentProduct!.name,
-  price: currentVariant?.price || currentProduct!.price,
-  quantity,
-  image: currentVariant?.image || "/placeholder.png",
-});
+    addToCart({
+      id: currentVariant.id,
+      name: currentVariant.name || currentProduct.name,
+      price: currentVariant.price,
+      quantity,
+      image: currentVariant.image,
+    });
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);
@@ -225,31 +254,19 @@ export default function ResinPhotoFrameDetailPage() {
 
           {/* Variant Selector */}
           {currentProduct.variants && currentProduct.variants.length > 1 && (
-            <select
+           <select
               value={currentVariant?.id}
               onChange={(e) => {
                 const selected = currentProduct.variants?.find(
                   (v) => v.id === e.target.value
                 );
-                if (selected)
+                if (selected) {
                   setCurrentVariant({
-                    id: selected.id,
-                    name: selected.name,
-                    price: selected.price,
-                    discount: selected.discount,
-                    image: selected.image,
-                    inStock: selected.inStock,
-                    description: selected.description,
-                    contents: selected.contents,
-                    customization: selected.customization,
-                    specifications: selected.specifications,
-                    material: selected.material,
-                    dimensions: selected.dimensions,
-                    weight: selected.weight,
-                    careInstructions: selected.careInstructions,
-                    tags: selected.tags,
-                    warranty: selected.warranty,
+                    ...selected, // spread all existing properties
+                    customizationAvailable: selected.customizationAvailable,
+                    customizationOptions: selected.customizationOptions,
                   });
+                }
                 setQuantity(1);
               }}
               className="border px-2 py-1 rounded w-44 mt-2"
@@ -260,6 +277,7 @@ export default function ResinPhotoFrameDetailPage() {
                 </option>
               ))}
             </select>
+
           )}
 
           {/* Description */}
@@ -270,26 +288,42 @@ export default function ResinPhotoFrameDetailPage() {
           {/* Structured Info */}
           <div className="mt-2 space-y-2 text-gray-700">
             {currentVariant?.material && (
-              <p>
-                <span className="font-semibold">Material:</span> {currentVariant.material}
-              </p>
+              <p><span className="font-semibold">Material:</span> {currentVariant.material}</p>
             )}
             {currentVariant?.dimensions && (
-              <p>
-                <span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}
-              </p>
+              <p><span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}</p>
             )}
             {currentVariant?.weight && (
-              <p>
-                <span className="font-semibold">Weight:</span> {currentVariant.weight}
-              </p>
+              <p><span className="font-semibold">Weight:</span> {currentVariant.weight}</p>
             )}
             {currentVariant?.careInstructions && (
+              <p><span className="font-semibold">Care Instructions:</span> {currentVariant.careInstructions}</p>
+            )}
+            {currentVariant?.seller && (
+              <p><span className="font-semibold">Seller:</span> {currentVariant.seller}</p>
+            )}
+            {currentVariant?.brand && (
+              <p><span className="font-semibold">Brand:</span> {currentVariant.brand}</p>
+            )}
+           {currentVariant?.deliveryType && (
               <p>
-                <span className="font-semibold">Care Instructions:</span>{" "}
-                {currentVariant.careInstructions}
+                <span className="font-semibold">Delivery:</span>{" "}
+                {currentVariant.deliveryType}, {currentVariant.deliveryAvailability}, Estimated {currentVariant.deliveryEstimated}
               </p>
             )}
+            {currentVariant?.maxOrderQuantity && (
+              <p><span className="font-semibold">Max Order Quantity:</span> {currentVariant.maxOrderQuantity}</p>
+            )}
+            {currentVariant?.returnPolicy && (
+              <p><span className="font-semibold">Return Policy:</span> {currentVariant.returnPolicy}</p>
+            )}
+           {Array.isArray(currentVariant?.occasion) && currentVariant.occasion.length > 0 && (
+  <p>
+    <span className="font-semibold">Occasion:</span>{" "}
+    {currentVariant.occasion.join(", ")}
+  </p>
+)}
+
           </div>
 
           {/* Tags + Stock + Warranty */}
@@ -301,11 +335,10 @@ export default function ResinPhotoFrameDetailPage() {
             ))}
 
             <span
-              className={`px-2 py-1 rounded ${
-                currentVariant?.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
+              className={`px-2 py-1 rounded ${currentVariant?.inStock
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+                }`}
             >
               {currentVariant?.inStock ? "In Stock" : "Out of Stock"}
             </span>
@@ -320,38 +353,25 @@ export default function ResinPhotoFrameDetailPage() {
             <button
               onClick={handleAddToCart}
               disabled={!currentVariant?.inStock}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${
-                currentVariant?.inStock
-                  ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
-                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium shadow-lg ${currentVariant?.inStock
+                ? "bg-[#b46029] hover:bg-[#8c4a20] text-white"
+                : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                }`}
             >
               <ShoppingCart className="w-5 h-5" /> Add to Cart
             </button>
           </div>
 
           {/* Contents / customization / specs */}
-          <div className="mt-6 flex flex-col gap-4">
-            {currentVariant?.contents && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Contents</h3>
-                <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentVariant.contents.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          <div className="mt-1 flex flex-col gap-4">
 
-            {currentVariant?.customization?.available && (
-              <div className="bg-gray-50 p-3 rounded-md">
+           {currentVariant?.customizationAvailable &&
+            currentVariant.customizationOptions && (
+              <div className="bg-gray-50 p-3 rounded-md mt-2">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">
-                  {currentVariant.customization.options?.join(", ")}
-                </p>
+                <p className="text-gray-600">{currentVariant.customizationOptions}</p>
               </div>
-            )}
-
+          )}
             {currentVariant?.specifications && (
               <div className="bg-gray-50 p-3 rounded-md">
                 <h3 className="font-semibold text-gray-800">Specifications</h3>
@@ -367,20 +387,21 @@ export default function ResinPhotoFrameDetailPage() {
           </div>
         </div>
       </div>
-
       {/* REVIEWS */}
       <CustomerReview
-        productId={currentProduct.id}
+        productId={currentProduct._id}
         variantId={currentVariant?.id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
 
-      <FloatingCustomerReview
-        productId={currentProduct.id}
-        variantId={currentVariant?.id}
-        onReviewSubmitted={fetchReviews}
-      />
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
 
       {/* TOAST */}
       <AnimatePresence>

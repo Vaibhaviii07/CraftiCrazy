@@ -122,10 +122,27 @@ export const updateOrderStatus = async(req:Request,res:Response,next:NextFunctio
         const {status} = req.body;
 
         const updatedOrder = await orderService.orderUpdate(orderId,status);
+        console.log(updatedOrder);
 
         res.status(200).json({message:"Order status updated Successfully",order:updatedOrder});
     } catch (error:any) {
         res.status(400).json({message: error.message});
     }
+}
+
+export const deleteOrder = async(req:Request,res:Response,next:NextFunction)=> {
+      const {orderId} = req.params;
+
+      try {
+        const result = await orderService.deleteOrderService(orderId);
+
+        if(!result){
+          return res.status(404).json({message:"Order not found"});
+        }
+
+        res.status(200).json({message:"Order Deleted Successfully"});
+      } catch (error) {
+        next(error);
+      }
 }
 

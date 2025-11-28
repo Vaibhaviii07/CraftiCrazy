@@ -5,46 +5,36 @@ import * as productService from "../services/product.service";
 
 const storage = multer.memoryStorage();
 export const uploadMiddleware = multer({ storage }).single("image");
-
 export const createProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log("product Api is running in backend...");
+    console.log("Product API running...");
 
-    const data = req.body;
-    console.log(data);
+    let { ...data } = req.body;
     let imageUrl: string | null = req.body?.imageUrl || null;
 
-    // If no file and no URL
     if (!req.file && !imageUrl) {
-      return res.status(400).json({
-        message: "Image is required (either file or imageUrl)",
-      });
+      return res.status(400).json({ message: "Image file or URL is required" });
     }
 
-    console.log("product image api is running...");
-
-    // Upload file to Cloudinary
     if (req.file) {
-      const cloudinaryResult: any = await uploadToCloudinary(
-        req.file.buffer,
-        "Craftcrazy-products"
-      );
-      imageUrl = cloudinaryResult.secure_url;
+      const upload: any = await uploadToCloudinary(req.file.buffer, "Craftcrazy-products");
+      imageUrl = upload.secure_url;
     }
 
-    // Create product
-    const newProduct = await productService.createProductService({
+    const product = await productService.createProductService({
       ...data,
-      imageUrl, // will NEVER be undefined
+      imageUrl
     });
 
     return res.status(201).json({
+      success: true,
       message: "Product created successfully",
-      product: newProduct,
+      product,
     });
+
   } catch (error) {
     console.log("CREATE PRODUCT ERROR:", error);
-    next(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -71,6 +61,7 @@ export const getProductByIdController = async (req: Request, res: Response, next
 //  Update Product
 export const updateProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const {id} = req.params;
     let updateData = req.body;
 
     if (req.file) {
@@ -78,7 +69,7 @@ export const updateProductController = async (req: Request, res: Response, next:
       updateData.imageUrl = cloudinaryResult.secure_url;
     }
 
-    const updatedProduct = await productService.updateProductService(req.params.id, updateData);
+    const updatedProduct = await productService.updateProductService(id, updateData);
 
     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
   } catch (error) {
@@ -93,5 +84,61 @@ export const deleteProductController = async (req: Request, res: Response, next:
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getProductsByCategoryController = async (req: Request, res: Response) => {
+  try {
+    console.log("category api is running...")
+    const { category } = req.query;
+    console.log(category);
+
+    const products = await productService.getProductsByCategoryService(category as string);
+
+    console.log("category api is running 2");
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products
+    });
+
+    console.log(products);
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to load products",
+      error
+    });
+  }
+};
+
+export const searchController = async (req: Request, res: Response) => {
+  try {
+    // Extract query
+    let q = req.query.q;
+
+    // Normalize to a string
+    if (Array.isArray(q)) {
+      q = q[0];   // If multiple values, take first
+    }
+
+    if (typeof q !== "string") {
+      q = "";     // Ensure q is ALWAYS a string
+    }
+
+    // Validate trimmed value
+    const queryString = q.trim();
+
+    if (!queryString) {
+      return res.json([]);  
+    }
+
+    const results = await productService.searchService(queryString);
+    return res.status(200).json(results);
+
+  } catch (error) {
+    console.error("Search Error:", error);
+    return res.status(500).json({ message: "Search failed", error });
   }
 };

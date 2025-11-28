@@ -63,6 +63,34 @@ const AddProducts = () => {
     image: null,
   });
 
+  const categoriesMap: Record<string, string> = {
+    "keychain": "keychain",
+    "tote bag": "totebag",
+    "wallet": "wallet",
+    "accessories": "accessories",
+    "birthday hamper": "birthdayhamper",
+    "corporate": "corporate",
+    "wedding": "wedding",
+    "christmas": "christmas",
+    "diwali": "diwali",
+    "holi": "holi",
+    "rakhi": "rakhi",
+    "glass frame": "glassframe",
+    "resin frame": "resinframe",
+    "wooden frame": "woodenframe",
+    "resin clock": "resinclock",
+    "resin coaster": "resincoaster",
+    "resin jewelry": "resinjewelry",
+    "resin keychain": "resinkeychain",
+    "resin name plate": "resinnameplate",
+    "resin photo frame": "photoframe",
+    "resin puja thale": "resinpujathale",
+    "engagement tray": "engagementtray",
+    "haldi platter": "haldipplatter",
+    "varmala": "varmala",
+    "bracelet" :"bracelet"
+  };
+
   const [preview, setPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
@@ -80,8 +108,8 @@ const AddProducts = () => {
 
   // auto hide success
   useEffect(() => {
-    if(successMsg){
-      setTimeout(()=> setSuccessMsg(false), 2500);
+    if (successMsg) {
+      setTimeout(() => setSuccessMsg(false), 2500);
     }
   }, [successMsg]);
 
@@ -91,7 +119,7 @@ const AddProducts = () => {
 
     if (type === "checkbox") {
       setForm(prev => ({ ...prev, [name]: e.target.checked }));
-    } 
+    }
     else if (type === "file") {
       const file = e.target.files?.[0];
       setForm(prev => ({ ...prev, image: file || null }));
@@ -105,7 +133,7 @@ const AddProducts = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    if(submitting) return;
+    if (submitting) return;
 
     if (!form.image) {
       toast.error("Product image is required");
@@ -187,10 +215,27 @@ const AddProducts = () => {
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
+          <div className="col-span-2">
+            <label className="block mb-1 font-medium text-gray-700">Category</label>
+            <select
+              name="category"
+              value={form.category}
+              onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))}
+              className="p-3 rounded-xl border border-gray-300 w-full text-sm focus:ring-2 focus:ring-[#c9a26d]"
+            >
+              <option value="">Select Category</option>
+              {Object.entries(categoriesMap).map(([label, value]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* TEXT FIELDS */}
           {[
             "name", "description", "price", "rating", "reviews", "discount", "highlight",
-            "category", "tags", "brand", "seller", "warranty", "returnPolicy",
+            "tags", "brand", "seller", "warranty", "returnPolicy",
             "occasion", "material", "dimensions", "weight", "careInstructions",
             "maxOrderQuantity", "deliveryType", "deliveryAvailability", "deliveryEstimated",
             "customizationOptions"
@@ -250,9 +295,8 @@ const AddProducts = () => {
             type="submit"
             whileHover={{ scale: 1.05 }}
             disabled={submitting}
-            className={`col-span-2 py-3 mt-4 bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl ${
-              submitting ? "opacity-60 cursor-not-allowed" : ""
-            }`}
+            className={`col-span-2 py-3 mt-4 bg-gradient-to-r from-[#c9a26d] to-[#8b5e34] text-white font-medium rounded-xl ${submitting ? "opacity-60 cursor-not-allowed" : ""
+              }`}
           >
             {submitting ? "Uploading..." : "Add Product"}
           </motion.button>

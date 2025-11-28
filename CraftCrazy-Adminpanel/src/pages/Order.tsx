@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { FaTrashAlt } from "react-icons/fa";
+import Swal from "sweetalert2"; 
+import "sweetalert2/dist/sweetalert2.min.css";
 import {
   BarChart,
   Bar,
@@ -16,6 +19,11 @@ interface OrderItem {
   quantity: number;
 }
 
+interface CustomerInfo {
+  name: string;
+  phone: string;
+}
+
 interface Order {
   _id: string;
   totalAmount: number;
@@ -23,6 +31,7 @@ interface Order {
   orderStatus: string;
   transactionStatus: string;
   items: OrderItem[];
+  customer: CustomerInfo;
 }
 
 const Order: React.FC = () => {
@@ -35,18 +44,71 @@ const Order: React.FC = () => {
       const res = await axios.get(`http://localhost:8000/api/order/getOrder`, {
         withCredentials: true,
       });
+
       const { data } = res.data;
-      if (Array.isArray(data)) {
-        setOrders(data);
-      } else {
-        console.warn("Unexpected response structure:", data);
-        setOrders([]);
-      }
-    } catch (err: any) {
-      console.error("Error fetching orders:", err);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
       setError("Failed to load orders.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "Deleting an order is permanent and cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it",
+      background: "#fff",
+      buttonsStyling: true
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:8000/api/order/${orderId}`, {
+          withCredentials: true,
+        });
+
+        setOrders(prev => prev.filter(order => order._id !== orderId));
+
+        Swal.fire({
+          title: "Deleted!",
+          text: "Order has been removed successfully.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        Swal.fire({
+          title: "Failed",
+          text: "Something went wrong.",
+          icon: "error",
+        });
+      }
+    }
+  };
+
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await axios.patch(
+        `http://localhost:8000/api/order/order/${orderId}`,
+        { status: newStatus },
+        { withCredentials: true }
+      );
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === orderId ? { ...o, orderStatus: newStatus } : o
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update status");
     }
   };
 
@@ -54,121 +116,134 @@ const Order: React.FC = () => {
     fetchOrders();
   }, []);
 
-  // Transform data for bar chart
   const chartData = orders.map((order) => ({
     date: new Date(order.createdAt).toLocaleDateString(),
     totalAmount: order.totalAmount,
   }));
 
-  if (loading) {
-    return <div className="text-center mt-10 text-lg">Loading orders...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center mt-10 text-red-500">{error}</div>;
-  }
+  if (loading) return <div className="text-center mt-10 text-lg">Loading...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">📦 Order Summary</h2>
+      <h2 className="text-2xl font-bold text-gray-800">📦 Orders Dashboard</h2>
 
-      {/* Chart Section */}
-      <div className="w-full bg-white shadow-md rounded-2xl p-6 border border-gray-100">
-        <h3 className="text-lg font-semibold mb-3 text-gray-700">Revenue Overview</h3>
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h3 className="font-semibold text-lg mb-3">Revenue Overview</h3>
         <div className="w-full h-[350px]">
-          {/* ✅ Fixed container sizing issue with ResponsiveContainer */}
-          <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={300}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fill: "#555" }} />
-              <YAxis tick={{ fill: "#555" }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#fff",
-                  borderRadius: "10px",
-                  border: "1px solid #ddd",
-                }}
-              />
-              <Bar dataKey="totalAmount" fill="#4CAF50" barSize={40} radius={[8, 8, 0, 0]} />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="totalAmount" fill="#4CAF50" barSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100 overflow-x-auto">
-        <h3 className="text-lg font-semibold mb-3 text-gray-700">All Orders</h3>
-        <table className="w-full text-sm text-left border-collapse">
+      <div className="bg-white p-6 rounded-2xl shadow overflow-x-auto">
+        <h3 className="font-semibold text-lg mb-4">All Orders</h3>
+
+        <table className="w-full border-collapse text-sm">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="px-4 py-3">#</th>
+              <th className="px-4 py-3">Customer</th>
               <th className="px-4 py-3">Order ID</th>
-              <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Amount</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Payment</th>
               <th className="px-4 py-3">Items</th>
+              <th className="px-4 py-3">Action</th>
             </tr>
           </thead>
+
           <tbody>
-            {orders.length > 0 ? (
-              orders.map((order, index) => (
-                <tr
-                  key={order._id}
-                  className="border-b hover:bg-gray-50 transition-all duration-200"
-                >
-                  <td className="px-4 py-3">{index + 1}</td>
-                  <td className="px-4 py-3">{order._id}</td>
-                  <td className="px-4 py-3">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-green-600">
-                    ₹{order.totalAmount.toFixed(2)}
-                  </td>
-                  <td
-                    className={`px-4 py-3 font-medium ${
-                      order.orderStatus === "Delivered"
-                        ? "text-green-600"
-                        : order.orderStatus === "Pending"
-                        ? "text-yellow-500"
-                        : "text-gray-600"
-                    }`}
+            {orders.map((order, index) => (
+              <tr
+                key={order._id}
+                className="border-b hover:bg-gray-50 transition"
+              >
+                <td className="px-4 py-3">{index + 1}</td>
+
+                <td className="px-4 py-3 font-medium">
+                  <p>{order.customer?.name || "NA"}</p>
+                  <p className="text-blue-500 text-xs">
+                    {order.customer?.phone || "—"}
+                  </p>
+                </td>
+
+                <td className="px-4 py-3">{order._id}</td>
+                <td className="px-4 py-3 text-green-600 font-bold">
+                  ₹{order.totalAmount.toFixed(2)}
+                </td>
+
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-white text-xs ${order.orderStatus === "Processing"
+                        ? "bg-yellow-500"
+                        : order.orderStatus === "Shipped"
+                          ? "bg-blue-500"
+                          : "bg-green-600"
+                      }`}
                   >
                     {order.orderStatus}
-                  </td>
-                  <td
-                    className={`px-4 py-3 font-medium ${
-                      order.transactionStatus === "Payment Succeed"
-                        ? "text-green-600"
-                        : order.transactionStatus === "Payment Pending"
-                        ? "text-yellow-500"
-                        : "text-red-600"
-                    }`}
+                  </span>
+                </td>
+
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs ${order.transactionStatus === "Payment Succeed"
+                        ? "bg-green-200 text-green-700"
+                        : "bg-red-200 text-red-600"
+                      }`}
                   >
                     {order.transactionStatus}
-                  </td>
-                  <td className="px-4 py-3">
-                    {order.items && order.items.length > 0 ? (
-                      <ul className="list-disc list-inside">
-                        {order.items.map((item, i) => (
-                          <li key={i}>
-                            {item.name} x{item.quantity}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="text-gray-400 italic">No items</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={7} className="text-center py-6 text-gray-500">
-                  No orders found.
+                  </span>
+                </td>
+
+                <td className="px-4 py-3">
+                  {order.items.map((item, i) => (
+                    <p key={i}>
+                      {item.name} x {item.quantity}
+                    </p>
+                  ))}
+                </td>
+
+                <td className="px-4 py-3 flex gap-2">
+                  <button
+                    className="px-3 py-1 cursor-pointer rounded bg-yellow-500 text-white text-xs"
+                    onClick={() => updateOrderStatus(order._id, "Processing")}
+                  >
+                    Processing
+                  </button>
+
+                  <button
+                    className="px-3 py-1 cursor-pointer rounded bg-blue-500 text-white text-xs"
+                    onClick={() => updateOrderStatus(order._id, "Shipped")}
+                  >
+                    Shipped
+                  </button>
+
+                  <button
+                    className="px-3 py-1 cursor-pointer rounded bg-green-600 text-white text-xs"
+                    onClick={() => updateOrderStatus(order._id, "Delivered")}
+                  >
+                    Delivered
+                  </button>
+
+                  <button
+                    onClick={() => deleteOrder(order._id)}
+                    className="px-3 py-1 cursor-pointer rounded text-red-600 text-xs flex items-center gap-1 border border-red-500 hover:bg-red-600 hover:text-white transition"
+                    title="Delete order"
+                  >
+                    <FaTrashAlt className="text-sm" /> Delete
+                  </button>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>

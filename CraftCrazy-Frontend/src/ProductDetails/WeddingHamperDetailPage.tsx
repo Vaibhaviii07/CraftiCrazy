@@ -24,34 +24,28 @@ export type SubProduct = {
   highlight?: string;
   category?: string;
   tags?: string[];
-  brand?: string;
-  seller?: string;
   inStock: boolean;
   warranty?: string;
-  returnPolicy?: string;
- image: string | null
+  image: string;
   contents?: string[];
-  occasion?: string[];
-  delivery?: {
-    type: string;
-    availability: string;
-    estimated: string;
-  };
-  customization?: {
-    available: boolean;
-    options?: string[];
-    userInput?: string;
-  };
   material?: string;
   dimensions?: string;
   weight?: string;
   careInstructions?: string;
-  maxOrderQuantity?: number;
-  specifications?: Record<string, string>;
+  brand?: string;
+  seller?: string;
+  deliveryType?: string; 
+  deliveryAvailability?: string;
+  deliveryEstimated?: string;
+  maxOrderQuantity?: string;
+  returnPolicy?: string;
+  occasion?: string[];
+  customizationAvailable: boolean;
+  customizationOptions?: string;
 };
 
 export type WeddingHamper = {
-  id: string;
+  _id: string;
   sku: string;
   name: string;
   description?: string;
@@ -62,31 +56,25 @@ export type WeddingHamper = {
   highlight?: string;
   category: string;
   tags?: string[];
-  brand?: string;
-  seller?: string;
   inStock: boolean;
   warranty?: string;
-  returnPolicy?: string;
- image: string | null
+  imageUrl: string;
   variants?: SubProduct[];
   contents?: string[];
-  occasion?: string[];
-  delivery?: {
-    type: string;
-    availability: string;
-    estimated: string;
-  };
-  customization?: {
-    available: boolean;
-    options?: string[];
-    userInput?: string;
-  };
   material?: string;
   dimensions?: string;
   weight?: string;
   careInstructions?: string;
-  maxOrderQuantity?: number;
-  specifications?: Record<string, string>;
+  brand?: string;
+  seller?: string;
+  deliveryType?: string; 
+  deliveryAvailability?: string;
+  deliveryEstimated?: string;
+  maxOrderQuantity?: string;
+  returnPolicy?: string;
+  occasion?: string[];
+  customizationAvailable: boolean;
+  customizationOptions?: string;
 };
 
 // ---------- MAIN COMPONENT ----------
@@ -125,20 +113,32 @@ export default function WeddingHamperDetails() {
         // Default variant = first variant or main product
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,
-            customization: data.customization,
-            specifications: data.specifications,
             material: data.material,
             dimensions: data.dimensions,
             weight: data.weight,
             careInstructions: data.careInstructions,
+            tags: data.tags,
+            warranty: data.warranty,
+            deliveryType: data.deliveryType,
+            deliveryAvailability: data.deliveryAvailability,
+            deliveryEstimated: data.deliveryEstimated,
+            maxOrderQuantity: data.maxOrderQuantity,
+            returnPolicy:data.returnPolicy,
+            occasion:data.occasion,
+            brand:data.brand,
+            seller:data.seller,
+            customizationAvailable: data.customizationAvailable,
+            customizationOptions: data.customizationOptions,
+            reviews :data.reviews,
+            rating :data.rating
           }
         );
       } catch (err) {
@@ -153,11 +153,11 @@ export default function WeddingHamperDetails() {
   }, [id]);
 
   // ---------- FETCH REVIEWS ----------
-  const fetchReviews = async () => {
+   const fetchReviews = async () => {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -176,13 +176,14 @@ export default function WeddingHamperDetails() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-     addToCart({
-  id: currentVariant?.id || currentProduct!.id,
-  name: currentVariant?.name || currentProduct!.name,
-  price: currentVariant?.price || currentProduct!.price,
-  quantity,
-  image: currentVariant?.image || "/placeholder.png",
-});
+    addToCart({
+      id: currentVariant.id,
+      name: currentVariant.name || currentProduct.name,
+      price: currentVariant.price,
+      quantity,
+      image: currentVariant.image,
+    });
+
     if (isAuthenticated) {
       setToast(`${currentVariant.name || currentProduct.name} added to cart`);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -225,9 +226,8 @@ export default function WeddingHamperDetails() {
             <motion.img
               src={currentVariant.image}
               alt={currentVariant.name}
-              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className={`w-full rounded-3xl shadow-xl object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"
+                }`}
               onLoad={() => setImgLoaded(true)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
@@ -287,30 +287,45 @@ export default function WeddingHamperDetails() {
           )}
 
           {/* Structured Info */}
-          <div className="mt-2 space-y-2 text-gray-700">
+           <div className="mt-2 space-y-2 text-gray-700">
             {currentVariant?.material && (
-              <p>
-                <span className="font-semibold">Material:</span> {currentVariant.material}
-              </p>
+              <p><span className="font-semibold">Material:</span> {currentVariant.material}</p>
             )}
             {currentVariant?.dimensions && (
-              <p>
-                <span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}
-              </p>
+              <p><span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}</p>
             )}
             {currentVariant?.weight && (
-              <p>
-                <span className="font-semibold">Weight:</span> {currentVariant.weight}
-              </p>
+              <p><span className="font-semibold">Weight:</span> {currentVariant.weight}</p>
             )}
             {currentVariant?.careInstructions && (
-              <p>
-                <span className="font-semibold">Care Instructions:</span>{" "}
-                {currentVariant.careInstructions}
-              </p>
+              <p><span className="font-semibold">Care Instructions:</span> {currentVariant.careInstructions}</p>
             )}
-          </div>
+            {currentVariant?.seller && (
+              <p><span className="font-semibold">Seller:</span> {currentVariant.seller}</p>
+            )}
+            {currentVariant?.brand && (
+              <p><span className="font-semibold">Brand:</span> {currentVariant.brand}</p>
+            )}
+           {currentVariant?.deliveryType && (
+          <p>
+            <span className="font-semibold">Delivery:</span>{" "}
+            {currentVariant.deliveryType}, {currentVariant.deliveryAvailability}, Estimated {currentVariant.deliveryEstimated}
+          </p>
+        )}
 
+            {currentVariant?.maxOrderQuantity && (
+              <p><span className="font-semibold">Max Order Quantity:</span> {currentVariant.maxOrderQuantity}</p>
+            )}
+            {currentVariant?.returnPolicy && (
+              <p><span className="font-semibold">Return Policy:</span> {currentVariant.returnPolicy}</p>
+            )}
+           {Array.isArray(currentVariant?.occasion) && currentVariant.occasion.length > 0 && (
+        <p>
+          <span className="font-semibold">Occasion:</span>{" "}
+          {currentVariant.occasion.join(", ")}
+        </p>
+      )}
+      </div>
           {/* Tags + Stock + Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             {currentVariant?.tags?.map((tag, idx) => (
@@ -351,38 +366,15 @@ export default function WeddingHamperDetails() {
 
           {/* Contents / customization / specs */}
           <div className="mt-6 flex flex-col gap-4">
-            {currentVariant?.contents && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Contents</h3>
-                <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {currentVariant.contents.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
-            {currentVariant?.customization?.available && (
-              <div className="bg-gray-50 p-3 rounded-md">
+
+            {currentVariant?.customizationAvailable &&
+            currentVariant.customizationOptions && (
+              <div className="bg-gray-50 p-3 rounded-md mt-2">
                 <h3 className="font-semibold text-gray-800">Customization Options</h3>
-                <p className="text-gray-600">
-                  {currentVariant.customization.options?.join(", ")}
-                </p>
+                <p className="text-gray-600">{currentVariant.customizationOptions}</p>
               </div>
-            )}
-
-            {currentVariant?.specifications && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <h3 className="font-semibold text-gray-800">Specifications</h3>
-                <ul className="list-disc list-inside text-gray-600 space-y-1">
-                  {Object.entries(currentVariant.specifications).map(([key, value], idx) => (
-                    <li key={idx}>
-                      <span className="font-medium">{key}:</span> {value}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          )}
           </div>
         </div>
       </div>
@@ -391,16 +383,19 @@ export default function WeddingHamperDetails() {
       {currentProduct && currentVariant && (
         <>
           <CustomerReview
-            productId={currentProduct.id}
+            productId={currentProduct._id}
             variantId={currentVariant.id}
             setBackendRating={setBackendRating}
             setBackendReviewsCount={setBackendReviewsCount}
           />
-          <FloatingCustomerReview
-            productId={currentProduct.id}
-            variantId={currentVariant.id}
-            onReviewSubmitted={fetchReviews}
-          />
+         
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
         </>
       )}
 

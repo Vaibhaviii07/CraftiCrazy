@@ -30,6 +30,10 @@ export const initSocket = (server: HTTPServer) => {
       io.emit("trend:update");  
     });
 
+    socket.on("searching-adminData", (data)=> {
+      io.emit("search_result",data);
+    });
+
     //for contact 
     socket.on("contact-created",(data)=> {
       io.emit("contact-updated",data);

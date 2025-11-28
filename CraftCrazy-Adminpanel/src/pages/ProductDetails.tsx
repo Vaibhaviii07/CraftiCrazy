@@ -170,30 +170,6 @@ const ProductDetail: React.FC = () => {
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-[#2a0a4b]">🪄 Product Details</h1>
-
-        <div className="flex gap-3">
-          {/* ✏️ Edit Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleEdit}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all"
-          >
-            <Edit size={18} />
-            <span className="font-medium">Edit</span>
-          </motion.button>
-
-          {/* 🗑️ Delete Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleDelete}
-            className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all"
-          >
-            <Trash2 size={18} />
-            <span className="font-medium">Delete</span>
-          </motion.button>
-        </div>
       </div>
 
       {/* Product Info */}
@@ -264,30 +240,7 @@ const ProductDetail: React.FC = () => {
 
           {/* Add to Cart & Share */}
           <div className="flex items-center gap-4 mb-8">
-            <input
-              type="number"
-              min="1"
-              max={Number(product.maxOrderQuantity) || 5}
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="w-16 border border-gray-300 rounded-md px-2 py-1 text-center"
-            />
-            <button
-              onClick={handleAddToCart}
-              className="flex items-center gap-2 bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800 transition"
-            >
-              <ShoppingCart size={18} /> Add to Cart
-            </button>
-
-            {/* Share */}
             <div className="relative">
-              <button
-                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition"
-                onClick={() => setShowShareMenu(!showShareMenu)}
-              >
-                <Share2 size={20} />
-              </button>
-
               {showShareMenu && (
                 <div className="absolute top-12 right-0 bg-white shadow-lg rounded-xl p-3 w-52 z-50 border border-gray-100">
                   <div className="flex justify-between items-center mb-2">

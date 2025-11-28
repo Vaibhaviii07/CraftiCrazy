@@ -8,36 +8,89 @@ import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
-import { ResinFrame, Variant } from "../Data/ResinFramedata";
 
 // ---------- TYPES ----------
 type Params = { id: string };
 
-export type SubProduct = Variant & {
+export type SubVariant = {
   id: string;
+  sku?: string;
   name: string;
   description?: string;
   price: number;
   discount?: number;
+  rating?: number;
+  reviews?: number;
+  highlight?: string;
+  category?: string;
+  tags?: string[];
+  brand?: string;
+  seller?: string;
   inStock: boolean;
-  image: string | null
+  warranty?: string;
+  returnPolicy?: string;
+  image: string;
   contents?: string[];
+  occasion?: string[];
+  delivery?: {
+    type: string;
+    availability: string;
+    estimated: string;
+  };
   customization?: {
     available: boolean;
     options?: string[];
     userInput?: string;
   };
-  specifications?: Record<string, string>;
   material?: string;
   dimensions?: string;
   weight?: string;
   careInstructions?: string;
-  tags?: string[];
-  warranty?: string;
+  maxOrderQuantity?: number;
+  specifications?: Record<string, string>;
+};
+
+export type ResinFrame = {
+   _id: string;
+   sku: string;
+   name: string;
+   description?: string;
+   price: number;
+   rating?: number;
+   reviews?: number;
+   discount?: number;
+   highlight?: string;
+   category: string;
+   tags?: string[];
+   brand?: string;
+   seller?: string;
+   inStock: boolean;
+   warranty?: string;
+   returnPolicy?: string;
+   image: string;
+   variants?: SubVariant[];  // <- FIXED
+   contents?: string[];
+   occasion?: string[];
+   delivery?: {
+     type: string;
+     availability: string;
+     estimated: string;
+   };
+   customization?: {
+     available: boolean;
+     options?: string[];
+     userInput?: string;
+   };
+   material?: string;
+   dimensions?: string;
+   weight?: string;
+   careInstructions?: string;
+   maxOrderQuantity?: number;
+   specifications?: Record<string, string>;
 };
 
 export type ResinFrameProduct = ResinFrame & {
-  variants?: SubProduct[];
+  variants?: SubVariant[];
 };
 
 // ---------- COMPONENT ----------
@@ -47,7 +100,7 @@ export default function ResinFrameDetailPage() {
   const { isAuthenticated } = useAuth();
 
   const [currentProduct, setCurrentProduct] = useState<ResinFrameProduct | null>(null);
-  const [currentVariant, setCurrentVariant] = useState<SubProduct | null>(null);
+  const [currentVariant, setCurrentVariant] = useState<SubVariant | null>(null);
 
   const [quantity, setQuantity] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
@@ -73,7 +126,7 @@ export default function ResinFrameDetailPage() {
 
         setCurrentVariant(
           data.variants?.[0] || {
-            id: data.id,
+            id: data._id,
             name: data.name,
             price: data.price,
             discount: data.discount,
@@ -107,7 +160,7 @@ export default function ResinFrameDetailPage() {
     if (!currentProduct || !currentVariant) return;
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/review/${currentProduct.id}?limit=8`
+        `http://localhost:8000/api/review/${currentProduct._id}?limit=8`
       );
       setBackendRating(res.data.averageRating ?? 0);
       setBackendReviewsCount(res.data.reviewCount ?? 0);
@@ -122,13 +175,13 @@ export default function ResinFrameDetailPage() {
   const handleAddToCart = () => {
     if (!currentProduct || !currentVariant) return;
 
-     addToCart({
-  id: currentVariant?.id || currentProduct!.id,
-  name: currentVariant?.name || currentProduct!.name,
-  price: currentVariant?.price || currentProduct!.price,
-  quantity,
-  image: currentVariant?.image || "/placeholder.png",
-});
+    addToCart({
+      id: currentVariant.id,
+      name: currentVariant.name,
+      price: currentVariant.price,
+      quantity,
+      image: currentVariant.image,
+    });
 
     if (isAuthenticated) {
       setToast(`${currentVariant.name} added to cart`);
@@ -284,16 +337,19 @@ export default function ResinFrameDetailPage() {
 
       {/* REVIEWS */}
       <CustomerReview
-        productId={currentProduct.id}
+        productId={currentProduct._id}
         variantId={currentVariant?.id}
         setBackendRating={setBackendRating}
         setBackendReviewsCount={setBackendReviewsCount}
       />
-      <FloatingCustomerReview
-        productId={currentProduct.id}
-        variantId={currentVariant?.id}
-        onReviewSubmitted={fetchReviews}
-      />
+      
+      {isAuthenticated &&
+        <FloatingCustomerReview
+          productId={currentProduct._id}
+          variantId={currentVariant?.id}
+          onReviewSubmitted={fetchReviews}
+        />
+      }
 
       {/* TOAST */}
       <AnimatePresence>

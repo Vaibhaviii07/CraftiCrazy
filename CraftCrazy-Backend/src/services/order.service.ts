@@ -116,3 +116,7 @@ export const orderUpdate = async(orderId:string, Status:string) => {
 
     return order;
 }
+
+export const deleteOrderService = async(orderId:string) => {
+      return await Order.findByIdAndDelete(orderId);
+}
