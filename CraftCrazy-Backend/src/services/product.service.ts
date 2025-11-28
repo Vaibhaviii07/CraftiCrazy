@@ -2,6 +2,7 @@ import { Product, IProduct } from "../models/product.model";
 import User from "../models/user.model";
 import { getIO } from "../socket/initSocket";
 import { formatText, toTitleCase, normalizeCategory } from "../utils/normalize";
+
 export const createProductService = async (data: IProduct) => {
   // Handle tags properly
   let tags: string[] = [];

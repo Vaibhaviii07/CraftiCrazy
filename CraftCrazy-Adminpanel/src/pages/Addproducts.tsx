@@ -69,6 +69,7 @@ const AddProducts = () => {
     "wallet": "wallet",
     "accessories": "accessories",
     "birthday hamper": "birthdayhamper",
+    "Bracelets":"bracelets",
     "corporate": "corporate",
     "wedding": "wedding",
     "christmas": "christmas",
@@ -93,7 +94,7 @@ const AddProducts = () => {
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
 
-  // 🎨 image preview
+  // image preview
   useEffect(() => {
     if (!form.image) {
       setPreview(null);

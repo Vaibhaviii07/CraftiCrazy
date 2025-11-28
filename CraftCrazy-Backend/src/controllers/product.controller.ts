@@ -41,6 +41,7 @@ export const createProductController = async (req: Request, res: Response, next:
 export const getAllProdutsController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const allProudcts = await productService.getAllProductsService();
+    console.log(allProudcts);
     res.status(200).json({ allProudcts });
   } catch (error) {
     next(error);

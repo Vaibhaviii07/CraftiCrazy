@@ -67,8 +67,8 @@ export type ResinCoaster = {
    inStock: boolean;
    warranty?: string;
    returnPolicy?: string;
-   image: string;
-   variants?: SubVariant[];  // <- FIXED
+   imageUrl: string;
+   variants?: SubVariant[];
    contents?: string[];
    occasion?: string[];
    delivery?: {
@@ -106,13 +106,12 @@ export default function ResinCoasterDetailPage() {
 
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ---------- FETCH PRODUCT ----------
   useEffect(() => {
     if (!id) return;
 
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/resin-coasters/${id}`);
+        const res = await axios.get(`http://localhost:8000/api/products/${id}`);
         const data: ResinCoaster = res.data?.product;
         if (!data) throw new Error("No product found");
 
@@ -125,7 +124,7 @@ export default function ResinCoasterDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: [],
