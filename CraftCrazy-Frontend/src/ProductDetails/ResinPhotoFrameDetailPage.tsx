@@ -40,7 +40,7 @@ export type ResinPhotoFrame = {
   name: string;
   price: number;
   discount?: number;
-  image: string;
+  imageUrl: string;
   inStock: boolean;
   description?: string;
   variants?: ResinSubVariant[];
@@ -96,7 +96,7 @@ export default function ResinPhotoFrameDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,

@@ -95,7 +95,7 @@ const FloatingCustomerReview: React.FC<FloatingCustomerReviewProps> = ({
       }, 1500);
     } catch (error) {
       console.error(error);
-      showToast("❌Something went wrong.");
+      showToast("Something went wrong.");
     }
   };
 

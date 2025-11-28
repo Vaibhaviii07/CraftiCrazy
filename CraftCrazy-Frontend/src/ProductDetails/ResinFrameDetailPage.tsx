@@ -67,8 +67,8 @@ export type ResinFrame = {
    inStock: boolean;
    warranty?: string;
    returnPolicy?: string;
-   image: string;
-   variants?: SubVariant[];  // <- FIXED
+   imageUrl: string;
+   variants?: SubVariant[];
    contents?: string[];
    occasion?: string[];
    delivery?: {
@@ -130,7 +130,7 @@ export default function ResinFrameDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,

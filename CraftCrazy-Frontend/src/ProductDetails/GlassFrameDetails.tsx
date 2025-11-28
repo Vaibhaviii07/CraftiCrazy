@@ -46,7 +46,7 @@ export type GlassFrame = {
   reviews?: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+  imageUrl: string;
   variants?: SubProduct[];
   contents?: string[];
   customization?: {
@@ -85,7 +85,7 @@ export default function GlassFrameDetails() {
 
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/glassframes/${id}`);
+        const res = await axios.get(`http://localhost:8000/api/products/${id}`);
         const data: GlassFrame = res.data?.product;
         if (!data) throw new Error("No product found");
 
@@ -97,7 +97,7 @@ export default function GlassFrameDetails() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,

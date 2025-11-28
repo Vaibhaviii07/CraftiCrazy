@@ -55,6 +55,7 @@ const NewArrivals: React.FC = () => {
       try {
         const res = await axios.get("http://localhost:8000/api/products/newarrivals");
         const apiData = res.data?.allProudcts || [];
+        console.log("resin api is running...")
         console.log(apiData)
         const mapped: Product[] = apiData.map((item: any) => ({
           id: item.id || item._id,

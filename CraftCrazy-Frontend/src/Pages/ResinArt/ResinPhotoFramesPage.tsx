@@ -44,7 +44,7 @@ const NewArrivals: React.FC = () => {
   }, []);
 
   const routeMap: Record<string, string> = {
-    "resinphotoframe": "/photoframedetail/:id",
+    "resinframe": "/photoframedetail/:id",
   };
 
   // Fetch products from API only
@@ -91,7 +91,7 @@ const NewArrivals: React.FC = () => {
   }, []);
 
   const filteredProducts = products.filter((item) => {
-    const isBracelet = (item.category || "").toLowerCase() === "resinphotoframe";
+    const isBracelet = (item.category || "").toLowerCase() === "resinframe";
 
     let highlightMatch = true;
     switch (highlight) {

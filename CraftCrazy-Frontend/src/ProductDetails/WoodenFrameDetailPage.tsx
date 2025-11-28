@@ -40,7 +40,7 @@ export type WoodenFrame = {
   price: number;
   description?: string;
   discount?: number;
-  image: string;
+  imageUrl: string;
   inStock: boolean;
   rating?: number;
   reviews?: number;
@@ -98,7 +98,7 @@ export default function WoodenFrameDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,
