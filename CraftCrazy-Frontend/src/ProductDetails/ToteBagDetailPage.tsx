@@ -8,9 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
-import { ToteBag, Variant } from "../Data/ToteBagData";
 
-// ---------- TYPES ----------
 type Params = { id: string };
 
 export type SubProduct = {
@@ -68,7 +66,7 @@ export type ToteBagProduct = {
   inStock: boolean;
   warranty?: string;
   returnPolicy?: string;
-  image: string;
+  imageUrl: string;
   variants?: SubProduct[];
   contents?: string[];
   occasion?: string[];
@@ -126,7 +124,7 @@ export default function ToteBagDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,
@@ -288,6 +286,9 @@ export default function ToteBagDetailPage() {
                 {currentVariant.material}
               </p>
             )}
+              <p className="text-sm text-gray-600 mt-2">
+              📌We provide <strong>custom dimensions based on your need</strong> Just mention your preferred size in the checkout customization note — our team will reach out to finalize the details.
+            </p>
             {currentVariant?.dimensions && (
               <p>
                 <span className="font-semibold">Dimensions:</span>{" "}
@@ -307,7 +308,6 @@ export default function ToteBagDetailPage() {
             )}
           </div>
 
-          {/* ADD TO CART */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}

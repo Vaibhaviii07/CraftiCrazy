@@ -86,7 +86,7 @@ const AddProducts = () => {
     "resin name plate": "resinnameplate",
     "resin puja thale": "resinpujathale",
     "engagement tray": "engagementtray",
-    "haldi platter": "haldipplatter",
+    "haldi platter": "haldiplatter",
     "varmala": "varmala",
   };
 

@@ -39,7 +39,7 @@ export type VarmalaPreservation = {
   rating?: number;
   reviews?: number;
   discount?: number;
-  image: string;
+  imageUrl: string;
   inStock: boolean;
   variants?: VarmalaVariant[];
   description?: string;
@@ -94,7 +94,7 @@ export default function VarmalaDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             contents: data.contents,
@@ -234,6 +234,9 @@ export default function VarmalaDetailPage() {
                 <span className="font-semibold">Material:</span> {currentVariant.material}
               </p>
             )}
+              <p className="text-sm text-gray-600 mt-2">
+              📌We provide <strong>custom dimensions based on your need</strong> Just mention your preferred size in the checkout customization note — our team will reach out to finalize the details.
+            </p>
             {currentVariant?.dimensions && (
               <p>
                 <span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}

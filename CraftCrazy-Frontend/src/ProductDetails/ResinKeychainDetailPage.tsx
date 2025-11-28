@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import CustomerReview from "../Components/CustomerReview";
 import FloatingCustomerReview from "../Components/FloatingCustomerReview";
 import { useAuth } from "../AuthContext/AuthContext";
-import { resinKeychains } from "../Data/ResinKeychainData";
 
 // ---------- TYPES ----------
 type Params = { id: string };
@@ -44,7 +43,7 @@ export type ResinKeychain = {
     rating?: number;
     reviews?: number;
     inStock: boolean;
-    image: string;
+    imageUrl: string;
     contents?: string[];
     customization?: {
       available: boolean;
@@ -95,7 +94,7 @@ export default function ResinKeychainDetailPage() {
             name: data.name,
             price: data.price,
             discount: data.discount,
-            image: data.image,
+            image: data.imageUrl,
             inStock: data.inStock,
             description: data.description,
             material: undefined,
@@ -254,6 +253,9 @@ export default function ResinKeychainDetailPage() {
                 {currentVariant.material}
               </p>
             )}
+              <p className="text-sm text-gray-600 mt-2">
+              📌We provide <strong>custom dimensions based on your need</strong> Just mention your preferred size in the checkout customization note — our team will reach out to finalize the details.
+            </p>
             {currentVariant?.dimensions && (
               <p>
                 <span className="font-semibold">Dimensions:</span>{" "}

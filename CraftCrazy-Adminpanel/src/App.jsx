@@ -17,6 +17,7 @@ import CustomerContact from "./pages/CustomerContact";
 import AdminLogin from "./components/AdminLogin";
 import ProtectedRoute from "./middleware/protectedRoute";
 import CustomerReviewsPage from "./pages/Review";
+import DemandOrderPage from "./pages/DemandOrderpage"
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function AppRoutes() {
@@ -64,6 +65,7 @@ function AppRoutes() {
             <Route path="/setting" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/ListInvoice" element={<ProtectedRoute><InvoiceList /></ProtectedRoute>} />
             <Route path="/InvoiceDetail/:id" element={<ProtectedRoute><InvoiceDetails /></ProtectedRoute>} />
+            <Route path="/demand" element={<ProtectedRoute><DemandOrderPage /></ProtectedRoute>} />
             <Route path="/contact" element={<ProtectedRoute><CustomerContact /></ProtectedRoute>} />
           </Routes>
         </main>

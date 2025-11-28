@@ -260,6 +260,9 @@ export default function ResinFrameDetailPage() {
           {currentVariant?.description && (
             <p className="text-gray-700 leading-relaxed">{currentVariant.description}</p>
           )}
+            <p className="text-sm text-gray-600 mt-2">
+              📌We provide <strong>custom dimensions based on your need</strong> Just mention your preferred size in the checkout customization note — our team will reach out to finalize the details.
+            </p>
 
           {/* Tags + Stock + Warranty */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">

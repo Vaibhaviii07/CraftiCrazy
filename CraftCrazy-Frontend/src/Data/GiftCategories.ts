@@ -47,7 +47,7 @@ export const giftCategories = [
       variants: [
         { id: 501, name: "Resin Coasters Set", image: "Coaster.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/resincoasters" },
         { id: 502, name: "Resin Wall Clock", image: "Clock.jpeg", oldPrice: 2499, price: 1999, discount: "20%", link: "/resinclock" },
-        { id: 503, name: "Resin Jewelry Box", image: "ResinBox.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/customerdemand" },
+        { id: 503, name: "Resin Jewelry Box", image: "ResinBox.jpeg", oldPrice: 1799, price: 1499, discount: "17%", link: "/resinjwell" },
       ],
     },    {
       id: 6,
@@ -74,7 +74,7 @@ export const giftCategories = [
       name: "Corporate Gifting",
       tagline: "Professional | Classy & Useful",
       variants: [
-        { id: 801, name: "Premium Pen Set", image: "PenSet.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/customerdemand" },
+        { id: 801, name: "Premium Pen Set", image: "PenSet.jpeg", oldPrice: 1299, price: 999, discount: "23%", link: "/corporate" },
         { id: 802, name: "Office Desk Organizer", image: "DeskOrganizer.jpeg", oldPrice: 1699, price: 1399, discount: "18%", link: "/corporate" },
         { id: 803, name: "Business Gift Hamper", image: "CorporateHamper.jpeg", oldPrice: 2499, price: 2099, discount: "16%", link: "/corporate" },
       ],

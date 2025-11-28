@@ -39,7 +39,7 @@ export type ResinPujaThale = {
   price: number;
   discount?: number;
   inStock: boolean;
-  image: string;
+  imageUrl: string;
   rating?: number;
   reviews?: number;
   description?: string;
@@ -98,7 +98,7 @@ export default function ResinPujaThaleDetailPage() {
             price: data.price,
             discount: data.discount,
             inStock: data.inStock,
-            image: data.image,
+            image: data.imageUrl,
             description: data.description,
             contents: data.contents,
             customization: data.customization,
@@ -282,7 +282,6 @@ export default function ResinPujaThaleDetailPage() {
             )}
           </div>
 
-          {/* Tags + Stock */}
           <div className="flex flex-wrap gap-3 text-gray-500 text-sm sm:text-base mt-2">
             <span
               className={`px-2 py-1 rounded ${
@@ -295,7 +294,6 @@ export default function ResinPujaThaleDetailPage() {
             </span>
           </div>
 
-          {/* ADD TO CART */}
           <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 items-center">
             <button
               onClick={handleAddToCart}

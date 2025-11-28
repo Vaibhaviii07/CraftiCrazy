@@ -269,6 +269,9 @@ export default function KeyChainDetailPage() {
                 <span className="font-semibold">Material:</span> {currentProduct.material}
               </p>
             )}
+            <p className="text-sm text-gray-600 mt-2">
+              📌We provide <strong>custom dimensions based on your need</strong> Just mention your preferred size in the checkout customization note — our team will reach out to finalize the details.
+            </p>
             {currentProduct.dimensions && (
               <p>
                 <span className="font-semibold">Dimensions:</span> {currentProduct.dimensions}

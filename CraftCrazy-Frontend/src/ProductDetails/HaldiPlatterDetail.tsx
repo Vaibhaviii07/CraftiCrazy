@@ -254,6 +254,9 @@ export default function HaldiPlatterDetailPage() {
           {/* Structured Info */}
           <div className="mt-2 space-y-2 text-gray-700">
             {currentVariant?.material && <p><span className="font-semibold">Material:</span> {currentVariant.material}</p>}
+            <p className="text-sm text-gray-600 mt-2">
+              📌We provide <strong>custom dimensions based on your need</strong> Just mention your preferred size in the checkout customization note — our team will reach out to finalize the details.
+            </p>
             {currentVariant?.dimensions && <p><span className="font-semibold">Dimensions:</span> {currentVariant.dimensions}</p>}
             {currentVariant?.weight && <p><span className="font-semibold">Weight:</span> {currentVariant.weight}</p>}
             {currentVariant?.careInstructions && <p><span className="font-semibold">Care Instructions:</span> {currentVariant.careInstructions}</p>}

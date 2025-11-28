@@ -37,9 +37,10 @@ export const createDemandController = async (req: Request, res: Response) => {
   }
 };
 
-export const demandOrders = (req:Request,res:Response,next:NextFunction) => {
+export const demandOrders = async(req:Request,res:Response,next:NextFunction) => {
       try {
-         const allDemandOrders = demandService.getAllDemandService();
+         const allDemandOrders = await demandService.getAllDemandService();
+         console.log(allDemandOrders);
          res.status(200).json({message:"All customized Orders", customizedOrder: allDemandOrders});
       } catch (error) {
           next(error);

@@ -243,6 +243,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <Link to="/orders" className={menuItemClass("/orders")}>
                         All Orders
                       </Link>
+                       <Link to="/demand" className={menuItemClass("/orders")}>
+                        Customer Demand
+                      </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
